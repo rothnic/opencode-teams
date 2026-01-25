@@ -63,10 +63,10 @@
     "vitest": "^3.2.4"
   },
   "peerDependencies": {
-    "opencode": "*"
+    "@opencode-ai/plugin": "*"
   },
   "peerDependenciesMeta": {
-    "opencode": {
+    "@opencode-ai/plugin": {
       "optional": true
     }
   }

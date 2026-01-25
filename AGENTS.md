@@ -1,13 +1,15 @@
 # Agent Development Guide
 
-This file provides guidelines for AI agents (like Copilot) working on this codebase.
+**This file is for developers/AI agents working ON this plugin codebase.**
+
+For documentation on how AI agents USE this plugin's features (teams, coordination), see the [skills/](skills/) directory.
 
 ## Project Overview
 
 **Type**: OpenCode plugin for multi-agent team coordination  
 **Runtime**: Bun (ES Module)  
 **Language**: TypeScript (strict mode)  
-**Purpose**: Enable AI agents to coordinate work through teams and shared task queues
+**Purpose**: Provide custom tools for AI agents to coordinate via teams and shared task queues
 
 ## Build & Test Commands
 
@@ -116,12 +118,13 @@ opencode-teams/
 │   ├── types/          # TypeScript interfaces
 │   ├── utils/          # Utility functions (Bun APIs)
 │   ├── operations/     # Team and Task operations
+│   ├── tools/          # OpenCode tool definitions
 │   ├── index.ts        # Plugin entry point
 │   └── version.ts      # Version info
 ├── tests/              # Unit & integration tests
 ├── docs/               # User documentation
-├── agent/              # Agent templates (for OpenCode)
-├── skills/             # Skill definitions (for OpenCode)
+├── agent/              # Agent role templates
+├── skills/             # Skill definitions (for OpenCode AI agents)
 ├── examples/           # Example workflows
 ├── dist/               # Built output (generated)
 └── AGENTS.md           # This file
@@ -131,17 +134,42 @@ opencode-teams/
 
 This is an **OpenCode plugin** that:
 
-1. **Exports operations globally** - Makes TeamOperations and TaskOperations available via `global` object
-2. **Provides skills** - Skill files describe how AI agents use the operations
+1. **Registers custom tools** - Using `tool()` helper from OpenCode SDK
+2. **Provides skills** - Skill files describe how AI agents use the tools
 3. **Defines agent templates** - Pre-configured agent roles (leader, worker, reviewer)
 4. **Hooks into OpenCode lifecycle** - Responds to session and tool events
 
 ### Key Files
 
 - **opencode.json**: Defines plugin entry point (`./dist/index.js`)
-- **src/index.ts**: Main export that initializes plugin and sets up global operations
-- **skills/**: Markdown files with YAML frontmatter describing available operations
+- **src/index.ts**: Main export that registers tools with OpenCode
+- **src/tools/**: Tool definitions using OpenCode's tool() helper
+- **skills/**: Markdown files with YAML frontmatter describing tools for AI agents
 - **agent/**: Markdown files with YAML frontmatter defining agent roles
+
+### Tool Registration Pattern
+
+Tools should be defined using OpenCode's standard pattern:
+
+```typescript
+import { tool } from '@opencode/sdk'; // or similar
+import { z } from 'zod';
+
+export const spawnTeam = tool({
+  description: 'Create a new team of AI agents',
+  args: {
+    teamName: z.string().describe('Unique name for the team'),
+    leaderInfo: z.object({
+      agentId: z.string().optional(),
+      agentName: z.string().optional(),
+    }).optional(),
+  },
+  async execute({ teamName, leaderInfo }, context) {
+    // Implementation using operations modules
+    return TeamOperations.spawnTeam(teamName, leaderInfo);
+  },
+});
+```
 
 ## Development Workflow
 
@@ -160,20 +188,21 @@ Automatically runs on git operations:
 
 ## Common Tasks
 
-### Adding a New Operation
+### Adding a New Tool
 
-1. Add function to `src/operations/team.ts` or `task.ts`
-2. Export from `src/index.ts` if needed for external use
-3. Update skill documentation in `skills/*/SKILL.md`
-4. Add tests in `tests/`
-5. Build and verify: `mise run build && bun test`
+1. Create tool in `src/tools/myTool.ts` using `tool()` helper
+2. Export from `src/tools/index.ts`
+3. Import and register in `src/index.ts`
+4. Create/update skill documentation in `skills/*/SKILL.md`
+5. Add tests in `tests/`
+6. Build and verify: `mise run build && bun test`
 
 ### Adding a New Skill
 
 1. Create directory: `skills/skill-name/`
 2. Create `SKILL.md` with YAML frontmatter
-3. Document how AI agents use the operations
-4. Reference global operations: `global.TeamOperations.methodName()`
+3. Document what the skill does and when to use it
+4. Reference the tools that skill uses
 
 ### Updating Documentation
 
@@ -217,5 +246,7 @@ mise run lint
 
 - [Bun Documentation](https://bun.sh/docs)
 - [OpenCode Documentation](https://opencode.ai/docs/)
+- [OpenCode Custom Tools](https://opencode.ai/docs/custom-tools/)
+- [OpenCode Skills](https://opencode.ai/docs/skills/)
 - [Development Guide](docs/DEVELOPMENT.md)
 - [TypeScript Handbook](https://www.typescriptlang.org/docs/)

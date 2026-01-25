@@ -1,65 +1,239 @@
 /**
  * OpenCode Teams Plugin
  *
- * Multi-agent team coordination plugin inspired by Claude Code's TeammateTool.
- * Enables spawning, coordinating, and managing teams of AI agents working together.
+ * Multi-agent team coordination plugin for OpenCode.
+ * Enables AI agents to create teams, share task queues, and communicate.
  *
- * Refactored to use Bun built-in APIs and modular structure.
+ * Follows OpenCode's plugin architecture with proper tool registration.
  */
 
-// Export operations
-export { TeamOperations } from './operations/team';
-export { TaskOperations } from './operations/task';
+// Try to import from @opencode-ai/plugin, fall back to local types
+let Plugin: any, tool: any;
+try {
+  const pkg = await import('@opencode-ai/plugin');
+  Plugin = pkg.Plugin;
+  tool = pkg.tool;
+} catch {
+  // Use local type definitions when @opencode-ai/plugin is not available
+  const local = await import('./plugin-types');
+  Plugin = local.Plugin;
+  tool = local.tool;
+}
 
-// Export types
-export type {
-  TeamConfig,
-  TeamMember,
-  LeaderInfo,
-  Message,
-  Task,
-  TeamSummary,
-  TaskFilters,
-  JoinResult,
-} from './types/index';
-
-// Import for plugin initialization
 import { TeamOperations } from './operations/team';
 import { TaskOperations } from './operations/task';
+import type { TeamConfig, LeaderInfo, TeamMember, Message, Task } from './types/index';
 
 /**
- * Main plugin export
+ * OpenCode Teams Plugin
+ * 
+ * Registers custom tools for team coordination:
+ * - spawn-team: Create a new team
+ * - discover-teams: List available teams
+ * - join-team: Join an existing team
+ * - send-message: Send direct message to team member
+ * - broadcast-message: Broadcast to all team members
+ * - read-messages: Read messages for current agent
+ * - create-task: Create a task in team queue
+ * - get-tasks: Get tasks from team queue
+ * - claim-task: Claim a pending task
+ * - update-task: Update task status or details
+ * - get-team-info: Get team details
  */
-export default async (_context: any) => {
-  console.log('[OpenCode Teams Plugin] Initialized');
-
-  // Make operations available globally for skills to use
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  (global as any).TeamOperations = TeamOperations;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  (global as any).TaskOperations = TaskOperations;
+export const OpenCodeTeamsPlugin = async (ctx: any) => {
+  console.log('[OpenCode Teams Plugin] Initializing...');
 
   return {
-    // Hook into tool execution to provide team context
-    'tool.execute.before': async (_input: any, _output: any) => {
-      // Inject team context if available
-      const teamName = process.env.OPENCODE_TEAM_NAME;
-      if (teamName) {
-        console.log(`[OpenCode Teams] Executing in team context: ${teamName}`);
-      }
+    // Register custom tools
+    tool: {
+      'spawn-team': tool({
+        description: 'Create a new team of AI agents for collaborative work',
+        args: {
+          teamName: tool.schema.string().describe('Unique name for the team'),
+          leaderInfo: tool.schema
+            .object({
+              agentId: tool.schema.string().optional(),
+              agentName: tool.schema.string().optional(),
+              agentType: tool.schema.string().optional(),
+            })
+            .optional()
+            .describe('Optional leader information'),
+        },
+        async execute(args: any, _ctx: any): Promise<TeamConfig> {
+          return TeamOperations.spawnTeam(args.teamName, args.leaderInfo);
+        },
+      }),
+
+      'discover-teams': tool({
+        description: 'List all available teams',
+        args: {},
+        async execute(_args: any, _ctx: any) {
+          return TeamOperations.discoverTeams();
+        },
+      }),
+
+      'join-team': tool({
+        description: 'Join an existing team as a member',
+        args: {
+          teamName: tool.schema.string().describe('Name of the team to join'),
+          agentInfo: tool.schema
+            .object({
+              agentId: tool.schema.string().optional(),
+              agentName: tool.schema.string().optional(),
+              agentType: tool.schema.string().optional(),
+            })
+            .optional()
+            .describe('Optional agent information'),
+        },
+        async execute(args: any, _ctx: any): Promise<TeamMember> {
+          return TeamOperations.requestJoin(args.teamName, args.agentInfo);
+        },
+      }),
+
+      'get-team-info': tool({
+        description: 'Get detailed information about a team',
+        args: {
+          teamName: tool.schema.string().describe('Name of the team'),
+        },
+        async execute(args: any, _ctx: any): Promise<TeamConfig> {
+          return TeamOperations.getTeamInfo(args.teamName);
+        },
+      }),
+
+      'send-message': tool({
+        description: 'Send a direct message to another team member',
+        args: {
+          teamName: tool.schema.string().describe('Team name'),
+          targetAgentId: tool.schema.string().describe('ID of the agent to message'),
+          message: tool.schema.string().describe('Message content'),
+          fromAgentId: tool.schema.string().optional().describe('Sender agent ID (optional)'),
+        },
+        async execute(args: any, _ctx: any): Promise<Message> {
+          return TeamOperations.write(
+            args.teamName,
+            args.targetAgentId,
+            args.message,
+            args.fromAgentId
+          );
+        },
+      }),
+
+      'broadcast-message': tool({
+        description: 'Broadcast a message to all team members',
+        args: {
+          teamName: tool.schema.string().describe('Team name'),
+          message: tool.schema.string().describe('Message content'),
+          fromAgentId: tool.schema.string().optional().describe('Sender agent ID (optional)'),
+        },
+        async execute(args: any, _ctx: any): Promise<Message> {
+          return TeamOperations.broadcast(args.teamName, args.message, args.fromAgentId);
+        },
+      }),
+
+      'read-messages': tool({
+        description: 'Read messages for the current agent',
+        args: {
+          teamName: tool.schema.string().describe('Team name'),
+          agentId: tool.schema.string().optional().describe('Agent ID (optional)'),
+        },
+        async execute(args: any, _ctx: any): Promise<Message[]> {
+          return TeamOperations.readMessages(args.teamName, args.agentId);
+        },
+      }),
+
+      'create-task': tool({
+        description: 'Create a new task in the team queue',
+        args: {
+          teamName: tool.schema.string().describe('Team name'),
+          taskData: tool.schema
+            .object({
+              title: tool.schema.string().optional(),
+              description: tool.schema.string().optional(),
+              priority: tool.schema.string().optional(),
+            })
+            .describe('Task details'),
+        },
+        async execute(args: any, _ctx: any): Promise<Task> {
+          return TaskOperations.createTask(args.teamName, args.taskData);
+        },
+      }),
+
+      'get-tasks': tool({
+        description: 'Get tasks from the team queue',
+        args: {
+          teamName: tool.schema.string().describe('Team name'),
+          filters: tool.schema
+            .object({
+              status: tool.schema.string().optional(),
+              owner: tool.schema.string().optional(),
+            })
+            .optional()
+            .describe('Optional filter criteria'),
+        },
+        async execute(args: any, _ctx: any): Promise<Task[]> {
+          return TaskOperations.getTasks(args.teamName, args.filters);
+        },
+      }),
+
+      'claim-task': tool({
+        description: 'Claim a pending task from the team queue',
+        args: {
+          teamName: tool.schema.string().describe('Team name'),
+          taskId: tool.schema.string().describe('Task ID to claim'),
+          agentId: tool.schema.string().optional().describe('Agent ID (optional)'),
+        },
+        async execute(args: any, _ctx: any): Promise<Task> {
+          return TaskOperations.claimTask(args.teamName, args.taskId, args.agentId);
+        },
+      }),
+
+      'update-task': tool({
+        description: 'Update task details or status',
+        args: {
+          teamName: tool.schema.string().describe('Team name'),
+          taskId: tool.schema.string().describe('Task ID'),
+          updates: tool.schema
+            .object({
+              status: tool.schema.string().optional(),
+              description: tool.schema.string().optional(),
+              completedAt: tool.schema.string().optional(),
+            })
+            .describe('Fields to update'),
+        },
+        async execute(args: any, _ctx: any): Promise<Task> {
+          return TaskOperations.updateTask(args.teamName, args.taskId, args.updates);
+        },
+      }),
     },
 
-    // Hook into session creation to set up team context
+    // Hook into session events
     'session.created': async (_event: any) => {
-      console.log('[OpenCode Teams] New session created - team coordination available');
+      console.log('[OpenCode Teams] Session created - team coordination tools available');
     },
 
-    // Hook into session cleanup
     'session.deleted': async (_event: any) => {
       const teamName = process.env.OPENCODE_TEAM_NAME;
       if (teamName) {
         console.log(`[OpenCode Teams] Session ended - team: ${teamName}`);
       }
     },
+
+    // Hook into tool execution for context injection
+    'tool.execute.before': async (input: any, output: any) => {
+      const teamName = process.env.OPENCODE_TEAM_NAME;
+      if (teamName && !input.tool.startsWith('spawn-team')) {
+        // Inject team context for debugging
+        if (ctx.client?.app?.log) {
+          await ctx.client.app.log({
+            service: 'opencode-teams',
+            level: 'debug',
+            message: `Executing ${input.tool} in team context: ${teamName}`,
+          });
+        }
+      }
+    },
   };
 };
+
+// Export as default for OpenCode to load
+export default OpenCodeTeamsPlugin;
