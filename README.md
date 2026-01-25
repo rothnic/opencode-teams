@@ -2,38 +2,51 @@
 
 Multi-agent team coordination plugin for [OpenCode](https://opencode.ai), inspired by Claude Code's TeammateTool feature.
 
-Enable teams of AI agents to collaborate on complex coding tasks through coordinated workflows, task distribution, and inter-agent communication.
+**For AI Agents**: This plugin enables you to collaborate with other AI agents through teams, shared task queues, and inter-agent messaging.
 
-Built with TypeScript following the [bun-module](https://github.com/zenobi-us/bun-module) structure for modern tooling and publishing.
+**For Developers**: This plugin adds team coordination capabilities to OpenCode, allowing AI agents to work together on complex tasks.
 
-## Features
+Built with TypeScript and Bun following modern best practices.
 
-- **Team Management**: Create and coordinate teams of AI agents
-- **Task Distribution**: Shared task queue for work distribution
-- **Inter-Agent Communication**: Direct messaging and broadcasts
-- **Multiple Agent Types**: Leaders, workers, and specialists
-- **File-Based Coordination**: Persistent team state and messages
-- **Example Workflows**: Pre-built team templates for common scenarios
-- **TypeScript**: Full type safety and modern development experience
-- **Bun Native**: Uses Bun's built-in APIs for optimal performance
+## What This Plugin Does
 
-## Prerequisites
+OpenCode Teams provides coordination primitives for AI agents:
 
-- [Bun](https://bun.sh) >= 1.3.2
-- [mise](https://mise.jdx.dev/) (optional, for task running)
+- **Teams**: Create and join teams for collaborative work
+- **Task Queues**: Share work across team members via task queues
+- **Messaging**: Send direct messages or broadcast to all team members
+- **Roles**: Support for leaders, workers, and specialized agents
 
-## Quick Start
+AI agents use these via **skills** (spawn-team, team-communicate, team-coordinate) that the plugin provides.
+
+## For AI Agents Using This Plugin
+
+Once this plugin is installed in OpenCode, you can:
+
+1. **Create or join teams** using the `spawn-team` skill
+2. **Claim and complete tasks** using the `team-coordinate` skill
+3. **Message other agents** using the `team-communicate` skill
+
+See the [skills directory](skills/) for detailed documentation on each capability.
+
+## For Developers Installing This Plugin
+
+### Prerequisites
+
+- [Bun](https://bun.sh) >= 1.3.2 (for development)
+- [OpenCode](https://opencode.ai)
 
 ### Installation
 
+#### Via npm/bun Registry
+
 ```bash
-# Install via npm/bun
-bun add opencode-teams
-# or
 npm install opencode-teams
+# or
+bun add opencode-teams
 ```
 
-Or reference directly in your `opencode.json`:
+Then add to your `opencode.json`:
 
 ```json
 {
@@ -41,50 +54,94 @@ Or reference directly in your `opencode.json`:
 }
 ```
 
-### For Development
+#### Local Development Install
 
 ```bash
-# Clone repository
-git clone https://github.com/rothnic/opencode-teams.git
-cd opencode-teams
+# Clone to OpenCode's plugins directory
+git clone https://github.com/rothnic/opencode-teams.git ~/.config/opencode/plugins/opencode-teams
+cd ~/.config/opencode/plugins/opencode-teams
 
-# Setup (installs dependencies and git hooks)
+# Install and build
 bun install
-npm run setup
+mise run build
+```
 
-# Build
-bun run build
+Then reference in your `opencode.json`:
 
-# Test
-bun test
+```json
+{
+  "plugin": ["opencode-teams"]
+}
+```
 
-# Lint
-bun run lint
+### Verification
+
+After installation, OpenCode should recognize:
+- `TeamOperations` and `TaskOperations` global objects
+- Skills: spawn-team, team-communicate, team-coordinate
+- Agent templates: team-leader, team-worker, code-reviewer
+
+## Project Structure
+
+```
+opencode-teams/
+├── src/                # Plugin source code
+│   ├── types/          # TypeScript interfaces
+│   ├── utils/          # Utility functions (Bun APIs)
+│   ├── operations/     # Team and Task operations
+│   └── index.ts        # Plugin entry point
+├── skills/             # Skill definitions for AI agents
+├── agent/              # Agent role templates
+├── examples/           # Example workflows
+├── tests/              # Unit and integration tests
+├── docs/               # Developer documentation
+└── dist/               # Built output (generated)
 ```
 
 ## Development
 
-### Available Commands
+### Setup
 
-Using mise (recommended):
+```bash
+git clone https://github.com/rothnic/opencode-teams.git
+cd opencode-teams
+bun install
+mise run setup  # Installs git hooks
+```
+
+### Common Commands
+
+```bash
+# Build
+mise run build
+
+# Test
+bun test
+
+# Lint and format
+mise run lint:fix
+mise run format
+
+# Type check
+mise run typecheck
+```
+
+### Using mise (Recommended)
+
+[mise](https://mise.jdx.dev/) provides consistent task running:
+
 ```bash
 mise run setup      # Initial setup with git hooks
-mise run build      # Build the module
+mise run build      # Build TypeScript
 mise run test       # Run tests
-mise run lint       # Lint code
-mise run lint:fix   # Fix linting issues
-mise run format     # Format code with Prettier
+mise run lint       # Check code style
+mise run lint:fix   # Auto-fix linting issues
+mise run format     # Format with Prettier
 mise run typecheck  # Type check without emitting
 ```
 
-Using bun directly:
-```bash
-bun install         # Install dependencies
-bun test            # Run tests
-bun run build       # Build via mise
-```
+### Using npm Scripts
 
-Using npm scripts:
 ```bash
 npm run setup       # Setup project
 npm run build       # Build
@@ -92,77 +149,73 @@ npm test            # Test
 npm run lint        # Lint
 ```
 
-### Git Hooks
-
-This project uses [Lefthook](https://github.com/evilmartians/lefthook) for git hooks:
-
-- **pre-commit**: Runs linting, formatting, and type-checking
-- **pre-push**: Runs tests and builds
-
-Hooks are installed automatically during `mise run setup` or `npm run setup`.
-
-## Project Structure
-
-```
-opencode-teams/
-├── src/
-│   ├── types/          # TypeScript interfaces
-│   ├── utils/          # Utility functions (Bun APIs)
-│   ├── operations/     # Team and Task operations
-│   └── index.ts        # Plugin entry point
-├── tests/              # Unit and integration tests
-├── docs/               # Documentation
-├── agent/              # Agent templates
-├── skills/             # Skill definitions
-├── examples/           # Example workflows
-└── dist/               # Built output (generated)
-```
-
 ## Documentation
 
-- [Installation Guide](docs/INSTALL.md)
-- [Quick Start](docs/QUICKSTART.md)
-- [Implementation Summary](docs/SUMMARY.md)
-- [Research Background](docs/RESEARCH.md)
-- [Agent Development](docs/AGENTS.md)
+- **For AI Agents**: See [skills/](skills/) directory for how to use the coordination features
+- **For Developers**: See [docs/](docs/) directory for:
+  - [Installation Guide](docs/INSTALL.md)
+  - [Quick Start](docs/QUICKSTART.md)
+  - [Development Guide](docs/DEVELOPMENT.md)
+  - [Implementation Details](docs/SUMMARY.md)
+  - [Research Background](docs/RESEARCH.md)
 
-## Core Operations
+## Example Use Case
 
-### TeamOperations
+**Scenario**: Code review by specialized agents
 
-- `spawnTeam(teamName, leaderInfo)` - Create new team
-- `discoverTeams()` - List available teams
-- `requestJoin(teamName, agentInfo)` - Join a team
-- `getTeamInfo(teamName)` - Get team details
-- `write(teamName, targetAgentId, message)` - Direct message
-- `broadcast(teamName, message)` - Message all members
-- `readMessages(teamName, agentId)` - Read your messages
-- `cleanup(teamName)` - Remove team data
+```
+1. Leader Agent creates team:
+   - Uses spawn-team skill to create 'review-pr-123'
+   - Creates tasks: security-review, performance-review, style-review
 
-### TaskOperations
+2. Specialist Agents join:
+   - Security specialist joins team, claims security-review task
+   - Performance specialist joins team, claims performance-review task
+   - Style specialist joins team, claims style-review task
 
-- `createTask(teamName, taskData)` - Create new task
-- `getTasks(teamName, filters)` - List tasks
-- `updateTask(teamName, taskId, updates)` - Update task
-- `claimTask(teamName, taskId)` - Claim a task
+3. Agents complete work:
+   - Each specialist completes their review
+   - Uses team-communicate to share findings
+   - Updates task status to 'completed'
 
-## Example Use Cases
-
-### Code Review Team
-
-```javascript
-// Leader creates team and review tasks
-const team = global.TeamOperations.spawnTeam('code-review-pr-789');
-
-['security', 'performance', 'style', 'logic'].forEach(aspect => {
-  global.TaskOperations.createTask('code-review-pr-789', {
-    title: `${aspect} review`,
-    specialization: aspect
-  });
-});
+4. Leader synthesizes:
+   - Reads all messages
+   - Combines findings into final review
 ```
 
-See [examples/](examples/) for more workflows.
+See [examples/](examples/) for more workflow patterns.
+
+## Architecture
+
+### Plugin Design
+
+- **Entry Point**: `src/index.ts` exports the plugin initializer
+- **Global Operations**: TeamOperations and TaskOperations exposed to skills via `global` object
+- **File-Based Storage**: Teams and tasks persisted in `~/.config/opencode/opencode-teams/`
+- **Bun Native**: Uses Bun APIs (`Bun.spawnSync`, `Bun.write`, `Bun.file`) for performance
+
+### OpenCode Integration
+
+- **Plugin Registration**: Defined in `opencode.json` pointing to `./dist/index.js`
+- **Lifecycle Hooks**: Responds to OpenCode events (session created/deleted, tool execution)
+- **Skills**: Markdown files with YAML frontmatter describe capabilities for AI agents
+- **Agents**: Pre-configured agent templates (leader, worker, reviewer roles)
+
+## Contributing
+
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Make changes following our [development guide](docs/DEVELOPMENT.md)
+4. Commit using [conventional commits](https://www.conventionalcommits.org/)
+5. Push and open a Pull Request
+
+### Git Hooks
+
+Lefthook ensures quality:
+- **pre-commit**: Runs linting, formatting, type-checking
+- **pre-push**: Runs tests and build
+
+Hooks install automatically via `mise run setup`.
 
 ## Testing
 
@@ -170,27 +223,23 @@ See [examples/](examples/) for more workflows.
 # Run all tests
 bun test
 
-# Run specific test file
+# Run specific test
 bun test tests/team-operations.test.ts
 
-# Run integration test
+# Watch mode
+bun test --watch
+
+# Integration test (requires OpenCode installed)
 ./tests/integration.sh
 ```
 
-## Contributing
-
-1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (following conventional commits)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
-
 ## License
 
-MIT License - see [LICENSE](LICENSE) file for details
+MIT License - see [LICENSE](LICENSE)
 
 ## Links
 
 - [OpenCode Documentation](https://opencode.ai/docs/)
 - [Bun Documentation](https://bun.sh/docs)
-- [Bun Module Template](https://github.com/zenobi-us/bun-module)
+- [Plugin Template](https://github.com/zenobi-us/bun-module)
+- [Issue Tracker](https://github.com/rothnic/opencode-teams/issues)
