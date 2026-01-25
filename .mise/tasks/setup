@@ -12,6 +12,12 @@ fi
 
 bun install
 
+# Install lefthook git hooks
+if command -v lefthook &> /dev/null; then
+	echo "📎 Installing git hooks with lefthook..."
+	lefthook install
+fi
+
 echo ""
 echo "👍 Done"
 echo ""

@@ -1,0 +1,28 @@
+# Lefthook configuration for pre-commit hooks
+# See: https://github.com/evilmartians/lefthook
+
+pre-commit:
+  parallel: true
+  commands:
+    lint:
+      glob: "*.{js,ts}"
+      run: mise run lint:fix
+      stage_fixed: true
+    
+    format:
+      glob: "*.{js,ts,json,md}"
+      run: mise run format
+      stage_fixed: true
+    
+    type-check:
+      glob: "*.ts"
+      run: mise run typecheck
+      
+pre-push:
+  parallel: false
+  commands:
+    test:
+      run: mise run test
+    
+    build:
+      run: mise run build
