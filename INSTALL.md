@@ -6,52 +6,69 @@ This guide will help you install and configure the OpenCode Teams plugin.
 
 - OpenCode installed and configured
 - Node.js (for the plugin's JavaScript code)
-- Basic understanding of OpenCode plugins and skills
+- Basic understanding of OpenCode plugins
 
-## Installation Methods
+## Recommended Installation
 
-### Method 1: Project-Specific Installation (Recommended for Testing)
-
-1. **Clone or Download the Plugin**
-
-```bash
-cd /path/to/your/project
-git clone https://github.com/rothnic/opencode-teams.git .opencode/plugins/opencode-teams
-```
-
-Or download and extract:
-
-```bash
-cd /path/to/your/project
-mkdir -p .opencode/plugins
-cd .opencode/plugins
-# Download and extract opencode-teams here
-```
-
-2. **Configure OpenCode**
-
-Create or edit `.opencode/opencode.json` in your project root:
+The simplest way to use this plugin is to reference it in your `opencode.json`:
 
 ```json
 {
-  "plugin": ["./.opencode/plugins/opencode-teams/plugin/index.js"],
-  "skills": {
-    "allow": ["*"],
-    "directories": ["./.opencode/plugins/opencode-teams/skills"]
-  },
-  "agents": {
-    "directories": ["./.opencode/plugins/opencode-teams/agent"]
-  }
+  "plugin": ["opencode-teams"]
 }
 ```
 
-3. **Verify Installation**
+OpenCode will automatically handle the plugin discovery and initialization.
 
-Start OpenCode and run:
+## Manual Installation (Development/Testing)
+
+If you want to develop or test the plugin locally:
+
+### Global Installation
+
+```bash
+# Clone to OpenCode's global plugins directory
+mkdir -p ~/.config/opencode/plugins
+cd ~/.config/opencode/plugins
+git clone https://github.com/rothnic/opencode-teams.git opencode-teams
+```
+
+Then reference in your `opencode.json`:
+
+```json
+{
+  "plugin": ["opencode-teams"]
+}
+```
+
+### Project-Specific Installation
+
+```bash
+# Clone to project's plugins directory
+cd /path/to/your/project
+mkdir -p .opencode/plugins
+cd .opencode/plugins
+git clone https://github.com/rothnic/opencode-teams.git opencode-teams
+```
+
+Then reference in project's `opencode.json`:
+
+```json
+{
+  "plugin": ["opencode-teams"]
+}
+```
+## Verification
+
+Start OpenCode and verify the plugin loaded:
 
 ```javascript
 // Check if TeamOperations is available
 console.log(typeof global.TeamOperations);
+// Should output: "object"
+
+// Check if TaskOperations is available
+console.log(typeof global.TaskOperations);
 // Should output: "object"
 
 // Try creating a test team
@@ -62,58 +79,18 @@ console.log('Team created:', team);
 global.TeamOperations.cleanup('test-team');
 ```
 
-### Method 2: Global Installation (Available to All Projects)
+## Data Storage
 
-1. **Install Plugin Globally**
+The plugin stores all data in `~/.config/opencode/opencode-teams/`:
 
-```bash
-# For Linux/macOS
-mkdir -p ~/.config/opencode/plugins
-cd ~/.config/opencode/plugins
-git clone https://github.com/rothnic/opencode-teams.git
-
-# For Windows
-mkdir %USERPROFILE%\.config\opencode\plugins
-cd %USERPROFILE%\.config\opencode\plugins
-git clone https://github.com/rothnic/opencode-teams.git
+```
+~/.config/opencode/opencode-teams/
+├── teams/           # Team configurations and messages
+└── tasks/           # Task queues
 ```
 
-2. **Configure OpenCode Globally**
+You can override this location by setting the `OPENCODE_TEAMS_DIR` environment variable.
 
-Edit `~/.config/opencode/opencode.json`:
-
-```json
-{
-  "plugin": ["opencode-teams/plugin/index.js"],
-  "skills": {
-    "allow": ["*"],
-    "directories": ["opencode-teams/skills"]
-  },
-  "agents": {
-    "directories": ["opencode-teams/agent"]
-  }
-}
-```
-
-3. **Verify Installation**
-
-Same verification steps as Method 1.
-
-### Method 3: NPM Package (Future)
-
-Once published to npm:
-
-```bash
-npm install -g opencode-teams
-```
-
-Then reference in `opencode.json`:
-
-```json
-{
-  "plugin": ["opencode-teams"]
-}
-```
 
 ## Configuration
 
@@ -122,30 +99,14 @@ Then reference in `opencode.json`:
 Set these to provide context for your agents:
 
 ```bash
-# Required for team operations
+# Agent context (used during team operations)
 export OPENCODE_TEAM_NAME="my-team"
 export OPENCODE_AGENT_ID="agent-1"
 export OPENCODE_AGENT_NAME="My Agent"
 export OPENCODE_AGENT_TYPE="worker"
 
-# Optional: Override default directories
-export OPENCODE_TEAMS_DIR="$HOME/.opencode/teams"
-export OPENCODE_TASKS_DIR="$HOME/.opencode/tasks"
-```
-
-### Directory Structure
-
-After installation, the plugin creates these directories:
-
-```
-~/.opencode/
-├── teams/              # Team data and configuration
-│   └── {team-name}/
-│       ├── config.json
-│       └── messages/
-└── tasks/              # Task queues
-    └── {team-name}/
-        └── {task-id}.json
+# Optional: Override plugin data directory
+export OPENCODE_TEAMS_DIR="$HOME/.config/opencode/my-custom-teams-dir"
 ```
 
 ## Usage Examples

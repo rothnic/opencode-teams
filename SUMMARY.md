@@ -67,7 +67,7 @@ Each agent includes:
 
 ### File-Based Coordination
 ```
-~/.opencode/
+~/.config/opencode/opencode-teams/
 ├── teams/
 │   └── {team-name}/
 │       ├── config.json
@@ -156,8 +156,7 @@ const task2 = global.TaskOperations.createTask('team', {
 - `OPENCODE_AGENT_ID`: Unique agent identifier
 - `OPENCODE_AGENT_NAME`: Display name
 - `OPENCODE_AGENT_TYPE`: Role (leader, worker, specialist)
-- `OPENCODE_TEAMS_DIR`: Override teams directory
-- `OPENCODE_TASKS_DIR`: Override tasks directory
+- `OPENCODE_TEAMS_DIR`: Override plugin data directory (default: `~/.config/opencode/opencode-teams`)
 
 ## File Structure
 ```
@@ -190,26 +189,26 @@ opencode-teams/
 
 ### Quick Install
 ```bash
-# Project-specific
-git clone https://github.com/rothnic/opencode-teams.git .opencode/plugins/opencode-teams
+# Add to opencode.json
+{
+  "plugin": ["opencode-teams"]
+}
 
-# Global
-mkdir -p ~/.config/opencode/plugins
+# Or clone for development
 git clone https://github.com/rothnic/opencode-teams.git ~/.config/opencode/plugins/opencode-teams
 ```
 
 ### Configuration
+The plugin automatically:
+- Registers with OpenCode
+- Creates data storage in `~/.config/opencode/opencode-teams/`
+- Makes TeamOperations and TaskOperations available globally
+- Registers included skills and agent templates
+
 Add to `opencode.json`:
 ```json
 {
-  "plugin": ["./.opencode/plugins/opencode-teams/plugin/index.js"],
-  "skills": {
-    "allow": ["*"],
-    "directories": ["./.opencode/plugins/opencode-teams/skills"]
-  },
-  "agents": {
-    "directories": ["./.opencode/plugins/opencode-teams/agent"]
-  }
+  "plugin": ["opencode-teams"]
 }
 ```
 

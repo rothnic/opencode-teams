@@ -35,10 +35,21 @@ function generateId() {
 }
 
 /**
+ * Get the plugin's base directory in OpenCode config
+ */
+function getPluginDir() {
+  const baseDir = process.env.OPENCODE_TEAMS_DIR || join(homedir(), '.config', 'opencode', 'opencode-teams');
+  if (!existsSync(baseDir)) {
+    mkdirSync(baseDir, { recursive: true });
+  }
+  return baseDir;
+}
+
+/**
  * Get the teams directory path
  */
 function getTeamsDir() {
-  const baseDir = process.env.OPENCODE_TEAMS_DIR || join(homedir(), '.opencode', 'teams');
+  const baseDir = join(getPluginDir(), 'teams');
   if (!existsSync(baseDir)) {
     mkdirSync(baseDir, { recursive: true });
   }
@@ -49,7 +60,7 @@ function getTeamsDir() {
  * Get the tasks directory path
  */
 function getTasksDir() {
-  const baseDir = process.env.OPENCODE_TASKS_DIR || join(homedir(), '.opencode', 'tasks');
+  const baseDir = join(getPluginDir(), 'tasks');
   if (!existsSync(baseDir)) {
     mkdirSync(baseDir, { recursive: true });
   }

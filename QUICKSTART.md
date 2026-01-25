@@ -4,31 +4,25 @@ Get started with OpenCode Teams in 5 minutes!
 
 ## Installation
 
-```bash
-# Option 1: Project-specific installation
-cd your-project
-git clone https://github.com/rothnic/opencode-teams.git .opencode/plugins/opencode-teams
-
-# Option 2: Global installation
-mkdir -p ~/.config/opencode/plugins
-cd ~/.config/opencode/plugins
-git clone https://github.com/rothnic/opencode-teams.git
-```
-
-## Configuration
-
-Create or edit `opencode.json`:
+Simply add the plugin to your `opencode.json`:
 
 ```json
 {
-  "plugin": ["./.opencode/plugins/opencode-teams/plugin/index.js"],
-  "skills": {
-    "allow": ["*"],
-    "directories": ["./.opencode/plugins/opencode-teams/skills"]
-  },
-  "agents": {
-    "directories": ["./.opencode/plugins/opencode-teams/agent"]
-  }
+  "plugin": ["opencode-teams"]
+}
+```
+
+For development/testing, clone to OpenCode's plugins directory:
+
+```bash
+git clone https://github.com/rothnic/opencode-teams.git ~/.config/opencode/plugins/opencode-teams
+```
+
+Then reference in `opencode.json`:
+
+```json
+{
+  "plugin": ["opencode-teams"]
 }
 ```
 

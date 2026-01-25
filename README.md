@@ -17,30 +17,34 @@ Enable teams of AI agents to collaborate on complex coding tasks through coordin
 
 ### Installation
 
-1. Clone or download this repository
-2. Place it in your OpenCode plugins directory:
-
-```bash
-# For project-specific installation
-cp -r opencode-teams /path/to/your/project/.opencode/plugins/
-
-# For global installation
-cp -r opencode-teams ~/.config/opencode/plugins/
-```
-
-3. Reference the plugin in your `opencode.json`:
+Simply reference the plugin in your `opencode.json`:
 
 ```json
 {
-  "plugin": ["opencode-teams/plugin/index.js"],
-  "skills": {
-    "directories": ["opencode-teams/skills"]
-  },
-  "agents": {
-    "directories": ["opencode-teams/agent"]
-  }
+  "plugin": ["opencode-teams"]
 }
 ```
+
+Or for development/local installation:
+
+```bash
+# Clone to OpenCode's global plugins directory
+git clone https://github.com/rothnic/opencode-teams.git ~/.config/opencode/plugins/opencode-teams
+```
+
+Then reference in `opencode.json`:
+
+```json
+{
+  "plugin": ["opencode-teams"]
+}
+```
+
+The plugin will automatically:
+- Register itself with OpenCode
+- Create data storage in `~/.config/opencode/opencode-teams/`
+- Make `TeamOperations` and `TaskOperations` available globally
+- Register included skills and agent templates
 
 ### Basic Usage
 
@@ -141,18 +145,20 @@ opencode-teams/
 
 ### Data Storage
 
-Teams and tasks are stored in:
+All plugin data is stored in `~/.config/opencode/opencode-teams/`:
 
 ```
-~/.opencode/
+~/.config/opencode/opencode-teams/
 ├── teams/
 │   └── {team-name}/
-│       ├── config.json
-│       └── messages/
+│       ├── config.json          # Team metadata, member list
+│       └── messages/            # Inter-agent mailbox
 └── tasks/
-    └── {team-name}/
+    └── {team-name}/             # Team-scoped task queue
         └── {task-id}.json
 ```
+
+You can override the base directory with `OPENCODE_TEAMS_DIR` environment variable.
 
 ## Available Skills
 
@@ -295,8 +301,7 @@ Set these to provide context for your agents:
 - `OPENCODE_AGENT_ID` - Unique agent identifier
 - `OPENCODE_AGENT_NAME` - Display name for agent
 - `OPENCODE_AGENT_TYPE` - Role (leader, worker, specialist)
-- `OPENCODE_TEAMS_DIR` - Override teams directory (default: `~/.opencode/teams`)
-- `OPENCODE_TASKS_DIR` - Override tasks directory (default: `~/.opencode/tasks`)
+- `OPENCODE_TEAMS_DIR` - Override plugin data directory (default: `~/.config/opencode/opencode-teams`)
 
 ## Common Patterns
 
