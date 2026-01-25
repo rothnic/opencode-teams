@@ -1,11 +1,19 @@
 {
   "name": "opencode-teams",
   "version": "0.1.0",
-  "description": "Implementation of Claude code teams in opencode",
+  "description": "Multi-agent team coordination plugin for OpenCode",
   "author": {
     "name": "rothnic",
     "email": ""
   },
+  "keywords": [
+    "opencode",
+    "plugin",
+    "teams",
+    "multi-agent",
+    "coordination",
+    "collaboration"
+  ],
   "type": "module",
   "exports": {
     ".": {
@@ -23,7 +31,11 @@
   },
   "files": [
     "dist",
-    "src/version.ts"
+    "src/version.ts",
+    "skills",
+    "agent",
+    "examples",
+    "opencode.json"
   ],
   "devDependencies": {
     "@eslint/js": "^9.39.1",
@@ -35,7 +47,16 @@
     "eslint-config-prettier": "10.1.8",
     "eslint-plugin-prettier": "^5.1.3",
     "prettier": "^3.2.4",
+    "typescript": "^5.3.3",
     "typescript-eslint": "^8.47.0",
     "vitest": "^3.2.4"
+  },
+  "peerDependencies": {
+    "opencode": "*"
+  },
+  "peerDependenciesMeta": {
+    "opencode": {
+      "optional": true
+    }
   }
 }
