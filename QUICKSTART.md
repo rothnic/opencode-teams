@@ -21,7 +21,7 @@ Create or edit `opencode.json`:
 
 ```json
 {
-  "plugin": ["./. opencode/plugins/opencode-teams/plugin/index.js"],
+  "plugin": ["./.opencode/plugins/opencode-teams/plugin/index.js"],
   "skills": {
     "allow": ["*"],
     "directories": ["./.opencode/plugins/opencode-teams/skills"]

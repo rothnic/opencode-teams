@@ -8,6 +8,31 @@
 import { readFileSync, writeFileSync, existsSync, mkdirSync, readdirSync, rmSync } from 'fs';
 import { join } from 'path';
 import { homedir } from 'os';
+import { randomBytes } from 'crypto';
+
+/**
+ * Safely read and parse a JSON file
+ */
+function safeReadJSON(filePath) {
+  try {
+    const content = readFileSync(filePath, 'utf-8');
+    return JSON.parse(content);
+  } catch (error) {
+    if (error.code === 'ENOENT') {
+      throw new Error(`File not found: ${filePath}`);
+    } else if (error instanceof SyntaxError) {
+      throw new Error(`Invalid JSON in file: ${filePath}`);
+    }
+    throw error;
+  }
+}
+
+/**
+ * Generate a unique ID
+ */
+function generateId() {
+  return `${Date.now()}-${randomBytes(4).toString('hex')}`;
+}
 
 /**
  * Get the teams directory path
@@ -91,13 +116,17 @@ const TeamOperations = {
     for (const teamName of teamDirs) {
       const configPath = join(teamsDir, teamName, 'config.json');
       if (existsSync(configPath)) {
-        const config = JSON.parse(readFileSync(configPath, 'utf-8'));
-        teams.push({
-          name: teamName,
-          leader: config.leader,
-          memberCount: config.members.length,
-          created: config.created
-        });
+        try {
+          const config = safeReadJSON(configPath);
+          teams.push({
+            name: teamName,
+            leader: config.leader,
+            memberCount: config.members.length,
+            created: config.created
+          });
+        } catch (error) {
+          console.warn(`Warning: Could not read team config for ${teamName}:`, error.message);
+        }
       }
     }
     
@@ -116,7 +145,7 @@ const TeamOperations = {
       throw new Error(`Team "${teamName}" does not exist`);
     }
     
-    const config = JSON.parse(readFileSync(configPath, 'utf-8'));
+    const config = safeReadJSON(configPath);
     
     // Add to pending requests (simplified - could be enhanced with approval workflow)
     const member = {
@@ -143,7 +172,7 @@ const TeamOperations = {
       throw new Error(`Team "${teamName}" does not exist`);
     }
     
-    const messageFile = join(messagesDir, `${Date.now()}-${targetAgentId}.json`);
+    const messageFile = join(messagesDir, `${generateId()}-${targetAgentId}.json`);
     const messageData = {
       from: fromAgentId || process.env.OPENCODE_AGENT_ID || 'unknown',
       to: targetAgentId,
@@ -167,7 +196,7 @@ const TeamOperations = {
       throw new Error(`Team "${teamName}" does not exist`);
     }
     
-    const config = JSON.parse(readFileSync(configPath, 'utf-8'));
+    const config = safeReadJSON(configPath);
     const messagesDir = join(teamDir, 'messages');
     
     const messageData = {
@@ -178,7 +207,7 @@ const TeamOperations = {
       recipients: config.members.map(m => m.agentId)
     };
     
-    const messageFile = join(messagesDir, `${Date.now()}-broadcast.json`);
+    const messageFile = join(messagesDir, `${generateId()}-broadcast.json`);
     writeFileSync(messageFile, JSON.stringify(messageData, null, 2));
     
     return messageData;
@@ -204,11 +233,15 @@ const TeamOperations = {
     
     for (const file of files) {
       const msgPath = join(messagesDir, file);
-      const msg = JSON.parse(readFileSync(msgPath, 'utf-8'));
-      
-      // Include if addressed to this agent or broadcast
-      if (msg.to === currentAgentId || msg.to === 'broadcast') {
-        messages.push(msg);
+      try {
+        const msg = safeReadJSON(msgPath);
+        
+        // Include if addressed to this agent or broadcast
+        if (msg.to === currentAgentId || msg.to === 'broadcast') {
+          messages.push(msg);
+        }
+      } catch (error) {
+        console.warn(`Warning: Could not read message ${file}:`, error.message);
       }
     }
     
@@ -247,7 +280,7 @@ const TeamOperations = {
       throw new Error(`Team "${teamName}" does not exist`);
     }
     
-    return JSON.parse(readFileSync(configPath, 'utf-8'));
+    return safeReadJSON(configPath);
   }
 };
 
@@ -266,7 +299,7 @@ const TaskOperations = {
       mkdirSync(teamTasksDir, { recursive: true });
     }
     
-    const taskId = Date.now();
+    const taskId = generateId(); // Use unique ID with random component
     const taskData = {
       id: taskId,
       ...task,
@@ -300,13 +333,17 @@ const TaskOperations = {
     
     for (const file of files) {
       const taskPath = join(teamTasksDir, file);
-      const task = JSON.parse(readFileSync(taskPath, 'utf-8'));
-      
-      // Apply filters
-      if (filters.status && task.status !== filters.status) continue;
-      if (filters.owner && task.owner !== filters.owner) continue;
-      
-      tasks.push(task);
+      try {
+        const task = safeReadJSON(taskPath);
+        
+        // Apply filters
+        if (filters.status && task.status !== filters.status) continue;
+        if (filters.owner && task.owner !== filters.owner) continue;
+        
+        tasks.push(task);
+      } catch (error) {
+        console.warn(`Warning: Could not read task ${file}:`, error.message);
+      }
     }
     
     return tasks;
@@ -323,7 +360,7 @@ const TaskOperations = {
       throw new Error(`Task ${taskId} not found in team ${teamName}`);
     }
     
-    const task = JSON.parse(readFileSync(taskPath, 'utf-8'));
+    const task = safeReadJSON(taskPath);
     const updatedTask = {
       ...task,
       ...updates,
@@ -336,9 +373,26 @@ const TaskOperations = {
 
   /**
    * Claim a task (for worker agents)
+   * Includes race condition check
    */
   claimTask: (teamName, taskId, agentId = null) => {
     const currentAgentId = agentId || process.env.OPENCODE_AGENT_ID || 'unknown';
+    const tasksDir = getTasksDir();
+    const taskPath = join(tasksDir, teamName, `${taskId}.json`);
+    
+    if (!existsSync(taskPath)) {
+      throw new Error(`Task ${taskId} not found in team ${teamName}`);
+    }
+    
+    // Read current task state
+    const task = safeReadJSON(taskPath);
+    
+    // Check if task is still available
+    if (task.status !== 'pending') {
+      throw new Error(`Task ${taskId} is not available (status: ${task.status})`);
+    }
+    
+    // Claim the task
     return TaskOperations.updateTask(teamName, taskId, {
       status: 'in_progress',
       owner: currentAgentId,
