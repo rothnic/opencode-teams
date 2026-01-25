@@ -1,0 +1,10 @@
+{
+  "plugin": ["./plugin/index.js"],
+  "skills": {
+    "allow": ["*"],
+    "directories": ["./skills"]
+  },
+  "agents": {
+    "directories": ["./agent"]
+  }
+}

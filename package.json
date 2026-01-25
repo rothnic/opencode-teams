@@ -1,0 +1,21 @@
+{
+  "name": "opencode-teams",
+  "version": "0.1.0",
+  "description": "Multi-agent team coordination plugin for OpenCode",
+  "main": "plugin/index.js",
+  "type": "module",
+  "keywords": [
+    "opencode",
+    "plugin",
+    "teams",
+    "multi-agent",
+    "coordination",
+    "collaboration"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {},
+  "peerDependencies": {
+    "opencode": "*"
+  }
+}
