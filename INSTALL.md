@@ -5,12 +5,18 @@ This guide will help you install and configure the OpenCode Teams plugin.
 ## Prerequisites
 
 - OpenCode installed and configured
-- Node.js (for the plugin's JavaScript code)
-- Basic understanding of OpenCode plugins
+- Node.js 18+ (for building from source)
+- npm or yarn package manager
 
 ## Recommended Installation
 
-The simplest way to use this plugin is to reference it in your `opencode.json`:
+### From npm (when published)
+
+```bash
+npm install opencode-teams
+```
+
+Then reference in your `opencode.json`:
 
 ```json
 {
@@ -20,7 +26,7 @@ The simplest way to use this plugin is to reference it in your `opencode.json`:
 
 OpenCode will automatically handle the plugin discovery and initialization.
 
-## Manual Installation (Development/Testing)
+## Development Installation
 
 If you want to develop or test the plugin locally:
 
@@ -31,6 +37,11 @@ If you want to develop or test the plugin locally:
 mkdir -p ~/.config/opencode/plugins
 cd ~/.config/opencode/plugins
 git clone https://github.com/rothnic/opencode-teams.git opencode-teams
+cd opencode-teams
+
+# Install dependencies and build
+npm install
+npm run build
 ```
 
 Then reference in your `opencode.json`:
@@ -49,6 +60,11 @@ cd /path/to/your/project
 mkdir -p .opencode/plugins
 cd .opencode/plugins
 git clone https://github.com/rothnic/opencode-teams.git opencode-teams
+cd opencode-teams
+
+# Install dependencies and build
+npm install
+npm run build
 ```
 
 Then reference in project's `opencode.json`:
@@ -58,6 +74,18 @@ Then reference in project's `opencode.json`:
   "plugin": ["opencode-teams"]
 }
 ```
+
+## Building
+
+The plugin is written in TypeScript and must be built before use:
+
+```bash
+cd opencode-teams
+npm install    # Install dependencies
+npm run build  # Compile TypeScript to JavaScript
+```
+
+This creates the `dist/` directory with compiled JavaScript files.
 ## Verification
 
 Start OpenCode and verify the plugin loaded:

@@ -4,6 +4,8 @@ Multi-agent team coordination plugin for [OpenCode](https://opencode.ai), inspir
 
 Enable teams of AI agents to collaborate on complex coding tasks through coordinated workflows, task distribution, and inter-agent communication.
 
+Built with TypeScript following the [bun-module](https://github.com/zenobi-us/bun-module) structure for modern tooling and publishing.
+
 ## Features
 
 - **Team Management**: Create and coordinate teams of AI agents
@@ -12,12 +14,19 @@ Enable teams of AI agents to collaborate on complex coding tasks through coordin
 - **Multiple Agent Types**: Leaders, workers, and specialists
 - **File-Based Coordination**: Persistent team state and messages
 - **Example Workflows**: Pre-built team templates for common scenarios
+- **TypeScript**: Full type safety and modern development experience
 
 ## Quick Start
 
 ### Installation
 
-Simply reference the plugin in your `opencode.json`:
+For published package:
+
+```bash
+npm install opencode-teams
+```
+
+Or reference directly in your `opencode.json`:
 
 ```json
 {
@@ -25,11 +34,14 @@ Simply reference the plugin in your `opencode.json`:
 }
 ```
 
-Or for development/local installation:
+For development/local installation:
 
 ```bash
 # Clone to OpenCode's global plugins directory
 git clone https://github.com/rothnic/opencode-teams.git ~/.config/opencode/plugins/opencode-teams
+cd ~/.config/opencode/plugins/opencode-teams
+npm install
+npm run build
 ```
 
 Then reference in `opencode.json`:
@@ -106,8 +118,13 @@ global.TeamOperations.broadcast('code-review-pr-123', 'All reviews done!');
 
 ```
 opencode-teams/
-├── plugin/
-│   └── index.js           # Main plugin with TeamOperations and TaskOperations
+├── src/
+│   ├── index.ts           # Main plugin with TeamOperations and TaskOperations
+│   └── version.ts         # Version info
+├── dist/                  # Built output (generated)
+│   ├── index.js
+│   ├── index.d.ts
+│   └── version.js
 ├── skills/
 │   ├── spawn-team/        # Team creation and management
 │   ├── team-communicate/  # Inter-agent messaging
@@ -119,6 +136,8 @@ opencode-teams/
 ├── examples/
 │   ├── code-review-team.md
 │   └── ...
+├── package.json           # Module metadata with build scripts
+├── tsconfig.json          # TypeScript configuration
 ├── RESEARCH.md            # Background on TeammateTool
 └── README.md
 ```
@@ -369,6 +388,40 @@ This plugin is inspired by Claude Code's TeammateTool feature, discovered throug
 - Failure handling
 - Implementation details
 
+## Development
+
+This plugin is built using TypeScript following the [bun-module](https://github.com/zenobi-us/bun-module) structure.
+
+### Setup
+
+```bash
+git clone https://github.com/rothnic/opencode-teams.git
+cd opencode-teams
+npm install
+```
+
+### Build
+
+```bash
+npm run build
+```
+
+This compiles TypeScript from `src/` to JavaScript in `dist/`.
+
+### Type Checking
+
+```bash
+npm run typecheck
+```
+
+### Project Structure
+
+- `src/` - TypeScript source code
+- `dist/` - Compiled JavaScript output (generated, not committed)
+- `skills/` - Skill definitions (markdown with YAML frontmatter)
+- `agent/` - Agent templates (markdown with YAML frontmatter)
+- `examples/` - Example workflows and usage patterns
+
 ## Contributing
 
 Contributions welcome! Areas for improvement:
@@ -389,3 +442,4 @@ MIT License - see [LICENSE](LICENSE) file for details
 - [OpenCode Plugins Guide](https://opencode.ai/docs/plugins/)
 - [OpenCode Skills Guide](https://opencode.ai/docs/skills/)
 - [TeammateTool Research](https://gist.github.com/kieranklaassen/d2b35569be2c7f1412c64861a219d51f)
+- [Bun Module Template](https://github.com/zenobi-us/bun-module)

@@ -4,9 +4,12 @@
 
 Successfully implemented a comprehensive OpenCode plugin for multi-agent team coordination, based on research of Claude Code's TeammateTool feature.
 
+**Now built with TypeScript** following the [bun-module](https://github.com/zenobi-us/bun-module) structure for modern tooling, type safety, and publishing capabilities.
+
 ## Deliverables
 
-### 1. Core Plugin (`plugin/index.js`)
+### 1. Core Plugin (`src/index.ts`)
+- **TypeScript Implementation**: Full type safety with interfaces for all operations
 - **TeamOperations**: 13 operations for team management
   - spawnTeam, discoverTeams, requestJoin, getTeamInfo
   - write, broadcast, readMessages
@@ -16,6 +19,7 @@ Successfully implemented a comprehensive OpenCode plugin for multi-agent team co
 - **Error Handling**: safeReadJSON helper, comprehensive error messages
 - **Unique IDs**: Crypto-based ID generation to prevent collisions
 - **Race Condition Protection**: Task claiming validates availability
+- **Modern Build System**: Compiles to `dist/` with TypeScript declarations
 
 ### 2. Skills (3 Total)
 - **spawn-team**: Create and manage teams
@@ -161,16 +165,13 @@ const task2 = global.TaskOperations.createTask('team', {
 ## File Structure
 ```
 opencode-teams/
-├── README.md              # Complete documentation
-├── INSTALL.md             # Installation guide
-├── QUICKSTART.md          # 5-minute tutorial
-├── RESEARCH.md            # TeammateTool research
-├── SUMMARY.md             # This file
-├── LICENSE                # MIT license
-├── package.json           # Plugin metadata
-├── opencode.json          # OpenCode configuration
-├── plugin/
-│   └── index.js          # Main plugin (13+5 operations)
+├── src/                   # TypeScript source code
+│   ├── index.ts          # Main plugin (13+5 operations)
+│   └── version.ts        # Version info
+├── dist/                  # Built output (generated)
+│   ├── index.js
+│   ├── index.d.ts
+│   └── version.js
 ├── skills/               # 3 skills
 │   ├── spawn-team/
 │   ├── team-communicate/
@@ -179,37 +180,54 @@ opencode-teams/
 │   ├── team-leader/
 │   ├── team-worker/
 │   └── code-reviewer/
-└── examples/             # 3 example workflows
-    ├── code-review-team.md
-    ├── refactoring-team.md
-    └── deployment-team.md
+├── examples/             # 3 example workflows
+│   ├── code-review-team.md
+│   ├── refactoring-team.md
+│   └── deployment-team.md
+├── README.md              # Complete documentation
+├── INSTALL.md             # Installation guide
+├── QUICKSTART.md          # 5-minute tutorial
+├── RESEARCH.md            # TeammateTool research
+├── SUMMARY.md             # This file
+├── LICENSE                # MIT license
+├── package.json           # Module metadata with build scripts
+├── tsconfig.json          # TypeScript configuration
+└── opencode.json          # OpenCode configuration
 ```
 
 ## Installation
 
 ### Quick Install
 ```bash
-# Add to opencode.json
-{
-  "plugin": ["opencode-teams"]
-}
+# From npm (when published)
+npm install opencode-teams
 
 # Or clone for development
 git clone https://github.com/rothnic/opencode-teams.git ~/.config/opencode/plugins/opencode-teams
+cd ~/.config/opencode/plugins/opencode-teams
+npm install
+npm run build
 ```
 
 ### Configuration
+Add to `opencode.json`:
+```json
+{
+  "plugin": ["opencode-teams"]
+}
+```
+
 The plugin automatically:
 - Registers with OpenCode
 - Creates data storage in `~/.config/opencode/opencode-teams/`
 - Makes TeamOperations and TaskOperations available globally
 - Registers included skills and agent templates
 
-Add to `opencode.json`:
-```json
-{
-  "plugin": ["opencode-teams"]
-}
+### Development
+```bash
+npm install     # Install dependencies
+npm run build   # Compile TypeScript to dist/
+npm run typecheck # Type check without building
 ```
 
 ## Testing
