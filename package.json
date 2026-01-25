@@ -1,0 +1,59 @@
+{
+  "name": "opencode-teams",
+  "version": "0.1.0",
+  "description": "Multi-agent team coordination plugin for OpenCode",
+  "author": {
+    "name": "",
+    "email": ""
+  },
+  "type": "module",
+  "main": "./dist/index.js",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "keywords": [
+    "opencode",
+    "plugin",
+    "teams",
+    "multi-agent",
+    "coordination",
+    "collaboration"
+  ],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/rothnic/opencode-teams"
+  },
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
+  },
+  "files": [
+    "dist",
+    "src/version.ts",
+    "skills",
+    "agent",
+    "examples"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "typecheck": "tsc --noEmit",
+    "prepublishOnly": "npm run build"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.5",
+    "typescript": "^5.3.3"
+  },
+  "peerDependencies": {
+    "opencode": "*"
+  },
+  "peerDependenciesMeta": {
+    "opencode": {
+      "optional": true
+    }
+  }
+}
+
