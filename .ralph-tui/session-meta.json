@@ -1,0 +1,14 @@
+{
+  "id": "5ecdf8d1-4ec1-43df-97e0-bafc92e39816",
+  "status": "running",
+  "startedAt": "2026-02-07T20:06:34.508Z",
+  "updatedAt": "2026-02-07T20:06:34.508Z",
+  "agentPlugin": "opencode",
+  "trackerPlugin": "beads-bv",
+  "epicId": "ralph-tui-epic",
+  "currentIteration": 0,
+  "maxIterations": 0,
+  "totalTasks": 0,
+  "tasksCompleted": 0,
+  "cwd": "/data/projects/opencode-teams"
+}

@@ -9,3 +9,6 @@ coverage/
 .eslintcache
 .bun/
 .memory/
+
+# bv (beads viewer) local config and caches
+.bv/
