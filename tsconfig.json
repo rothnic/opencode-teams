@@ -1,0 +1,19 @@
+{
+  "compilerOptions": {
+    "lib": ["ESNext"],
+    "target": "ESNext",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "strict": true,
+    "skipLibCheck": true,
+    "types": ["bun-types", "@types/node"],
+    "outDir": "./dist",
+    "declaration": true,
+    "declarationMap": true,
+    "sourceMap": true,
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true
+  },
+  "include": ["src/**/*"],
+  "exclude": ["node_modules", "dist", "**/*.backup"]
+}

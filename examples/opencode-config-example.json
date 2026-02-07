@@ -1,0 +1,91 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "plugin": ["opencode-teams"],
+  
+  "permission": {
+    "tool": {
+      "*": "ask",
+      "spawn-team": {
+        "*": "ask",
+        "team-leader": "allow"
+      },
+      "discover-teams": "allow",
+      "join-team": {
+        "*": "ask",
+        "team-leader": "deny",
+        "team-member": "allow",
+        "task-manager": "allow"
+      },
+      "create-task": {
+        "*": "ask",
+        "team-leader": "allow",
+        "task-manager": "allow",
+        "team-member": "deny"
+      },
+      "get-tasks": "allow",
+      "claim-task": {
+        "*": "ask",
+        "team-leader": "deny",
+        "team-member": "allow",
+        "task-manager": "allow"
+      },
+      "update-task": "allow",
+      "send-message": "allow",
+      "broadcast-message": {
+        "*": "ask",
+        "team-leader": "allow",
+        "team-member": "allow",
+        "task-manager": "deny"
+      },
+      "read-messages": "allow",
+      "get-team-info": "allow"
+    }
+  },
+  
+  "agent": {
+    "team-leader": {
+      "description": "Coordinates multi-agent workflows",
+      "model": "anthropic/claude-sonnet-4",
+      "permission": {
+        "tool": {
+          "spawn-team": "allow",
+          "create-task": "allow",
+          "broadcast-message": "allow",
+          "update-task": "allow",
+          "join-team": "deny",
+          "claim-task": "deny"
+        }
+      }
+    },
+    "team-member": {
+      "description": "Executes tasks and reports completion",
+      "model": "anthropic/claude-sonnet-4",
+      "permission": {
+        "tool": {
+          "join-team": "allow",
+          "claim-task": "allow",
+          "update-task": "allow",
+          "spawn-team": "deny",
+          "create-task": "deny"
+        }
+      }
+    },
+    "task-manager": {
+      "description": "Manages task queues and priorities",
+      "model": "anthropic/claude-sonnet-4",
+      "permission": {
+        "tool": {
+          "create-task": "allow",
+          "update-task": "allow",
+          "claim-task": "allow",
+          "spawn-team": "deny",
+          "broadcast-message": "deny"
+        }
+      }
+    }
+  },
+  
+  "skill": {
+    "team-coordination": "allow"
+  }
+}

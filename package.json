@@ -1,0 +1,73 @@
+{
+  "name": "opencode-teams",
+  "version": "0.1.0",
+  "description": "Multi-agent team coordination plugin for OpenCode",
+  "author": {
+    "name": "rothnic",
+    "email": ""
+  },
+  "keywords": [
+    "opencode",
+    "plugin",
+    "teams",
+    "multi-agent",
+    "coordination",
+    "collaboration"
+  ],
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/rothnic/opencode-teams"
+  },
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
+  },
+  "files": [
+    "dist",
+    "src/version.ts",
+    "skills",
+    "agent",
+    "examples",
+    "opencode.json"
+  ],
+  "scripts": {
+    "setup": "mise run setup",
+    "build": "mise run build",
+    "test": "bun test",
+    "lint": "mise run lint",
+    "lint:fix": "mise run lint:fix",
+    "format": "mise run format",
+    "typecheck": "mise run typecheck"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.39.1",
+    "@types/bun": "^1.3.6",
+    "@types/node": "^20.11.5",
+    "@typescript-eslint/eslint-plugin": "8.47.0",
+    "@typescript-eslint/parser": "8.47.0",
+    "bun-types": "latest",
+    "eslint": "^9.39.1",
+    "eslint-config-prettier": "10.1.8",
+    "eslint-plugin-prettier": "^5.1.3",
+    "lefthook": "^1.10.0",
+    "prettier": "^3.2.4",
+    "typescript": "^5.3.3",
+    "typescript-eslint": "^8.47.0",
+    "vitest": "^3.2.4"
+  },
+  "peerDependencies": {
+    "@opencode-ai/plugin": "*"
+  },
+  "peerDependenciesMeta": {
+    "@opencode-ai/plugin": {
+      "optional": true
+    }
+  }
+}
