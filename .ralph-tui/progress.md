@@ -10,6 +10,24 @@ after each iteration and it's included in prompts for context.
 
 ---
 
+## 2026-02-08 - ralph-tui-us005
+
+- Implemented `opencode-teams` CLI tool for Tmux session management.
+- Added `TmuxOperations` for `list`, `start`, and `stop` commands using `Bun.spawnSync`.
+- Exported `opencode-teams` binary in `package.json`.
+- Added comprehensive tests for Tmux operations with `Bun.spawnSync` mocking.
+- Files changed:
+  - `src/operations/tmux.ts`: Core Tmux management logic.
+  - `src/cli.ts`: CLI entry point with argument parsing.
+  - `package.json`: Added `bin` field for the CLI tool.
+  - `tests/tmux-operations.test.ts`: Unit tests for Tmux operations.
+- **Learnings:**
+  - **Bun spawnSync:** Using `Bun.spawnSync` is an efficient way to interact with system commands like `tmux`. It returns an object with `exitCode`, `stdout`, and `stderr`, making it easy to handle success and failure cases.
+  - **Shebang Preservation:** `tsc` preserves the shebang (`#!/usr/bin/env bun`) at the top of the file when compiling from `.ts` to `.js`, which is essential for executable CLI tools.
+  - **Mocking Bun APIs:** `spyOn(Bun, 'spawnSync')` works well for mocking system calls in Bun tests, allowing for controlled testing of CLI logic without requiring the actual external tools (like tmux) to be present or modified during tests.
+
+---
+
 ## 2026-02-08 - ralph-tui-us003
 
 - Implemented task dependency tracking and validation.

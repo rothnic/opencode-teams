@@ -15,6 +15,9 @@
     "collaboration"
   ],
   "type": "module",
+  "bin": {
+    "opencode-teams": "./dist/cli.js"
+  },
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
