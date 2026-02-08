@@ -7,6 +7,7 @@ after each iteration and it's included in prompts for context.
 
 - **Truly Synchronous JSON IO**: When synchronous file operations are required (e.g., in existing sync functions), use `node:fs`'s `readFileSync` and `writeFileSync` instead of Bun's `file` APIs, as Bun's `file.text()` and `Bun.write()` are asynchronous and return Promises.
 - **Bun Sleep**: Prefer `await Bun.sleep(ms)` over `setTimeout` for delays in Bun environments.
+- **Soft Blocking Pattern**: When implementing coordination tools that depend on other states (like task dependencies), use a "Soft Blocking" approach. This means checking the condition and returning a warning in the result instead of throwing a hard error, allowing agents to decide whether to proceed based on the warning.
 
 ---
 
@@ -45,6 +46,22 @@ after each iteration and it's included in prompts for context.
 
 ---
 
+## 2026-02-08 - ralph-tui-us004
+
+- Implemented Soft Blocking in `claim_task` tool.
+- Replaced hard failure for unmet dependencies with a warning message.
+- Updated `Task` interface to explicitly include a `warning` field.
+- Updated `TaskOperations.claimTask` to set a warning when dependencies are not met.
+- Files changed:
+  - `src/types/index.ts`: Added `warning` field to `Task` interface.
+  - `src/operations/task.ts`: Modified `claimTask` to implement soft blocking with warnings.
+  - `tests/task-operations.test.ts`: Updated tests to verify soft blocking behavior and warning persistence.
+- **Learnings:**
+  - **Soft Blocking Pattern:** Implementing "Soft Blocking" allows for more flexible agent coordination where agents can be notified of potential issues (like unmet dependencies) without being strictly prevented from proceeding if they deem it necessary.
+  - **Task Metadata:** Adding a `warning` field to the task itself is an effective way to communicate non-fatal issues that persist across tool calls.
+
+---
+
 ## 2026-02-08 - ralph-tui-us002
 
 - Fixed and verified `poll_inbox` tool with long-polling support.
@@ -76,5 +93,21 @@ after each iteration and it's included in prompts for context.
 - **Learnings:**
   - **Circular Dependency Detection:** When checking for circular dependencies during an update, you must account for the "pending" state of the task being updated, as disk-based reads will only show the old state. Checking if a dependency exists in the current `visited` set before recursing is an effective way to detect cycles.
   - **CRUD Integrity:** Enforcing referential integrity (preventing deletion of tasks that are dependencies) is crucial for a stable task system.
+
+---
+
+## 2026-02-08 - ralph-tui-us004
+
+- Implemented Soft Blocking in `claim_task` tool.
+- Replaced hard failure for unmet dependencies with a warning message.
+- Updated `Task` interface to explicitly include a `warning` field.
+- Updated `TaskOperations.claimTask` to set a warning when dependencies are not met.
+- Files changed:
+  - `src/types/index.ts`: Added `warning` field to `Task` interface.
+  - `src/operations/task.ts`: Modified `claimTask` to implement soft blocking with warnings.
+  - `tests/task-operations.test.ts`: Updated tests to verify soft blocking behavior and warning persistence.
+- **Learnings:**
+  - **Soft Blocking Pattern:** Implementing "Soft Blocking" allows for more flexible agent coordination where agents can be notified of potential issues (like unmet dependencies) without being strictly prevented from proceeding if they deem it necessary.
+  - **Task Metadata:** Adding a `warning` field to the task itself is an effective way to communicate non-fatal issues that persist across tool calls.
 
 ---

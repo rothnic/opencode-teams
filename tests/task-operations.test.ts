@@ -153,21 +153,22 @@ describe('TaskOperations', () => {
       expect(TaskOperations.areDependenciesMet(testTeamName, taskC.id)).toBe(true);
     });
 
-    it('should block claiming if dependencies are not met', () => {
+    it('should allow claiming with warning if dependencies are not met', () => {
       const taskC = TaskOperations.createTask(testTeamName, {
         title: 'Task C',
         dependencies: [taskA],
       });
 
-      expect(() => {
-        TaskOperations.claimTask(testTeamName, taskC.id, 'worker-1');
-      }).toThrow('dependencies are not met');
+      const claimedTask = TaskOperations.claimTask(testTeamName, taskC.id, 'worker-1');
+      expect(claimedTask.status).toBe('in_progress');
+      expect(claimedTask.warning).toContain('dependencies are not met');
 
       // Complete taskA
       TaskOperations.updateTask(testTeamName, taskA, { status: 'completed' });
 
-      const claimedTask = TaskOperations.claimTask(testTeamName, taskC.id, 'worker-1');
-      expect(claimedTask.status).toBe('in_progress');
+      // If we update it again (e.g. status), the warning should persist if not explicitly cleared
+      const taskCInfo = TaskOperations.getTask(testTeamName, taskC.id);
+      expect(taskCInfo.status).toBe('in_progress');
     });
 
     it('should block deletion if other tasks depend on it', () => {

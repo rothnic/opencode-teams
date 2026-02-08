@@ -248,16 +248,18 @@ export const TaskOperations = {
       throw new Error(`Task ${taskId} is not available (status: ${task.status})`);
     }
 
-    // Check if dependencies are met
-    if (!TaskOperations.areDependenciesMet(teamName, taskId)) {
-      throw new Error(`Task ${taskId} cannot be claimed because its dependencies are not met`);
-    }
-
-    // Claim the task
-    return TaskOperations.updateTask(teamName, taskId, {
+    const updates: Partial<Task> = {
       status: 'in_progress',
       owner: currentAgentId,
       claimedAt: new Date().toISOString(),
-    });
+    };
+
+    // Check if dependencies are met
+    if (!TaskOperations.areDependenciesMet(teamName, taskId)) {
+      updates.warning = `Warning: Task ${taskId} dependencies are not met. Proceed with caution.`;
+    }
+
+    // Claim the task
+    return TaskOperations.updateTask(teamName, taskId, updates);
   },
 };

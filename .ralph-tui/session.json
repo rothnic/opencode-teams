@@ -3,10 +3,10 @@
   "sessionId": "2742772f-f49b-4163-acdc-d865f862e840",
   "status": "running",
   "startedAt": "2026-02-08T17:40:41.995Z",
-  "updatedAt": "2026-02-08T17:51:52.832Z",
-  "currentIteration": 2,
+  "updatedAt": "2026-02-08T17:54:08.358Z",
+  "currentIteration": 3,
   "maxIterations": 0,
-  "tasksCompleted": 2,
+  "tasksCompleted": 3,
   "isPaused": false,
   "agentPlugin": "opencode",
   "trackerState": {
@@ -23,8 +23,8 @@
       {
         "id": "ralph-tui-us005",
         "title": "US-005: Global CLI opencode-teams",
-        "status": "open",
-        "completedInSession": false
+        "status": "completed",
+        "completedInSession": true
       },
       {
         "id": "ralph-tui-us003",
@@ -78,6 +78,16 @@
       "durationMs": 185462,
       "startedAt": "2026-02-08T17:46:04.186Z",
       "endedAt": "2026-02-08T17:49:09.648Z"
+    },
+    {
+      "iteration": 3,
+      "status": "completed",
+      "taskId": "ralph-tui-us005",
+      "taskTitle": "US-005: Global CLI opencode-teams",
+      "taskCompleted": true,
+      "durationMs": 124932,
+      "startedAt": "2026-02-08T17:49:37.679Z",
+      "endedAt": "2026-02-08T17:51:42.611Z"
     }
   ],
   "skippedTaskIds": [],
