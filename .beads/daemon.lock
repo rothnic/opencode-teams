@@ -1,7 +1,7 @@
 {
-  "pid": 349517,
-  "parent_pid": 349495,
+  "pid": 352812,
+  "parent_pid": 352791,
   "database": "/data/projects/opencode-teams/.beads/beads.db",
   "version": "0.49.0",
-  "started_at": "2026-02-08T17:45:41.407739729Z"
+  "started_at": "2026-02-08T17:48:48.042735564Z"
 }

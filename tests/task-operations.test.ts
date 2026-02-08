@@ -87,6 +87,110 @@ describe('TaskOperations', () => {
     });
   });
 
+  describe('getTask', () => {
+    it('should return a single task by ID', () => {
+      const task = TaskOperations.getTask(testTeamName, taskId);
+      expect(task.id).toBe(taskId);
+      expect(task.title).toBeDefined();
+    });
+
+    it('should throw error for non-existent task', () => {
+      expect(() => {
+        TaskOperations.getTask(testTeamName, 'invalid-task-id');
+      }).toThrow('not found');
+    });
+  });
+
+  describe('Dependencies', () => {
+    let taskA: string;
+    let taskB: string;
+
+    beforeEach(() => {
+      taskA = TaskOperations.createTask(testTeamName, { title: 'Task A' }).id;
+      taskB = TaskOperations.createTask(testTeamName, { title: 'Task B' }).id;
+    });
+
+    it('should create a task with dependencies', () => {
+      const taskC = TaskOperations.createTask(testTeamName, {
+        title: 'Task C',
+        dependencies: [taskA, taskB],
+      });
+
+      expect(taskC.dependencies).toContain(taskA);
+      expect(taskC.dependencies).toContain(taskB);
+    });
+
+    it('should throw error if dependency does not exist', () => {
+      expect(() => {
+        TaskOperations.createTask(testTeamName, {
+          title: 'Task C',
+          dependencies: ['non-existent-task'],
+        });
+      }).toThrow('does not exist');
+    });
+
+    it('should detect circular dependencies on update', () => {
+      // taskA depends on taskB
+      TaskOperations.updateTask(testTeamName, taskA, { dependencies: [taskB] });
+
+      // Try to make taskB depend on taskA
+      expect(() => {
+        TaskOperations.updateTask(testTeamName, taskB, { dependencies: [taskA] });
+      }).toThrow('Circular dependency detected');
+    });
+
+    it('should check if dependencies are met', () => {
+      const taskC = TaskOperations.createTask(testTeamName, {
+        title: 'Task C',
+        dependencies: [taskA],
+      });
+
+      expect(TaskOperations.areDependenciesMet(testTeamName, taskC.id)).toBe(false);
+
+      // Complete taskA
+      TaskOperations.updateTask(testTeamName, taskA, { status: 'completed' });
+
+      expect(TaskOperations.areDependenciesMet(testTeamName, taskC.id)).toBe(true);
+    });
+
+    it('should block claiming if dependencies are not met', () => {
+      const taskC = TaskOperations.createTask(testTeamName, {
+        title: 'Task C',
+        dependencies: [taskA],
+      });
+
+      expect(() => {
+        TaskOperations.claimTask(testTeamName, taskC.id, 'worker-1');
+      }).toThrow('dependencies are not met');
+
+      // Complete taskA
+      TaskOperations.updateTask(testTeamName, taskA, { status: 'completed' });
+
+      const claimedTask = TaskOperations.claimTask(testTeamName, taskC.id, 'worker-1');
+      expect(claimedTask.status).toBe('in_progress');
+    });
+
+    it('should block deletion if other tasks depend on it', () => {
+      TaskOperations.createTask(testTeamName, {
+        title: 'Task C',
+        dependencies: [taskA],
+      });
+
+      expect(() => {
+        TaskOperations.deleteTask(testTeamName, taskA);
+      }).toThrow('other tasks depend on it');
+    });
+
+    it('should delete a task with no dependents', () => {
+      const taskC = TaskOperations.createTask(testTeamName, { title: 'Task C' });
+      TaskOperations.deleteTask(testTeamName, taskC.id);
+
+      expect(() => {
+        TaskOperations.getTask(testTeamName, taskC.id);
+      }).toThrow('not found');
+    });
+  });
+
   describe('updateTask', () => {
     it('should update task fields', () => {
       const updatedTask = TaskOperations.updateTask(testTeamName, taskId, {

@@ -41,6 +41,7 @@ export interface Task {
   owner?: string;
   claimedAt?: string;
   completedAt?: string;
+  dependencies?: string[]; // Array of task IDs
   [key: string]: any;
 }
 
