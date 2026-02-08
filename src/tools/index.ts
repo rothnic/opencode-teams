@@ -14,6 +14,7 @@ import type {
   TeamMember,
   Message,
   Task,
+  TaskFilters,
   TeamSummary,
 } from '../types/index';
 
@@ -271,7 +272,8 @@ export const getTasks = tool<
       },
     },
   },
-  execute: async ({ teamName, filters }) => TaskOperations.getTasks(teamName, filters),
+  execute: async ({ teamName, filters }) =>
+    TaskOperations.getTasks(teamName, filters as TaskFilters | undefined),
 });
 
 /**

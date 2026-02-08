@@ -1,63 +1,39 @@
 /**
  * Type definitions for OpenCode Teams Plugin
+ *
+ * Re-exports Zod-derived types from schemas.ts for backward compatibility.
+ * All types are now defined via Zod schemas for runtime validation.
  */
 
-export interface LeaderInfo {
-  agentId?: string;
-  agentName?: string;
-  agentType?: string;
-}
+export type {
+  TeamMember,
+  TeamConfig,
+  Message,
+  Task,
+  TaskStatus,
+  TaskFilters,
+  TeamSummary,
+  LeaderInfo,
+  TaskCreateInput,
+  TaskUpdateInput,
+  Inbox,
+} from './schemas';
 
-export interface TeamMember {
-  agentId: string;
-  agentName: string;
-  agentType: string;
-  joinedAt: string;
-}
+export {
+  TeamMemberSchema,
+  TeamConfigSchema,
+  MessageSchema,
+  TaskSchema,
+  TaskStatusSchema,
+  TaskFiltersSchema,
+  TeamSummarySchema,
+  LeaderInfoSchema,
+  InboxSchema,
+  TaskCreateInputSchema,
+  TaskUpdateInputSchema,
+} from './schemas';
 
-export interface TeamConfig {
-  name: string;
-  created: string;
-  leader: string;
-  members: TeamMember[];
-  shutdownApprovals?: string[]; // Array of agent IDs who approved shutdown
-}
-
-export interface Message {
-  from: string;
-  to: string;
-  message: string;
-  timestamp: string;
-  recipients?: string[];
-}
-
-export interface Task {
-  id: string;
-  title?: string;
-  description?: string;
-  priority?: string;
-  status: string;
-  createdAt: string;
-  updatedAt?: string;
-  owner?: string;
-  claimedAt?: string;
-  completedAt?: string;
-  dependencies?: string[]; // Array of task IDs
-  warning?: string;
-  [key: string]: any;
-}
-
-export interface TeamSummary {
-  name: string;
-  leader: string;
-  memberCount: number;
-  created: string;
-}
-
-export interface TaskFilters {
-  status?: string;
-  owner?: string;
-}
+// Legacy types that are not schema-backed (kept for backward compat)
 
 export interface JoinResult {
   success: boolean;

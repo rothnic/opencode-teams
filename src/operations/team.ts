@@ -1,20 +1,41 @@
 /**
  * Team Operations Module
- * Using Bun built-in APIs for file operations
+ *
+ * All operations use:
+ * - Advisory file locks (via file-lock.ts) for concurrency safety
+ * - Atomic writes (via fs-atomic.ts) for crash safety
+ * - Zod schemas (via schemas.ts) for runtime validation
+ * - Project-specific storage paths (via storage-paths.ts)
  */
 
 import { join } from 'node:path';
-import type { TeamConfig, TeamMember, LeaderInfo, Message, TeamSummary } from '../types/index';
+import { rmSync, readdirSync } from 'node:fs';
+import {
+  TeamConfigSchema,
+  TeamMemberSchema,
+  MessageSchema,
+  InboxSchema,
+  type TeamConfig,
+  type TeamMember,
+  type LeaderInfo,
+  type Message,
+  type TeamSummary,
+} from '../types/schemas';
 import {
   getTeamsDir,
+  getTeamDir,
+  getTeamConfigPath,
+  getTeamLockPath,
+  getTeamTasksDir,
   getTasksDir,
-  generateId,
-  safeReadJSONSync,
-  writeJSONSync,
+  getInboxesDir,
+  getAgentInboxPath,
+  ensureDir,
+  fileExists,
   dirExists,
-  readDir,
-  removeDir,
-} from '../utils/index';
+} from '../utils/storage-paths';
+import { readValidatedJSON, writeAtomicJSON, lockedUpdate, lockedUpsert } from '../utils/fs-atomic';
+import { withLock } from '../utils/file-lock';
 
 /**
  * Team coordination operations
@@ -24,36 +45,47 @@ export const TeamOperations = {
    * Create a new team
    */
   spawnTeam: (teamName: string, leaderInfo: LeaderInfo = {}): TeamConfig => {
-    const teamsDir = getTeamsDir();
-    const teamDir = join(teamsDir, teamName);
+    // Validate team name format via schema
+    const nameResult = TeamConfigSchema.shape.name.safeParse(teamName);
+    if (!nameResult.success) {
+      throw new Error(`Invalid team name "${teamName}": ${nameResult.error.issues[0].message}`);
+    }
 
-    if (dirExists(teamDir)) {
+    const teamDir = getTeamDir(teamName);
+
+    if (dirExists(teamDir) && fileExists(getTeamConfigPath(teamName))) {
       throw new Error(`Team "${teamName}" already exists`);
     }
 
-    // Create team directories using Bun
-    Bun.spawnSync(['mkdir', '-p', join(teamDir, 'messages')]);
+    // Create team directories
+    ensureDir(teamDir);
+    ensureDir(getInboxesDir(teamName));
+    ensureDir(getTeamTasksDir(teamName));
+
+    const now = new Date().toISOString();
+    const leaderId = leaderInfo.agentId || process.env.OPENCODE_AGENT_ID || 'leader';
 
     const config: TeamConfig = {
       name: teamName,
-      created: new Date().toISOString(),
-      leader: leaderInfo.agentId || process.env.OPENCODE_AGENT_ID || 'leader',
+      created: now,
+      leader: leaderId,
       members: [
         {
-          agentId: leaderInfo.agentId || process.env.OPENCODE_AGENT_ID || 'leader',
+          agentId: leaderId,
           agentName: leaderInfo.agentName || process.env.OPENCODE_AGENT_NAME || 'Leader',
           agentType: leaderInfo.agentType || 'leader',
-          joinedAt: new Date().toISOString(),
+          joinedAt: now,
         },
       ],
     };
 
-    writeJSONSync(join(teamDir, 'config.json'), config);
+    // Validate and write atomically
+    const configPath = getTeamConfigPath(teamName);
+    writeAtomicJSON(configPath, config, TeamConfigSchema);
 
-    // Create task queue for team
-    const tasksDir = getTasksDir();
-    const teamTasksDir = join(tasksDir, teamName);
-    Bun.spawnSync(['mkdir', '-p', teamTasksDir]);
+    // Initialize leader's inbox as empty array
+    const leaderInboxPath = getAgentInboxPath(teamName, leaderId);
+    writeAtomicJSON(leaderInboxPath, [], InboxSchema);
 
     return config;
   },
@@ -68,22 +100,29 @@ export const TeamOperations = {
     }
 
     const teams: TeamSummary[] = [];
-    const teamDirs = readDir(teamsDir);
 
-    for (const teamName of teamDirs) {
-      const configPath = join(teamsDir, teamName, 'config.json');
-      if (dirExists(configPath)) {
-        try {
-          const config = safeReadJSONSync(configPath);
-          teams.push({
-            name: teamName,
-            leader: config.leader,
-            memberCount: config.members.length,
-            created: config.created,
-          });
-        } catch (error: any) {
-          console.warn(`Warning: Could not read team config for ${teamName}:`, error.message);
-        }
+    let entries: string[];
+    try {
+      entries = readdirSync(teamsDir);
+    } catch {
+      return [];
+    }
+
+    for (const teamName of entries) {
+      const configPath = getTeamConfigPath(teamName);
+      if (!fileExists(configPath)) continue;
+
+      try {
+        const config = readValidatedJSON(configPath, TeamConfigSchema);
+        teams.push({
+          name: config.name,
+          leader: config.leader,
+          memberCount: config.members.length,
+          created: config.created,
+        });
+      } catch (error: unknown) {
+        const msg = error instanceof Error ? error.message : String(error);
+        console.warn(`Warning: Could not read team config for ${teamName}: ${msg}`);
       }
     }
 
@@ -91,48 +130,63 @@ export const TeamOperations = {
   },
 
   /**
-   * Request to join a team
+   * Request to join a team (locked read-modify-write)
    */
   requestJoin: (teamName: string, agentInfo: LeaderInfo = {}): TeamMember => {
-    const teamsDir = getTeamsDir();
-    const teamDir = join(teamsDir, teamName);
-    const configPath = join(teamDir, 'config.json');
+    const configPath = getTeamConfigPath(teamName);
+    const lockPath = getTeamLockPath(teamName);
 
-    if (!dirExists(configPath)) {
+    if (!fileExists(configPath)) {
       throw new Error(`Team "${teamName}" does not exist`);
     }
 
-    const config = safeReadJSONSync(configPath);
+    const now = new Date().toISOString();
+    const agentId = agentInfo.agentId || process.env.OPENCODE_AGENT_ID || `agent-${Date.now()}`;
 
     const member: TeamMember = {
-      agentId: agentInfo.agentId || process.env.OPENCODE_AGENT_ID || `agent-${Date.now()}`,
+      agentId,
       agentName: agentInfo.agentName || process.env.OPENCODE_AGENT_NAME || 'Agent',
       agentType: agentInfo.agentType || process.env.OPENCODE_AGENT_TYPE || 'worker',
-      joinedAt: new Date().toISOString(),
+      joinedAt: now,
     };
 
-    config.members.push(member);
-    writeJSONSync(configPath, config);
+    // Validate member before modifying config
+    TeamMemberSchema.parse(member);
+
+    // Locked read-modify-write
+    lockedUpdate(lockPath, configPath, TeamConfigSchema, (config) => {
+      // Check for duplicate membership
+      if (config.members.some((m) => m.agentId === agentId)) {
+        throw new Error(`Agent "${agentId}" is already a member of team "${teamName}"`);
+      }
+      return { ...config, members: [...config.members, member] };
+    });
+
+    // Create agent's inbox file
+    const inboxPath = getAgentInboxPath(teamName, agentId);
+    if (!fileExists(inboxPath)) {
+      writeAtomicJSON(inboxPath, [], InboxSchema);
+    }
 
     return member;
   },
 
   /**
-   * Get team information
+   * Get team information (locked read)
    */
   getTeamInfo: (teamName: string): TeamConfig => {
-    const teamsDir = getTeamsDir();
-    const configPath = join(teamsDir, teamName, 'config.json');
+    const configPath = getTeamConfigPath(teamName);
+    const lockPath = getTeamLockPath(teamName);
 
-    if (!dirExists(configPath)) {
+    if (!fileExists(configPath)) {
       throw new Error(`Team "${teamName}" does not exist`);
     }
 
-    return safeReadJSONSync(configPath);
+    return withLock(lockPath, () => readValidatedJSON(configPath, TeamConfigSchema), false);
   },
 
   /**
-   * Send message to specific teammate
+   * Send a direct message to a specific teammate (per-agent inbox model)
    */
   write: (
     teamName: string,
@@ -140,92 +194,119 @@ export const TeamOperations = {
     message: string,
     fromAgentId?: string
   ): Message => {
-    const teamsDir = getTeamsDir();
-    const messagesDir = join(teamsDir, teamName, 'messages');
+    const configPath = getTeamConfigPath(teamName);
+    const lockPath = getTeamLockPath(teamName);
 
-    if (!dirExists(messagesDir)) {
+    if (!fileExists(configPath)) {
       throw new Error(`Team "${teamName}" does not exist`);
     }
 
-    const messageFile = join(messagesDir, `${generateId()}-${targetAgentId}.json`);
+    const senderId = fromAgentId || process.env.OPENCODE_AGENT_ID || 'unknown';
+
+    // Validate sender and recipient are team members
+    const config = withLock(lockPath, () => readValidatedJSON(configPath, TeamConfigSchema), false);
+
+    if (!config.members.some((m) => m.agentId === targetAgentId)) {
+      throw new Error(`Recipient "${targetAgentId}" is not a member of team "${teamName}"`);
+    }
+
     const messageData: Message = {
-      from: fromAgentId || process.env.OPENCODE_AGENT_ID || 'unknown',
+      from: senderId,
       to: targetAgentId,
       message,
       timestamp: new Date().toISOString(),
+      read: false,
     };
 
-    writeJSONSync(messageFile, messageData);
+    // Validate the message
+    MessageSchema.parse(messageData);
+
+    // Append to recipient's inbox (locked upsert)
+    const inboxPath = getAgentInboxPath(teamName, targetAgentId);
+    lockedUpsert(lockPath, inboxPath, InboxSchema, [], (inbox) => {
+      return [...inbox, messageData];
+    });
+
     return messageData;
   },
 
   /**
-   * Broadcast message to all teammates
+   * Broadcast message to all teammates (per-agent inbox model)
    */
   broadcast: (teamName: string, message: string, fromAgentId?: string): Message => {
-    const teamsDir = getTeamsDir();
-    const teamDir = join(teamsDir, teamName);
-    const configPath = join(teamDir, 'config.json');
+    const configPath = getTeamConfigPath(teamName);
+    const lockPath = getTeamLockPath(teamName);
 
-    if (!dirExists(configPath)) {
+    if (!fileExists(configPath)) {
       throw new Error(`Team "${teamName}" does not exist`);
     }
 
-    const config = safeReadJSONSync(configPath);
-    const messagesDir = join(teamDir, 'messages');
+    const senderId = fromAgentId || process.env.OPENCODE_AGENT_ID || 'unknown';
+
+    // Read config under lock to get member list
+    const config = withLock(lockPath, () => readValidatedJSON(configPath, TeamConfigSchema), false);
 
     const messageData: Message = {
-      from: fromAgentId || process.env.OPENCODE_AGENT_ID || 'unknown',
+      from: senderId,
       to: 'broadcast',
       message,
       timestamp: new Date().toISOString(),
-      recipients: config.members.map((m: TeamMember) => m.agentId),
+      read: false,
+      recipients: config.members.map((m) => m.agentId),
     };
 
-    const messageFile = join(messagesDir, `${generateId()}-broadcast.json`);
-    writeJSONSync(messageFile, messageData);
+    MessageSchema.parse(messageData);
+
+    // Deliver to each agent's inbox (except sender)
+    for (const member of config.members) {
+      if (member.agentId === senderId) continue;
+      const inboxPath = getAgentInboxPath(teamName, member.agentId);
+      lockedUpsert(lockPath, inboxPath, InboxSchema, [], (inbox) => {
+        return [...inbox, messageData];
+      });
+    }
 
     return messageData;
   },
 
   /**
-   * Read messages for current agent
+   * Read messages for current agent from their inbox
    */
   readMessages: (teamName: string, agentId?: string, since?: string): Message[] => {
-    const teamsDir = getTeamsDir();
-    const messagesDir = join(teamsDir, teamName, 'messages');
+    const lockPath = getTeamLockPath(teamName);
+    const currentAgentId = agentId || process.env.OPENCODE_AGENT_ID || 'unknown';
+    const inboxPath = getAgentInboxPath(teamName, currentAgentId);
 
-    if (!dirExists(messagesDir)) {
+    if (!fileExists(inboxPath)) {
       return [];
     }
 
-    const currentAgentId = agentId || process.env.OPENCODE_AGENT_ID || 'unknown';
-    const messages: Message[] = [];
+    return withLock(
+      lockPath,
+      () => {
+        const inbox = readValidatedJSON(inboxPath, InboxSchema);
 
-    const files = readDir(messagesDir)
-      .filter((f) => f.endsWith('.json'))
-      .sort();
-
-    for (const file of files) {
-      const msgPath = join(messagesDir, file);
-      try {
-        const msg = safeReadJSONSync(msgPath);
-
-        // Filter by timestamp if provided
-        if (since && msg.timestamp <= since) {
-          continue;
+        let filtered = inbox;
+        if (since) {
+          filtered = inbox.filter((m) => m.timestamp > since);
         }
 
-        // Check if message is for this agent
-        if (msg.to === currentAgentId || msg.to === 'broadcast') {
-          messages.push(msg);
+        // Mark returned messages as read
+        if (filtered.length > 0) {
+          const readTimestamps = new Set(filtered.map((m) => m.timestamp));
+          const updatedInbox = inbox.map((m) => {
+            if (readTimestamps.has(m.timestamp) && !m.read) {
+              return { ...m, read: true };
+            }
+            return m;
+          });
+          writeAtomicJSON(inboxPath, updatedInbox, InboxSchema);
         }
-      } catch (error: any) {
-        console.warn(`Warning: Could not read message ${file}:`, error.message);
-      }
-    }
 
-    return messages;
+        return filtered;
+      },
+      true
+    );
   },
 
   /**
@@ -239,44 +320,42 @@ export const TeamOperations = {
   ): Promise<Message[]> => {
     const startTime = Date.now();
     const currentAgentId = agentId || process.env.OPENCODE_AGENT_ID || 'unknown';
-    let lastCheck = since;
+    const inboxPath = getAgentInboxPath(teamName, currentAgentId);
 
+    // If inbox doesn't exist yet, wait for it
     while (Date.now() - startTime < timeoutMs) {
-      const messages = TeamOperations.readMessages(teamName, currentAgentId, lastCheck);
-      if (messages.length > 0) {
-        return messages;
+      if (fileExists(inboxPath)) {
+        const messages = TeamOperations.readMessages(teamName, currentAgentId, since);
+        if (messages.length > 0) {
+          return messages;
+        }
       }
-      // Wait for a bit before checking again to avoid CPU hogging
-      await Bun.sleep(1000);
+      await Bun.sleep(500);
     }
 
     return [];
   },
 
   /**
-   * Request team shutdown
+   * Request team shutdown (locked read-modify-write)
    */
   requestShutdown: (teamName: string, agentId?: string): TeamConfig => {
-    const teamsDir = getTeamsDir();
-    const configPath = join(teamsDir, teamName, 'config.json');
+    const configPath = getTeamConfigPath(teamName);
+    const lockPath = getTeamLockPath(teamName);
 
-    if (!dirExists(configPath)) {
+    if (!fileExists(configPath)) {
       throw new Error(`Team "${teamName}" does not exist`);
     }
 
-    const config = safeReadJSONSync(configPath) as TeamConfig;
     const currentAgentId = agentId || process.env.OPENCODE_AGENT_ID || 'unknown';
 
-    if (!config.shutdownApprovals) {
-      config.shutdownApprovals = [];
-    }
-
-    if (!config.shutdownApprovals.includes(currentAgentId)) {
-      config.shutdownApprovals.push(currentAgentId);
-    }
-
-    writeJSONSync(configPath, config);
-    return config;
+    return lockedUpdate(lockPath, configPath, TeamConfigSchema, (config) => {
+      const approvals = config.shutdownApprovals || [];
+      if (!approvals.includes(currentAgentId)) {
+        approvals.push(currentAgentId);
+      }
+      return { ...config, shutdownApprovals: approvals };
+    });
   },
 
   /**
@@ -290,19 +369,19 @@ export const TeamOperations = {
    * Check if team should shutdown
    */
   shouldShutdown: (teamName: string): boolean => {
-    const teamsDir = getTeamsDir();
-    const configPath = join(teamsDir, teamName, 'config.json');
+    const configPath = getTeamConfigPath(teamName);
+    const lockPath = getTeamLockPath(teamName);
 
-    if (!dirExists(configPath)) {
+    if (!fileExists(configPath)) {
       return false;
     }
 
-    const config = safeReadJSONSync(configPath) as TeamConfig;
+    const config = withLock(lockPath, () => readValidatedJSON(configPath, TeamConfigSchema), false);
+
     if (!config.shutdownApprovals || config.shutdownApprovals.length === 0) {
       return false;
     }
 
-    // If leader approved, or if all members approved
     const isLeaderApproved = config.shutdownApprovals.includes(config.leader);
     const areAllMembersApproved = config.members.every((m) =>
       config.shutdownApprovals?.includes(m.agentId)
@@ -315,18 +394,16 @@ export const TeamOperations = {
    * Clean up team data
    */
   cleanup: (teamName: string): void => {
-    const teamsDir = getTeamsDir();
-    const tasksDir = getTasksDir();
-
-    const teamDir = join(teamsDir, teamName);
-    const teamTasksDir = join(tasksDir, teamName);
+    const teamDir = getTeamDir(teamName);
+    // Construct path manually to avoid getTeamTasksDir() auto-creating the directory
+    const teamTasksDir = join(getTasksDir(), teamName);
 
     if (dirExists(teamDir)) {
-      removeDir(teamDir);
+      rmSync(teamDir, { recursive: true, force: true });
     }
 
     if (dirExists(teamTasksDir)) {
-      removeDir(teamTasksDir);
+      rmSync(teamTasksDir, { recursive: true, force: true });
     }
   },
 };

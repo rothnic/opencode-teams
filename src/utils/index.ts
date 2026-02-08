@@ -1,168 +1,105 @@
 /**
  * Utility functions for OpenCode Teams Plugin
- * Using Bun built-in APIs instead of Node.js
+ *
+ * Re-exports from the new modular utility files for backward compatibility.
+ * New code should import directly from the specific modules.
  */
 
+// Re-export storage path utilities
+export {
+  getTeamsDir,
+  getTasksDir,
+  getTeamDir,
+  getTeamConfigPath,
+  getTeamTasksDir,
+  getTeamLockPath,
+  getTaskLockPath,
+  getInboxesDir,
+  getAgentInboxPath,
+  getGlobalConfigDir,
+  getProjectStorageDir,
+  getTemplatesDir,
+  ensureDir,
+  fileExists,
+  dirExists,
+  detectProjectRoot,
+} from './storage-paths';
+
+// Re-export atomic file operations
+export {
+  readValidatedJSON,
+  readJSON,
+  writeAtomicJSON,
+  lockedRead,
+  lockedWrite,
+  lockedUpdate,
+  lockedUpsert,
+  listJSONFiles,
+  removeFile,
+  generateId,
+  ValidationError,
+} from './fs-atomic';
+
+// Re-export file locking
+export { acquireLock, tryAcquireLock, withLock, withLockAsync, type FileLock } from './file-lock';
+
+// Legacy compat aliases
+import { readJSON, writeAtomicJSON as _writeAtomicJSON } from './fs-atomic';
+import { getProjectStorageDir as _getProjectStorageDir } from './storage-paths';
+import { existsSync, readdirSync, rmSync } from 'node:fs';
 import { join } from 'node:path';
-import { homedir } from 'node:os';
-import { readFileSync, writeFileSync } from 'node:fs';
 import type { AppConfig } from '../types/index';
 
-/**
- * Safely read and parse a JSON file using Bun.file
- */
-export async function safeReadJSON(filePath: string): Promise<any> {
-  try {
-    const file = Bun.file(filePath);
-    const exists = await file.exists();
-
-    if (!exists) {
-      throw new Error(`File not found: ${filePath}`);
-    }
-
-    return await file.json();
-  } catch (error: any) {
-    if (error.message?.includes('File not found')) {
-      throw error;
-    }
-    throw new Error(`Invalid JSON in file: ${filePath}`);
-  }
-}
-
-/**
- * Safely read and parse a JSON file synchronously using node:fs
- */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function safeReadJSONSync(filePath: string): any {
-  try {
-    const content = readFileSync(filePath, 'utf8');
-    return JSON.parse(content);
-  } catch (error: any) {
-    if (error.code === 'ENOENT') {
-      throw new Error(`File not found: ${filePath}`);
-    } else if (error instanceof SyntaxError) {
-      throw new Error(`Invalid JSON in file: ${filePath}`);
-    }
-    throw error;
-  }
+  return readJSON(filePath);
 }
 
-/**
- * Write JSON to a file using Bun.write
- */
-export async function writeJSON(filePath: string, data: any): Promise<void> {
-  await Bun.write(filePath, JSON.stringify(data, null, 2));
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export async function safeReadJSON(filePath: string): Promise<any> {
+  return readJSON(filePath);
 }
 
-/**
- * Write JSON to a file synchronously using node:fs
- */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function writeJSONSync(filePath: string, data: any): void {
-  writeFileSync(filePath, JSON.stringify(data, null, 2), 'utf8');
+  _writeAtomicJSON(filePath, data);
 }
 
-/**
- * Generate a unique ID using Web Crypto API
- */
-export function generateId(): string {
-  const randomBytes = new Uint8Array(4);
-  globalThis.crypto.getRandomValues(randomBytes);
-  const randomHex = Array.from(randomBytes)
-    .map((b) => b.toString(16).padStart(2, '0'))
-    .join('');
-  return `${Date.now()}-${randomHex}`;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export async function writeJSON(filePath: string, data: any): Promise<void> {
+  _writeAtomicJSON(filePath, data);
 }
 
-/**
- * Get the plugin's base directory in OpenCode config
- */
-export function getPluginDir(): string {
-  const baseDir =
-    process.env.OPENCODE_TEAMS_DIR || join(homedir(), '.config', 'opencode', 'opencode-teams');
-
-  // Use Bun's synchronous file operations
-  if (!dirExists(baseDir)) {
-    Bun.spawnSync(['mkdir', '-p', baseDir]);
-  }
-
-  return baseDir;
-}
-
-/**
- * Get the teams directory path
- */
-export function getTeamsDir(): string {
-  const baseDir = join(getPluginDir(), 'teams');
-
-  if (!dirExists(baseDir)) {
-    Bun.spawnSync(['mkdir', '-p', baseDir]);
-  }
-
-  return baseDir;
-}
-
-/**
- * Get the tasks directory path
- */
-export function getTasksDir(): string {
-  const baseDir = join(getPluginDir(), 'tasks');
-
-  if (!dirExists(baseDir)) {
-    Bun.spawnSync(['mkdir', '-p', baseDir]);
-  }
-
-  return baseDir;
-}
-
-/**
- * Check if a directory or file exists
- */
-export function dirExists(path: string): boolean {
-  try {
-    const proc = Bun.spawnSync(['test', '-e', path]);
-    return proc.exitCode === 0;
-  } catch {
-    return false;
-  }
-}
-
-/**
- * Read directory contents
- */
 export function readDir(path: string): string[] {
   try {
-    const proc = Bun.spawnSync(['ls', '-1', path]);
-    if (proc.exitCode !== 0) {
-      return [];
-    }
-    const output = proc.stdout.toString().trim();
-    return output ? output.split('\n') : [];
+    return readdirSync(path);
   } catch {
     return [];
   }
 }
 
-/**
- * Remove directory recursively
- */
 export function removeDir(path: string): void {
-  Bun.spawnSync(['rm', '-rf', path]);
+  rmSync(path, { recursive: true, force: true });
 }
 
-/**
- * Get the application configuration
- */
+export function getPluginDir(): string {
+  return _getProjectStorageDir();
+}
+
 export function getAppConfig(): AppConfig {
-  const configPath = join(getPluginDir(), 'config.json');
+  const configPath = join(_getProjectStorageDir(), 'config.json');
   try {
-    return safeReadJSONSync(configPath);
+    if (existsSync(configPath)) {
+      return readJSON(configPath) as AppConfig;
+    }
   } catch {
-    // Default configuration
-    return {
-      tmux: {
-        enabled: true,
-        layout: 'tiled',
-        autoCleanup: true,
-      },
-    };
+    // fall through
   }
+  return {
+    tmux: {
+      enabled: true,
+      layout: 'tiled',
+      autoCleanup: true,
+    },
+  };
 }

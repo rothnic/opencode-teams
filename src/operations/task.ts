@@ -1,148 +1,187 @@
 /**
  * Task Operations Module
- * Using Bun built-in APIs for file operations
+ *
+ * All operations use:
+ * - Advisory file locks (via file-lock.ts) for concurrency safety
+ * - Atomic writes (via fs-atomic.ts) for crash safety
+ * - Zod schemas (via schemas.ts) for runtime validation
+ * - Project-specific storage paths (via storage-paths.ts)
  */
 
 import { join } from 'node:path';
-import type { Task, TaskFilters } from '../types/index';
 import {
-  getTasksDir,
-  generateId,
-  safeReadJSONSync,
-  writeJSONSync,
+  TaskSchema,
+  TaskStatusSchema,
+  type Task,
+  type TaskFilters,
+  type TaskCreateInput,
+} from '../types/schemas';
+import {
+  getTeamTasksDir,
+  getTaskLockPath,
+  getTaskFilePath,
+  getTeamConfigPath,
+  fileExists,
   dirExists,
-  readDir,
-} from '../utils/index';
+} from '../utils/storage-paths';
+import {
+  readValidatedJSON,
+  writeAtomicJSON,
+  listJSONFiles,
+  removeFile,
+  generateId,
+} from '../utils/fs-atomic';
+import { withLock } from '../utils/file-lock';
 
 /**
  * Task coordination operations
  */
 export const TaskOperations = {
   /**
-   * Check for circular dependencies
+   * Check for circular dependencies using iterative BFS.
+   * Also considers pending edges not yet written to disk.
    */
   checkCircularDependency: (
     teamName: string,
     taskId: string,
     dependencies: string[],
-    visited = new Set<string>()
+    _visited = new Set<string>()
   ): void => {
-    visited.add(taskId);
+    const teamTasksDir = getTeamTasksDir(teamName);
 
-    for (const depId of dependencies) {
-      if (visited.has(depId)) {
-        throw new Error(`Circular dependency detected: ${depId}`);
+    // BFS: starting from each dependency, walk its dependencies.
+    // If we reach taskId, we have a cycle.
+    const queue = [...dependencies];
+    const visited = new Set<string>();
+
+    while (queue.length > 0) {
+      const current = queue.shift()!;
+
+      if (current === taskId) {
+        throw new Error(`Circular dependency detected: ${current}`);
       }
 
+      if (visited.has(current)) continue;
+      visited.add(current);
+
+      // Read the current task's dependencies
+      const depFilePath = join(teamTasksDir, `${current}.json`);
+      if (!fileExists(depFilePath)) continue;
+
       try {
-        const dep = TaskOperations.getTask(teamName, depId);
-        if (dep.dependencies && dep.dependencies.length > 0) {
-          TaskOperations.checkCircularDependency(
-            teamName,
-            depId,
-            dep.dependencies,
-            new Set(visited)
-          );
+        const depTask = readValidatedJSON(depFilePath, TaskSchema);
+        if (depTask.dependencies && depTask.dependencies.length > 0) {
+          for (const dep of depTask.dependencies) {
+            if (!visited.has(dep)) {
+              queue.push(dep);
+            }
+          }
         }
-      } catch (error: any) {
-        // If dependency doesn't exist, it will be caught by other validation logic
-        if (!error.message.includes('not found')) {
-          throw error;
-        }
+      } catch {
+        // If task can't be read, skip it in cycle detection
       }
     }
   },
 
   /**
-   * Create a new task
+   * Create a new task (locked write)
    */
-  createTask: (teamName: string, taskData: Partial<Task>): Task => {
-    const tasksDir = getTasksDir();
-    const teamTasksDir = join(tasksDir, teamName);
-
-    if (!dirExists(teamTasksDir)) {
+  createTask: (teamName: string, taskData: Partial<TaskCreateInput>): Task => {
+    // Verify team exists by checking for team config file
+    const configPath = getTeamConfigPath(teamName);
+    if (!fileExists(configPath)) {
       throw new Error(`Team "${teamName}" does not exist`);
     }
 
-    const taskId = generateId();
-    const task: Task = {
-      id: taskId,
-      title: taskData.title || 'Untitled Task',
-      description: taskData.description,
-      priority: taskData.priority || 'normal',
-      status: 'pending',
-      createdAt: new Date().toISOString(),
-      dependencies: taskData.dependencies || [],
-      ...taskData,
-    };
+    getTeamTasksDir(teamName); // ensure dir exists
+    const lockPath = getTaskLockPath(teamName);
 
-    // Validate dependencies exist
-    if (task.dependencies && task.dependencies.length > 0) {
-      for (const depId of task.dependencies) {
-        const depPath = join(teamTasksDir, `${depId}.json`);
-        if (!dirExists(depPath)) {
-          throw new Error(`Dependency task ${depId} does not exist`);
+    return withLock(lockPath, () => {
+      const taskId = generateId();
+      const now = new Date().toISOString();
+
+      const task: Task = {
+        id: taskId,
+        title: taskData.title || 'Untitled Task',
+        description: taskData.description,
+        priority: taskData.priority || 'normal',
+        status: 'pending',
+        createdAt: now,
+        dependencies: taskData.dependencies || [],
+      };
+
+      // Validate dependencies exist
+      if (task.dependencies.length > 0) {
+        for (const depId of task.dependencies) {
+          const depPath = getTaskFilePath(teamName, depId);
+          if (!fileExists(depPath)) {
+            throw new Error(`Dependency task ${depId} does not exist`);
+          }
         }
+
+        // Check for circular dependencies
+        TaskOperations.checkCircularDependency(teamName, taskId, task.dependencies);
       }
 
-      // Check for circular dependencies
-      TaskOperations.checkCircularDependency(teamName, taskId, task.dependencies);
-    }
+      // Validate and write atomically
+      const taskPath = getTaskFilePath(teamName, taskId);
+      writeAtomicJSON(taskPath, task, TaskSchema);
 
-    const taskPath = join(teamTasksDir, `${taskId}.json`);
-    writeJSONSync(taskPath, task);
-
-    return task;
+      return task;
+    });
   },
 
   /**
-   * Get tasks for a team with optional filters
+   * Get tasks for a team with optional filters (locked read)
    */
   getTasks: (teamName: string, filters: TaskFilters = {}): Task[] => {
-    const tasksDir = getTasksDir();
-    const teamTasksDir = join(tasksDir, teamName);
+    const teamTasksDir = getTeamTasksDir(teamName);
+    const lockPath = getTaskLockPath(teamName);
 
     if (!dirExists(teamTasksDir)) {
       return [];
     }
 
-    const tasks: Task[] = [];
-    const files = readDir(teamTasksDir).filter((f) => f.endsWith('.json'));
+    return withLock(
+      lockPath,
+      () => {
+        const tasks: Task[] = [];
+        const files = listJSONFiles(teamTasksDir);
 
-    for (const file of files) {
-      const taskPath = join(teamTasksDir, file);
-      try {
-        const task = safeReadJSONSync(taskPath);
+        for (const file of files) {
+          const taskPath = join(teamTasksDir, file);
+          try {
+            const task = readValidatedJSON(taskPath, TaskSchema);
 
-        // Apply filters
-        if (filters.status && task.status !== filters.status) {
-          continue;
+            // Apply filters
+            if (filters.status && task.status !== filters.status) continue;
+            if (filters.owner && task.owner !== filters.owner) continue;
+
+            tasks.push(task);
+          } catch (error: unknown) {
+            const msg = error instanceof Error ? error.message : String(error);
+            console.warn(`Warning: Could not read task ${file}: ${msg}`);
+          }
         }
-        if (filters.owner && task.owner !== filters.owner) {
-          continue;
-        }
 
-        tasks.push(task);
-      } catch (error: any) {
-        console.warn(`Warning: Could not read task ${file}:`, error.message);
-      }
-    }
-
-    return tasks;
+        return tasks;
+      },
+      false // shared lock for reads
+    );
   },
 
   /**
-   * Get a single task by ID
+   * Get a single task by ID (locked read)
    */
   getTask: (teamName: string, taskId: string): Task => {
-    const tasksDir = getTasksDir();
-    const taskPath = join(tasksDir, teamName, `${taskId}.json`);
+    const taskPath = getTaskFilePath(teamName, taskId);
+    const lockPath = getTaskLockPath(teamName);
 
-    if (!dirExists(taskPath)) {
+    if (!fileExists(taskPath)) {
       throw new Error(`Task ${taskId} not found in team ${teamName}`);
     }
 
-    return safeReadJSONSync(taskPath);
+    return withLock(lockPath, () => readValidatedJSON(taskPath, TaskSchema), false);
   },
 
   /**
@@ -155,8 +194,13 @@ export const TaskOperations = {
     }
 
     for (const depId of task.dependencies) {
-      const dep = TaskOperations.getTask(teamName, depId);
-      if (dep.status !== 'completed') {
+      try {
+        const dep = TaskOperations.getTask(teamName, depId);
+        if (dep.status !== 'completed') {
+          return false;
+        }
+      } catch {
+        // If dependency doesn't exist, treat as not met
         return false;
       }
     }
@@ -165,101 +209,148 @@ export const TaskOperations = {
   },
 
   /**
-   * Update a task
+   * Update a task (locked read-modify-write)
    */
   updateTask: (teamName: string, taskId: string, updates: Partial<Task>): Task => {
-    const tasksDir = getTasksDir();
-    const teamTasksDir = join(tasksDir, teamName);
-    const taskPath = join(teamTasksDir, `${taskId}.json`);
+    const taskPath = getTaskFilePath(teamName, taskId);
+    const lockPath = getTaskLockPath(teamName);
 
-    if (!dirExists(taskPath)) {
+    if (!fileExists(taskPath)) {
       throw new Error(`Task ${taskId} not found in team ${teamName}`);
     }
 
-    const task = safeReadJSONSync(taskPath);
+    return withLock(lockPath, () => {
+      const task = readValidatedJSON(taskPath, TaskSchema);
 
-    // If updating dependencies, validate them
-    if (updates.dependencies) {
-      for (const depId of updates.dependencies) {
-        const depPath = join(teamTasksDir, `${depId}.json`);
-        if (!dirExists(depPath)) {
-          throw new Error(`Dependency task ${depId} does not exist`);
+      // If updating dependencies, validate them
+      if (updates.dependencies) {
+        for (const depId of updates.dependencies) {
+          const depPath = getTaskFilePath(teamName, depId);
+          if (!fileExists(depPath)) {
+            throw new Error(`Dependency task ${depId} does not exist`);
+          }
+        }
+
+        // Check for circular dependencies
+        TaskOperations.checkCircularDependency(teamName, taskId, updates.dependencies);
+      }
+
+      // Validate status transition if status is being updated
+      if (updates.status && updates.status !== task.status) {
+        const statusResult = TaskStatusSchema.safeParse(updates.status);
+        if (!statusResult.success) {
+          throw new Error(`Invalid status: ${updates.status}`);
         }
       }
 
-      // Check for circular dependencies
-      TaskOperations.checkCircularDependency(teamName, taskId, updates.dependencies);
-    }
+      const updatedTask: Task = {
+        ...task,
+        ...updates,
+        id: task.id, // ID cannot be changed
+        createdAt: task.createdAt, // createdAt cannot be changed
+        updatedAt: new Date().toISOString(),
+      };
 
-    const updatedTask: Task = {
-      ...task,
-      ...updates,
-      updatedAt: new Date().toISOString(),
-    };
-
-    writeJSONSync(taskPath, updatedTask);
-    return updatedTask;
+      writeAtomicJSON(taskPath, updatedTask, TaskSchema);
+      return updatedTask;
+    });
   },
 
   /**
-   * Delete a task
+   * Delete a task (locked)
    */
   deleteTask: (teamName: string, taskId: string): void => {
-    const tasksDir = getTasksDir();
-    const taskPath = join(tasksDir, teamName, `${taskId}.json`);
+    const taskPath = getTaskFilePath(teamName, taskId);
+    const lockPath = getTaskLockPath(teamName);
 
-    if (!dirExists(taskPath)) {
+    if (!fileExists(taskPath)) {
       throw new Error(`Task ${taskId} not found in team ${teamName}`);
     }
 
-    // Check if any other task depends on this one
-    const allTasks = TaskOperations.getTasks(teamName);
-    const dependents = allTasks.filter((t) => t.dependencies?.includes(taskId));
+    withLock(lockPath, () => {
+      // Check if any other task depends on this one
+      const teamTasksDir = getTeamTasksDir(teamName);
+      const files = listJSONFiles(teamTasksDir);
 
-    if (dependents.length > 0) {
-      throw new Error(
-        `Cannot delete task ${taskId} because other tasks depend on it: ${dependents
-          .map((t) => t.id)
-          .join(', ')}`
-      );
-    }
+      for (const file of files) {
+        const otherTaskPath = join(teamTasksDir, file);
+        try {
+          const otherTask = readValidatedJSON(otherTaskPath, TaskSchema);
+          if (otherTask.id !== taskId && otherTask.dependencies?.includes(taskId)) {
+            throw new Error(
+              `Cannot delete task ${taskId} because task ${otherTask.id} depends on it`
+            );
+          }
+        } catch (err: unknown) {
+          // Re-throw dependency errors, skip read errors
+          if (err instanceof Error && err.message.includes('Cannot delete')) {
+            throw err;
+          }
+        }
+      }
 
-    // In a real system we would delete the file, but for now let's just use Bun.spawnSync to rm
-    Bun.spawnSync(['rm', taskPath]);
+      removeFile(taskPath);
+    });
   },
 
   /**
-   * Claim a task (for worker agents)
+   * Claim a task (locked read-modify-write with soft blocking)
    */
   claimTask: (teamName: string, taskId: string, agentId?: string): Task => {
     const currentAgentId = agentId || process.env.OPENCODE_AGENT_ID || 'unknown';
-    const tasksDir = getTasksDir();
-    const taskPath = join(tasksDir, teamName, `${taskId}.json`);
+    const taskPath = getTaskFilePath(teamName, taskId);
+    const lockPath = getTaskLockPath(teamName);
 
-    if (!dirExists(taskPath)) {
+    if (!fileExists(taskPath)) {
       throw new Error(`Task ${taskId} not found in team ${teamName}`);
     }
 
-    // Read current task state
-    const task = safeReadJSONSync(taskPath);
+    return withLock(lockPath, () => {
+      const task = readValidatedJSON(taskPath, TaskSchema);
 
-    // Check if task is still available
-    if (task.status !== 'pending') {
-      throw new Error(`Task ${taskId} is not available (status: ${task.status})`);
-    }
+      // Check if task is still available
+      if (task.status !== 'pending') {
+        throw new Error(`Task ${taskId} is not available (status: ${task.status})`);
+      }
 
-    const updates: Partial<Task> = {
-      status: 'in_progress',
-      owner: currentAgentId,
-      claimedAt: new Date().toISOString(),
-    };
+      const now = new Date().toISOString();
+      const updatedTask: Task = {
+        ...task,
+        status: 'in_progress',
+        owner: currentAgentId,
+        claimedAt: now,
+        updatedAt: now,
+      };
 
-    // Check if dependencies are met
-    if (!TaskOperations.areDependenciesMet(teamName, taskId)) {
-      updates.warning = `Warning: Task ${taskId} dependencies are not met. Proceed with caution.`;
-    }
+      // Check if dependencies are met (soft blocking: warn but allow)
+      if (task.dependencies && task.dependencies.length > 0) {
+        let allMet = true;
+        for (const depId of task.dependencies) {
+          try {
+            const depPath = getTaskFilePath(teamName, depId);
+            if (fileExists(depPath)) {
+              const dep = readValidatedJSON(depPath, TaskSchema);
+              if (dep.status !== 'completed') {
+                allMet = false;
+                break;
+              }
+            } else {
+              allMet = false;
+              break;
+            }
+          } catch {
+            allMet = false;
+            break;
+          }
+        }
 
-    // Claim the task
-    return TaskOperations.updateTask(teamName, taskId, updates);
+        if (!allMet) {
+          updatedTask.warning = `Warning: Task ${taskId} dependencies are not met. Proceed with caution.`;
+        }
+      }
+
+      writeAtomicJSON(taskPath, updatedTask, TaskSchema);
+      return updatedTask;
+    });
   },
 };

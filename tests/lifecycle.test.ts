@@ -1,25 +1,44 @@
 import { describe, it, expect, beforeEach, afterEach } from 'bun:test';
+import { mkdtempSync, rmSync, existsSync } from 'node:fs';
+import { join } from 'node:path';
+import { tmpdir } from 'node:os';
 import { TeamOperations } from '../src/operations/team';
 import { getTeamsDir, dirExists } from '../src/utils/index';
-import { join } from 'node:path';
 
 describe('Lifecycle Management', () => {
   const teamName = 'test-lifecycle-team';
+  let tempDir: string;
+  let savedTeamsDir: string | undefined;
 
   beforeEach(() => {
+    savedTeamsDir = process.env.OPENCODE_TEAMS_DIR;
+    tempDir = mkdtempSync(join(tmpdir(), 'opencode-lifecycle-test-'));
+    process.env.OPENCODE_TEAMS_DIR = tempDir;
     // Ensure clean state
     TeamOperations.cleanup(teamName);
   });
 
   afterEach(() => {
     TeamOperations.cleanup(teamName);
+    if (tempDir && existsSync(tempDir)) {
+      rmSync(tempDir, { recursive: true, force: true });
+    }
+    if (savedTeamsDir !== undefined) {
+      process.env.OPENCODE_TEAMS_DIR = savedTeamsDir;
+    } else {
+      delete process.env.OPENCODE_TEAMS_DIR;
+    }
   });
 
   it('should handle shutdown requests and approvals', () => {
     const leaderInfo = { agentId: 'leader-1', agentName: 'Leader' };
     TeamOperations.spawnTeam(teamName, leaderInfo);
 
-    TeamOperations.requestJoin(teamName, { agentId: 'member-1', agentName: 'Member 1' });
+    TeamOperations.requestJoin(teamName, {
+      agentId: 'member-1',
+      agentName: 'Member 1',
+      agentType: 'worker',
+    });
 
     // Initial state: not should shutdown
     expect(TeamOperations.shouldShutdown(teamName)).toBe(false);
@@ -37,7 +56,11 @@ describe('Lifecycle Management', () => {
     const leaderInfo = { agentId: 'leader-1', agentName: 'Leader' };
     TeamOperations.spawnTeam(teamName, leaderInfo);
 
-    TeamOperations.requestJoin(teamName, { agentId: 'member-1', agentName: 'Member 1' });
+    TeamOperations.requestJoin(teamName, {
+      agentId: 'member-1',
+      agentName: 'Member 1',
+      agentType: 'worker',
+    });
 
     // Member 1 approves
     TeamOperations.approveShutdown(teamName, 'member-1');
@@ -49,8 +72,6 @@ describe('Lifecycle Management', () => {
   });
 
   it('should perform cleanup on shutdown', () => {
-    // This is tested by the tool execution logic in src/index.ts
-    // Here we just test the shouldShutdown logic which the tool uses
     const leaderInfo = { agentId: 'leader-1', agentName: 'Leader' };
     TeamOperations.spawnTeam(teamName, leaderInfo);
 
