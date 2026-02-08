@@ -3,10 +3,10 @@
   "sessionId": "2742772f-f49b-4163-acdc-d865f862e840",
   "status": "running",
   "startedAt": "2026-02-08T17:40:41.995Z",
-  "updatedAt": "2026-02-08T17:54:08.358Z",
-  "currentIteration": 3,
+  "updatedAt": "2026-02-08T17:56:16.294Z",
+  "currentIteration": 4,
   "maxIterations": 0,
-  "tasksCompleted": 3,
+  "tasksCompleted": 4,
   "isPaused": false,
   "agentPlugin": "opencode",
   "trackerState": {
@@ -53,8 +53,8 @@
       {
         "id": "ralph-tui-us004",
         "title": "US-004: Soft Blocking in Task Claiming",
-        "status": "open",
-        "completedInSession": false
+        "status": "completed",
+        "completedInSession": true
       }
     ]
   },
@@ -88,6 +88,16 @@
       "durationMs": 124932,
       "startedAt": "2026-02-08T17:49:37.679Z",
       "endedAt": "2026-02-08T17:51:42.611Z"
+    },
+    {
+      "iteration": 4,
+      "status": "completed",
+      "taskId": "ralph-tui-us004",
+      "taskTitle": "US-004: Soft Blocking in Task Claiming",
+      "taskCompleted": true,
+      "durationMs": 117171,
+      "startedAt": "2026-02-08T17:52:11.090Z",
+      "endedAt": "2026-02-08T17:54:08.261Z"
     }
   ],
   "skippedTaskIds": [],

@@ -62,3 +62,14 @@ export interface JoinResult {
   success: boolean;
   team: string;
 }
+
+export interface TmuxConfig {
+  enabled?: boolean;
+  layout?: string;
+  mainPaneSize?: number;
+  autoCleanup?: boolean;
+}
+
+export interface AppConfig {
+  tmux?: TmuxConfig;
+}

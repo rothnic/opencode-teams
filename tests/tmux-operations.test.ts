@@ -104,4 +104,55 @@ describe('TmuxOperations', () => {
     expect(spawnSpy).toHaveBeenCalledWith(['tmux', 'kill-session', '-t', 'test-session']);
     spawnSpy.mockRestore();
   });
+
+  it('should select a layout', () => {
+    const spawnSpy = spyOn(Bun, 'spawnSync').mockImplementation((args: any) => {
+      if (args[0] === 'which' && args[1] === 'tmux') {
+        return { exitCode: 0 } as any;
+      }
+      if (args[0] === 'tmux' && args[1] === 'select-layout') {
+        return { exitCode: 0 } as any;
+      }
+      return { exitCode: 1 } as any;
+    });
+
+    const success = TmuxOperations.selectLayout('test-session', 'tiled');
+    expect(success).toBe(true);
+    expect(spawnSpy).toHaveBeenCalledWith(['tmux', 'select-layout', '-t', 'test-session', 'tiled']);
+    spawnSpy.mockRestore();
+  });
+
+  it('should add a pane', () => {
+    const spawnSpy = spyOn(Bun, 'spawnSync').mockImplementation((args: any) => {
+      if (args[0] === 'which' && args[1] === 'tmux') {
+        return { exitCode: 0 } as any;
+      }
+      if (args[0] === 'tmux' && args[1] === 'split-window') {
+        return { exitCode: 0 } as any;
+      }
+      return { exitCode: 1 } as any;
+    });
+
+    const success = TmuxOperations.addPane('test-session');
+    expect(success).toBe(true);
+    expect(spawnSpy).toHaveBeenCalledWith(['tmux', 'split-window', '-t', 'test-session']);
+    spawnSpy.mockRestore();
+  });
+
+  it('should add a pane with command', () => {
+    const spawnSpy = spyOn(Bun, 'spawnSync').mockImplementation((args: any) => {
+      if (args[0] === 'which' && args[1] === 'tmux') {
+        return { exitCode: 0 } as any;
+      }
+      if (args[0] === 'tmux' && args[1] === 'split-window') {
+        return { exitCode: 0 } as any;
+      }
+      return { exitCode: 1 } as any;
+    });
+
+    const success = TmuxOperations.addPane('test-session', 'ls');
+    expect(success).toBe(true);
+    expect(spawnSpy).toHaveBeenCalledWith(['tmux', 'split-window', '-t', 'test-session', 'ls']);
+    spawnSpy.mockRestore();
+  });
 });

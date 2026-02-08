@@ -6,6 +6,7 @@
 import { join } from 'node:path';
 import { homedir } from 'node:os';
 import { readFileSync, writeFileSync } from 'node:fs';
+import type { AppConfig } from '../types/index';
 
 /**
  * Safely read and parse a JSON file using Bun.file
@@ -145,4 +146,23 @@ export function readDir(path: string): string[] {
  */
 export function removeDir(path: string): void {
   Bun.spawnSync(['rm', '-rf', path]);
+}
+
+/**
+ * Get the application configuration
+ */
+export function getAppConfig(): AppConfig {
+  const configPath = join(getPluginDir(), 'config.json');
+  try {
+    return safeReadJSONSync(configPath);
+  } catch {
+    // Default configuration
+    return {
+      tmux: {
+        enabled: true,
+        layout: 'tiled',
+        autoCleanup: true,
+      },
+    };
+  }
 }

@@ -64,4 +64,33 @@ export class TmuxOperations {
     const proc = Bun.spawnSync(['tmux', 'kill-session', '-t', sessionName]);
     return proc.exitCode === 0;
   }
+
+  /**
+   * Select a layout for the current window in a tmux session
+   */
+  static selectLayout(sessionName: string, layout: string): boolean {
+    if (!this.isTmuxInstalled()) {
+      throw new Error('tmux is not installed');
+    }
+
+    const proc = Bun.spawnSync(['tmux', 'select-layout', '-t', sessionName, layout]);
+    return proc.exitCode === 0;
+  }
+
+  /**
+   * Add a new pane to the current window in a tmux session
+   */
+  static addPane(sessionName: string, command?: string): boolean {
+    if (!this.isTmuxInstalled()) {
+      throw new Error('tmux is not installed');
+    }
+
+    const args = ['tmux', 'split-window', '-t', sessionName];
+    if (command) {
+      args.push(command);
+    }
+
+    const proc = Bun.spawnSync(args);
+    return proc.exitCode === 0;
+  }
 }

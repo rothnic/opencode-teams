@@ -8,6 +8,7 @@ after each iteration and it's included in prompts for context.
 - **Truly Synchronous JSON IO**: When synchronous file operations are required (e.g., in existing sync functions), use `node:fs`'s `readFileSync` and `writeFileSync` instead of Bun's `file` APIs, as Bun's `file.text()` and `Bun.write()` are asynchronous and return Promises.
 - **Bun Sleep**: Prefer `await Bun.sleep(ms)` over `setTimeout` for delays in Bun environments.
 - **Soft Blocking Pattern**: When implementing coordination tools that depend on other states (like task dependencies), use a "Soft Blocking" approach. This means checking the condition and returning a warning in the result instead of throwing a hard error, allowing agents to decide whether to proceed based on the warning.
+- **Tmux Layout Preservation**: When adding panes to a Tmux session, always re-apply the desired layout (e.g., `tiled`) immediately after adding the pane to maintain a consistent visual arrangement.
 
 ---
 
