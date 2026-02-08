@@ -8,25 +8,24 @@
  */
 
 // Try to import from @opencode-ai/plugin, fall back to local types
-let Plugin: any, tool: any;
+let tool: any;
 try {
+  // @ts-expect-error - Peer dependency might not be present during local development
   const pkg = await import('@opencode-ai/plugin');
-  Plugin = pkg.Plugin;
   tool = pkg.tool;
 } catch {
   // Use local type definitions when @opencode-ai/plugin is not available
   const local = await import('./plugin-types');
-  Plugin = local.Plugin;
   tool = local.tool;
 }
 
 import { TeamOperations } from './operations/team';
 import { TaskOperations } from './operations/task';
-import type { TeamConfig, LeaderInfo, TeamMember, Message, Task } from './types/index';
+import type { TeamConfig, TeamMember, Message, Task } from './types/index';
 
 /**
  * OpenCode Teams Plugin
- * 
+ *
  * Registers custom tools for team coordination:
  * - spawn-team: Create a new team
  * - discover-teams: List available teams
@@ -140,6 +139,24 @@ export const OpenCodeTeamsPlugin = async (ctx: any) => {
           return TeamOperations.readMessages(args.teamName, args.agentId);
         },
       }),
+      'poll-inbox': tool({
+        description: 'Poll for new messages with long-polling support',
+        args: {
+          teamName: tool.schema.string().describe('Team name'),
+          agentId: tool.schema.string().optional().describe('Agent ID (optional)'),
+          timeoutMs: tool.schema
+            .number()
+            .optional()
+            .describe('Timeout in milliseconds (default 30000)'),
+          since: tool.schema
+            .string()
+            .optional()
+            .describe('ISO timestamp to only get messages after this time'),
+        },
+        async execute(args: any, _ctx: any): Promise<Message[]> {
+          return TeamOperations.pollInbox(args.teamName, args.agentId, args.timeoutMs, args.since);
+        },
+      }),
 
       'create-task': tool({
         description: 'Create a new task in the team queue',
@@ -219,7 +236,7 @@ export const OpenCodeTeamsPlugin = async (ctx: any) => {
     },
 
     // Hook into tool execution for context injection
-    'tool.execute.before': async (input: any, output: any) => {
+    'tool.execute.before': async (input: any, _output: any) => {
       const teamName = process.env.OPENCODE_TEAM_NAME;
       if (teamName && !input.tool.startsWith('spawn-team')) {
         // Inject team context for debugging

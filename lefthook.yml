@@ -5,24 +5,24 @@ pre-commit:
   parallel: true
   commands:
     lint:
-      glob: "*.{js,ts}"
-      run: mise run lint:fix
+      glob: '*.{js,ts}'
+      run: bun run lint:fix
       stage_fixed: true
-    
+
     format:
-      glob: "*.{js,ts,json,md}"
-      run: mise run format
+      glob: '*.{js,ts,json,md}'
+      run: bun run format
       stage_fixed: true
-    
+
     type-check:
-      glob: "*.ts"
-      run: mise run typecheck
-      
+      glob: '*.ts'
+      run: bun run typecheck
+
 pre-push:
   parallel: false
   commands:
     test:
-      run: mise run test
-    
+      run: bun run test
+
     build:
-      run: mise run build
+      run: bun run build

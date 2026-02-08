@@ -15,7 +15,7 @@ describe('TaskOperations', () => {
     // Set up test environment
     process.env.OPENCODE_TEAMS_DIR = `/tmp/opencode-teams-test-${Date.now()}`;
     process.env.OPENCODE_AGENT_ID = 'test-agent-1';
-    
+
     // Create a test team
     TeamOperations.spawnTeam(testTeamName);
   });
@@ -40,7 +40,7 @@ describe('TaskOperations', () => {
       });
 
       taskId = task.id; // Save for other tests
-      
+
       expect(task.id).toBeDefined();
       expect(task.title).toBe('Test Task');
       expect(task.description).toBe('This is a test task');
@@ -51,7 +51,7 @@ describe('TaskOperations', () => {
 
     it('should create task with default values', () => {
       const task = TaskOperations.createTask(testTeamName, {});
-      
+
       expect(task.title).toBe('Untitled Task');
       expect(task.priority).toBe('normal');
       expect(task.status).toBe('pending');
@@ -67,14 +67,14 @@ describe('TaskOperations', () => {
   describe('getTasks', () => {
     it('should return all tasks', () => {
       const tasks = TaskOperations.getTasks(testTeamName);
-      
+
       expect(tasks).toBeArray();
       expect(tasks.length).toBeGreaterThanOrEqual(2);
     });
 
     it('should filter tasks by status', () => {
       const tasks = TaskOperations.getTasks(testTeamName, { status: 'pending' });
-      
+
       expect(tasks).toBeArray();
       tasks.forEach((task) => {
         expect(task.status).toBe('pending');
@@ -119,7 +119,7 @@ describe('TaskOperations', () => {
 
     it('should claim a pending task', () => {
       const claimedTask = TaskOperations.claimTask(testTeamName, claimableTaskId, 'worker-1');
-      
+
       expect(claimedTask.status).toBe('in_progress');
       expect(claimedTask.owner).toBe('worker-1');
       expect(claimedTask.claimedAt).toBeDefined();
@@ -128,7 +128,7 @@ describe('TaskOperations', () => {
     it('should throw error when claiming non-pending task', () => {
       // First claim
       TaskOperations.claimTask(testTeamName, claimableTaskId, 'worker-1');
-      
+
       // Try to claim again
       expect(() => {
         TaskOperations.claimTask(testTeamName, claimableTaskId, 'worker-2');

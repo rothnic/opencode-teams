@@ -191,7 +191,7 @@ export const TeamOperations = {
   /**
    * Read messages for current agent
    */
-  readMessages: (teamName: string, agentId?: string): Message[] => {
+  readMessages: (teamName: string, agentId?: string, since?: string): Message[] => {
     const teamsDir = getTeamsDir();
     const messagesDir = join(teamsDir, teamName, 'messages');
 
@@ -211,6 +211,11 @@ export const TeamOperations = {
       try {
         const msg = safeReadJSONSync(msgPath);
 
+        // Filter by timestamp if provided
+        if (since && msg.timestamp <= since) {
+          continue;
+        }
+
         // Check if message is for this agent
         if (msg.to === currentAgentId || msg.to === 'broadcast') {
           messages.push(msg);
@@ -221,6 +226,31 @@ export const TeamOperations = {
     }
 
     return messages;
+  },
+
+  /**
+   * Poll inbox for new messages with long-polling
+   */
+  pollInbox: async (
+    teamName: string,
+    agentId?: string,
+    timeoutMs: number = 30000,
+    since?: string
+  ): Promise<Message[]> => {
+    const startTime = Date.now();
+    const currentAgentId = agentId || process.env.OPENCODE_AGENT_ID || 'unknown';
+    let lastCheck = since;
+
+    while (Date.now() - startTime < timeoutMs) {
+      const messages = TeamOperations.readMessages(teamName, currentAgentId, lastCheck);
+      if (messages.length > 0) {
+        return messages;
+      }
+      // Wait for a bit before checking again to avoid CPU hogging
+      await Bun.sleep(1000);
+    }
+
+    return [];
   },
 
   /**

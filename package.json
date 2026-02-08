@@ -38,13 +38,13 @@
     "opencode.json"
   ],
   "scripts": {
-    "setup": "mise run setup",
-    "build": "mise run build",
+    "setup": "bun install",
+    "build": "bun x tsc",
     "test": "bun test",
-    "lint": "mise run lint",
-    "lint:fix": "mise run lint:fix",
-    "format": "mise run format",
-    "typecheck": "mise run typecheck"
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "format": "prettier --write .",
+    "typecheck": "tsc --noEmit"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.1",

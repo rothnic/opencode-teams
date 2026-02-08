@@ -1,6 +1,6 @@
 /**
  * OpenCode Tools for Team Coordination
- * 
+ *
  * This module exports all custom tools following OpenCode's tool registration pattern.
  * Each tool defines parameters and execution logic that OpenCode can invoke.
  */
@@ -8,7 +8,14 @@
 import { tool, type ToolDefinition } from './tool-helper';
 import { TeamOperations } from '../operations/team';
 import { TaskOperations } from '../operations/task';
-import type { TeamConfig, LeaderInfo, TeamMember, Message, Task, TeamSummary } from '../types/index';
+import type {
+  TeamConfig,
+  LeaderInfo,
+  TeamMember,
+  Message,
+  Task,
+  TeamSummary,
+} from '../types/index';
 
 /**
  * Create a new team
@@ -91,7 +98,10 @@ export const getTeamInfo = tool<{ teamName: string }, TeamConfig>({
 /**
  * Send a direct message
  */
-export const sendMessage = tool<{ teamName: string; targetAgentId: string; message: string; fromAgentId?: string }, Message>({
+export const sendMessage = tool<
+  { teamName: string; targetAgentId: string; message: string; fromAgentId?: string },
+  Message
+>({
   name: 'send-message',
   description: 'Send a direct message to another team member',
   parameters: {
@@ -123,7 +133,10 @@ export const sendMessage = tool<{ teamName: string; targetAgentId: string; messa
 /**
  * Broadcast a message
  */
-export const broadcastMessage = tool<{ teamName: string; message: string; fromAgentId?: string }, Message>({
+export const broadcastMessage = tool<
+  { teamName: string; message: string; fromAgentId?: string },
+  Message
+>({
   name: 'broadcast-message',
   description: 'Broadcast a message to all team members',
   parameters: {
@@ -169,6 +182,41 @@ export const readMessages = tool<{ teamName: string; agentId?: string }, Message
 });
 
 /**
+ * Poll inbox for new messages
+ */
+export const pollInbox = tool<
+  { teamName: string; agentId?: string; timeoutMs?: number; since?: string },
+  Message[]
+>({
+  name: 'poll-inbox',
+  description: 'Poll for new messages with long-polling support',
+  parameters: {
+    teamName: {
+      type: 'string',
+      description: 'Team name',
+      required: true,
+    },
+    agentId: {
+      type: 'string',
+      description: 'Agent ID (defaults to current agent)',
+      required: false,
+    },
+    timeoutMs: {
+      type: 'number',
+      description: 'Timeout in milliseconds (default 30000)',
+      required: false,
+    },
+    since: {
+      type: 'string',
+      description: 'ISO timestamp to only get messages after this time',
+      required: false,
+    },
+  },
+  execute: async ({ teamName, agentId, timeoutMs, since }) =>
+    TeamOperations.pollInbox(teamName, agentId, timeoutMs, since),
+});
+
+/**
  * Create a task
  */
 export const createTask = tool<{ teamName: string; taskData: Partial<Task> }, Task>({
@@ -197,7 +245,10 @@ export const createTask = tool<{ teamName: string; taskData: Partial<Task> }, Ta
 /**
  * Get tasks
  */
-export const getTasks = tool<{ teamName: string; filters?: { status?: string; owner?: string } }, Task[]>({
+export const getTasks = tool<
+  { teamName: string; filters?: { status?: string; owner?: string } },
+  Task[]
+>({
   name: 'get-tasks',
   description: 'Get tasks from the team queue',
   parameters: {
@@ -211,7 +262,11 @@ export const getTasks = tool<{ teamName: string; filters?: { status?: string; ow
       description: 'Filter criteria',
       required: false,
       properties: {
-        status: { type: 'string', description: 'Filter by status (pending, in_progress, completed)', required: false },
+        status: {
+          type: 'string',
+          description: 'Filter by status (pending, in_progress, completed)',
+          required: false,
+        },
         owner: { type: 'string', description: 'Filter by owner agent ID', required: false },
       },
     },
@@ -288,6 +343,7 @@ export const tools: Record<string, ToolDefinition> = {
   'send-message': sendMessage,
   'broadcast-message': broadcastMessage,
   'read-messages': readMessages,
+  'poll-inbox': pollInbox,
   'create-task': createTask,
   'get-tasks': getTasks,
   'claim-task': claimTask,

@@ -52,10 +52,10 @@ describe('TeamOperations', () => {
   describe('discoverTeams', () => {
     it('should return list of teams', () => {
       const teams = TeamOperations.discoverTeams();
-      
+
       expect(teams).toBeArray();
       expect(teams.length).toBeGreaterThanOrEqual(1);
-      
+
       const team = teams.find((t) => t.name === testTeamName);
       expect(team).toBeDefined();
       expect(team?.leader).toBe('leader-1');
@@ -72,7 +72,7 @@ describe('TeamOperations', () => {
 
       expect(member.agentId).toBe('worker-1');
       expect(member.agentType).toBe('worker');
-      
+
       const teamInfo = TeamOperations.getTeamInfo(testTeamName);
       expect(teamInfo.members).toHaveLength(2);
     });
@@ -87,7 +87,7 @@ describe('TeamOperations', () => {
   describe('messaging', () => {
     it('should send direct message', () => {
       const message = TeamOperations.write(testTeamName, 'worker-1', 'Hello worker!', 'leader-1');
-      
+
       expect(message.from).toBe('leader-1');
       expect(message.to).toBe('worker-1');
       expect(message.message).toBe('Hello worker!');
@@ -96,7 +96,7 @@ describe('TeamOperations', () => {
 
     it('should broadcast message', () => {
       const message = TeamOperations.broadcast(testTeamName, 'Team announcement', 'leader-1');
-      
+
       expect(message.from).toBe('leader-1');
       expect(message.to).toBe('broadcast');
       expect(message.message).toBe('Team announcement');
@@ -106,7 +106,7 @@ describe('TeamOperations', () => {
 
     it('should read messages for agent', () => {
       const messages = TeamOperations.readMessages(testTeamName, 'worker-1');
-      
+
       expect(messages).toBeArray();
       expect(messages.length).toBeGreaterThanOrEqual(2); // direct + broadcast
     });
@@ -115,7 +115,7 @@ describe('TeamOperations', () => {
   describe('cleanup', () => {
     it('should remove team data', () => {
       TeamOperations.cleanup(testTeamName);
-      
+
       const teams = TeamOperations.discoverTeams();
       const team = teams.find((t) => t.name === testTeamName);
       expect(team).toBeUndefined();

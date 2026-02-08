@@ -1,8 +1,8 @@
 {
-  "id": "5ecdf8d1-4ec1-43df-97e0-bafc92e39816",
+  "id": "2742772f-f49b-4163-acdc-d865f862e840",
   "status": "running",
-  "startedAt": "2026-02-07T20:06:34.508Z",
-  "updatedAt": "2026-02-07T20:06:34.508Z",
+  "startedAt": "2026-02-08T17:40:25.913Z",
+  "updatedAt": "2026-02-08T17:40:25.913Z",
   "agentPlugin": "opencode",
   "trackerPlugin": "beads-bv",
   "epicId": "ralph-tui-epic",

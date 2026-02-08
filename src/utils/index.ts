@@ -5,6 +5,7 @@
 
 import { join } from 'node:path';
 import { homedir } from 'node:os';
+import { readFileSync, writeFileSync } from 'node:fs';
 
 /**
  * Safely read and parse a JSON file using Bun.file
@@ -28,16 +29,14 @@ export async function safeReadJSON(filePath: string): Promise<any> {
 }
 
 /**
- * Safely read and parse a JSON file synchronously using Bun.file
+ * Safely read and parse a JSON file synchronously using node:fs
  */
 export function safeReadJSONSync(filePath: string): any {
   try {
-    const file = Bun.file(filePath);
-    const content = file.text();
-
-    return JSON.parse(content as any);
+    const content = readFileSync(filePath, 'utf8');
+    return JSON.parse(content);
   } catch (error: any) {
-    if (error.code === 'ENOENT' || error.message?.includes('No such file')) {
+    if (error.code === 'ENOENT') {
       throw new Error(`File not found: ${filePath}`);
     } else if (error instanceof SyntaxError) {
       throw new Error(`Invalid JSON in file: ${filePath}`);
@@ -54,10 +53,10 @@ export async function writeJSON(filePath: string, data: any): Promise<void> {
 }
 
 /**
- * Write JSON to a file synchronously
+ * Write JSON to a file synchronously using node:fs
  */
 export function writeJSONSync(filePath: string, data: any): void {
-  Bun.write(filePath, JSON.stringify(data, null, 2));
+  writeFileSync(filePath, JSON.stringify(data, null, 2), 'utf8');
 }
 
 /**

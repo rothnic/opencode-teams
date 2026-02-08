@@ -7,10 +7,7 @@ import { tool } from './tool-helper';
 import { TeamOperations } from '../operations/team';
 import type { TeamConfig, LeaderInfo } from '../types/index';
 
-export const spawnTeam = tool<
-  { teamName: string; leaderInfo?: LeaderInfo },
-  TeamConfig
->({
+export const spawnTeam = tool<{ teamName: string; leaderInfo?: LeaderInfo }, TeamConfig>({
   name: 'spawn-team',
   description: 'Create a new team of AI agents for collaborative work',
   parameters: {

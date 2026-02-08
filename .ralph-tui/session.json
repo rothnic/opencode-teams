@@ -1,9 +1,9 @@
 {
   "version": 1,
-  "sessionId": "5ecdf8d1-4ec1-43df-97e0-bafc92e39816",
+  "sessionId": "2742772f-f49b-4163-acdc-d865f862e840",
   "status": "running",
-  "startedAt": "2026-02-07T20:06:50.592Z",
-  "updatedAt": "2026-02-07T20:10:42.362Z",
+  "startedAt": "2026-02-08T17:40:41.995Z",
+  "updatedAt": "2026-02-08T17:41:44.251Z",
   "currentIteration": 0,
   "maxIterations": 0,
   "tasksCompleted": 0,
@@ -17,7 +17,7 @@
       {
         "id": "ralph-tui-us001",
         "title": "US-001: Centralized State Management & Concurrency",
-        "status": "open",
+        "status": "completed",
         "completedInSession": false
       },
       {
@@ -61,6 +61,6 @@
   "iterations": [],
   "skippedTaskIds": [],
   "cwd": "/data/projects/opencode-teams",
-  "activeTaskIds": [],
+  "activeTaskIds": ["ralph-tui-us002"],
   "subagentPanelVisible": false
 }

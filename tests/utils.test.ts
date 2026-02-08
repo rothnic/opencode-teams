@@ -12,7 +12,7 @@ describe('Utility Functions', () => {
     it('should generate a unique ID', () => {
       const id1 = generateId();
       const id2 = generateId();
-      
+
       expect(id1).not.toBe(id2);
       expect(id1).toMatch(/^\d+-[a-f0-9]{8}$/);
     });
@@ -20,7 +20,7 @@ describe('Utility Functions', () => {
     it('should include timestamp and random hex', () => {
       const id = generateId();
       const parts = id.split('-');
-      
+
       expect(parts).toHaveLength(2);
       expect(parseInt(parts[0])).toBeGreaterThan(0);
       expect(parts[1]).toMatch(/^[a-f0-9]{8}$/);
@@ -56,7 +56,7 @@ describe('Utility Functions', () => {
 
     it('should create and return plugin directory', () => {
       const pluginDir = getPluginDir();
-      
+
       expect(pluginDir).toBeDefined();
       expect(dirExists(pluginDir)).toBe(true);
     });
@@ -64,7 +64,7 @@ describe('Utility Functions', () => {
     it('should create and return teams directory', () => {
       const teamsDir = getTeamsDir();
       const pluginDir = getPluginDir();
-      
+
       expect(teamsDir).toBe(join(pluginDir, 'teams'));
       expect(dirExists(teamsDir)).toBe(true);
     });
@@ -72,7 +72,7 @@ describe('Utility Functions', () => {
     it('should create and return tasks directory', () => {
       const tasksDir = getTasksDir();
       const pluginDir = getPluginDir();
-      
+
       expect(tasksDir).toBe(join(pluginDir, 'tasks'));
       expect(dirExists(tasksDir)).toBe(true);
     });
