@@ -23,6 +23,7 @@ Coordinate multi-agent workflows using teams, shared task queues, and inter-agen
 ## When to Use This Skill
 
 Use this skill when:
+
 - You need multiple agents to work on a complex task together
 - Work can be parallelized across specialist agents
 - Agents need to communicate findings or coordinate actions
@@ -107,18 +108,21 @@ OpenCode sets these automatically:
 ## Best Practices
 
 **For Leaders:**
+
 - Create specific, well-scoped tasks
 - Set appropriate task priorities
 - Monitor team progress via get-tasks
 - Synthesize results from multiple agents
 
 **For Workers:**
+
 - Claim tasks that match your capabilities
 - Update task status regularly
 - Communicate blockers or questions
 - Share findings with relevant teammates
 
 **For Everyone:**
+
 - Use descriptive team names (e.g., "review-pr-123" not "team1")
 - Keep messages concise and actionable
 - Clean up teams when work is complete (leader responsibility)
@@ -126,6 +130,7 @@ OpenCode sets these automatically:
 ## Error Handling
 
 All tools throw descriptive errors:
+
 - Team already exists (when creating)
 - Team does not exist (when joining)
 - Task already claimed (when claiming)
@@ -136,6 +141,7 @@ Check error messages and adjust accordingly.
 ## Related Skills
 
 This skill works well with:
+
 - Code analysis skills (for reviewing code)
 - Testing skills (for test coverage tasks)
 - Documentation skills (for doc generation tasks)

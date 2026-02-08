@@ -25,7 +25,7 @@ process.env.OPENCODE_AGENT_TYPE = 'leader';
 const team = global.TeamOperations.spawnTeam('code-review-pr-789', {
   agentId: 'review-leader',
   agentName: 'Review Coordinator',
-  agentType: 'leader'
+  agentType: 'leader',
 });
 
 console.log('Code review team created:', team.name);
@@ -40,30 +40,30 @@ const reviewAspects = [
     title: 'Security Review',
     description: 'Check for security vulnerabilities, injection risks, auth issues',
     priority: 'critical',
-    specialization: 'security'
+    specialization: 'security',
   },
   {
     title: 'Performance Review',
     description: 'Check for performance issues, inefficient queries, optimization opportunities',
     priority: 'high',
-    specialization: 'performance'
+    specialization: 'performance',
   },
   {
     title: 'Style Review',
     description: 'Check code style, consistency, readability',
     priority: 'normal',
-    specialization: 'style'
+    specialization: 'style',
   },
   {
     title: 'Logic Review',
     description: 'Verify business logic correctness, edge cases, error handling',
     priority: 'high',
-    specialization: 'logic'
-  }
+    specialization: 'logic',
+  },
 ];
 
 // Create tasks
-reviewAspects.forEach(aspect => {
+reviewAspects.forEach((aspect) => {
   const task = global.TaskOperations.createTask('code-review-pr-789', aspect);
   console.log(`Created task: ${task.title}`);
 });
@@ -91,12 +91,12 @@ global.TeamOperations.requestJoin('code-review-pr-789', {
   agentId: 'security-reviewer',
   agentName: 'Security Specialist',
   agentType: 'code-reviewer',
-  specialization: 'security'
+  specialization: 'security',
 });
 
 // Claim security task
 const tasks = global.TaskOperations.getTasks('code-review-pr-789', { status: 'pending' });
-const securityTask = tasks.find(t => t.specialization === 'security');
+const securityTask = tasks.find((t) => t.specialization === 'security');
 global.TaskOperations.claimTask('code-review-pr-789', securityTask.id);
 
 // Perform review (example findings)
@@ -107,7 +107,7 @@ const findings = [
     severity: 'critical',
     issue: 'SQL injection vulnerability',
     description: 'User input not sanitized before database query',
-    recommendation: 'Use parameterized queries'
+    recommendation: 'Use parameterized queries',
   },
   {
     file: 'src/api/users.js',
@@ -115,16 +115,16 @@ const findings = [
     severity: 'high',
     issue: 'Missing authorization check',
     description: 'Endpoint allows any authenticated user to modify any profile',
-    recommendation: 'Add ownership check: user.id === profile.userId'
-  }
+    recommendation: 'Add ownership check: user.id === profile.userId',
+  },
 ];
 
 // Report findings
 global.TaskOperations.updateTask('code-review-pr-789', securityTask.id, {
   status: 'completed',
   findings: findings,
-  summary: `Found ${findings.length} security issues (${findings.filter(f => f.severity === 'critical').length} critical)`,
-  recommendation: 'changes_requested'
+  summary: `Found ${findings.length} security issues (${findings.filter((f) => f.severity === 'critical').length} critical)`,
+  recommendation: 'changes_requested',
 });
 
 // Notify leader
@@ -145,11 +145,11 @@ global.TeamOperations.requestJoin('code-review-pr-789', {
   agentId: 'performance-reviewer',
   agentName: 'Performance Specialist',
   agentType: 'code-reviewer',
-  specialization: 'performance'
+  specialization: 'performance',
 });
 
 const tasks = global.TaskOperations.getTasks('code-review-pr-789', { status: 'pending' });
-const perfTask = tasks.find(t => t.specialization === 'performance');
+const perfTask = tasks.find((t) => t.specialization === 'performance');
 global.TaskOperations.claimTask('code-review-pr-789', perfTask.id);
 
 // Review and report
@@ -160,15 +160,15 @@ const perfFindings = [
     severity: 'high',
     issue: 'N+1 query problem',
     description: 'Loading related data in a loop',
-    recommendation: 'Use eager loading with include/join'
-  }
+    recommendation: 'Use eager loading with include/join',
+  },
 ];
 
 global.TaskOperations.updateTask('code-review-pr-789', perfTask.id, {
   status: 'completed',
   findings: perfFindings,
   summary: 'Found 1 performance issue',
-  recommendation: 'changes_requested'
+  recommendation: 'changes_requested',
 });
 ```
 
@@ -181,11 +181,11 @@ global.TeamOperations.requestJoin('code-review-pr-789', {
   agentId: 'style-reviewer',
   agentName: 'Style Specialist',
   agentType: 'code-reviewer',
-  specialization: 'style'
+  specialization: 'style',
 });
 
 const tasks = global.TaskOperations.getTasks('code-review-pr-789', { status: 'pending' });
-const styleTask = tasks.find(t => t.specialization === 'style');
+const styleTask = tasks.find((t) => t.specialization === 'style');
 global.TaskOperations.claimTask('code-review-pr-789', styleTask.id);
 
 // Review for style issues
@@ -196,15 +196,15 @@ const styleFindings = [
     severity: 'low',
     issue: 'Inconsistent naming',
     description: 'Using camelCase when project uses snake_case',
-    recommendation: 'Rename getUserData to get_user_data'
-  }
+    recommendation: 'Rename getUserData to get_user_data',
+  },
 ];
 
 global.TaskOperations.updateTask('code-review-pr-789', styleTask.id, {
   status: 'completed',
   findings: styleFindings,
   summary: 'Minor style issues found',
-  recommendation: 'approved_with_suggestions'
+  recommendation: 'approved_with_suggestions',
 });
 ```
 
@@ -217,11 +217,11 @@ global.TeamOperations.requestJoin('code-review-pr-789', {
   agentId: 'logic-reviewer',
   agentName: 'Logic Specialist',
   agentType: 'code-reviewer',
-  specialization: 'logic'
+  specialization: 'logic',
 });
 
 const tasks = global.TaskOperations.getTasks('code-review-pr-789', { status: 'pending' });
-const logicTask = tasks.find(t => t.specialization === 'logic');
+const logicTask = tasks.find((t) => t.specialization === 'logic');
 global.TaskOperations.claimTask('code-review-pr-789', logicTask.id);
 
 // Review business logic
@@ -232,15 +232,15 @@ const logicFindings = [
     severity: 'high',
     issue: 'Missing edge case handling',
     description: 'Does not handle refund amount exceeding original payment',
-    recommendation: 'Add validation: if (refundAmount > payment.amount) throw error'
-  }
+    recommendation: 'Add validation: if (refundAmount > payment.amount) throw error',
+  },
 ];
 
 global.TaskOperations.updateTask('code-review-pr-789', logicTask.id, {
   status: 'completed',
   findings: logicFindings,
   summary: 'Found 1 logic issue with edge case handling',
-  recommendation: 'changes_requested'
+  recommendation: 'changes_requested',
 });
 ```
 
@@ -251,8 +251,8 @@ global.TaskOperations.updateTask('code-review-pr-789', logicTask.id, {
 ```javascript
 // Check task completion status
 const allTasks = global.TaskOperations.getTasks('code-review-pr-789');
-const completed = allTasks.filter(t => t.status === 'completed');
-const pending = allTasks.filter(t => t.status === 'pending');
+const completed = allTasks.filter((t) => t.status === 'completed');
+const pending = allTasks.filter((t) => t.status === 'pending');
 
 console.log(`Review progress: ${completed.length}/${allTasks.length} complete`);
 
@@ -265,12 +265,12 @@ if (pending.length === 0) {
 
 ```javascript
 // Gather all findings
-const completedReviews = global.TaskOperations.getTasks('code-review-pr-789', { 
-  status: 'completed' 
+const completedReviews = global.TaskOperations.getTasks('code-review-pr-789', {
+  status: 'completed',
 });
 
 const allFindings = completedReviews
-  .flatMap(review => review.findings || [])
+  .flatMap((review) => review.findings || [])
   .sort((a, b) => {
     const severityOrder = { critical: 0, high: 1, medium: 2, low: 3 };
     return (severityOrder[a.severity] || 3) - (severityOrder[b.severity] || 3);
@@ -279,16 +279,19 @@ const allFindings = completedReviews
 // Generate summary
 const summary = {
   totalFindings: allFindings.length,
-  critical: allFindings.filter(f => f.severity === 'critical').length,
-  high: allFindings.filter(f => f.severity === 'high').length,
-  medium: allFindings.filter(f => f.severity === 'medium').length,
-  low: allFindings.filter(f => f.severity === 'low').length,
+  critical: allFindings.filter((f) => f.severity === 'critical').length,
+  high: allFindings.filter((f) => f.severity === 'high').length,
+  medium: allFindings.filter((f) => f.severity === 'medium').length,
+  low: allFindings.filter((f) => f.severity === 'low').length,
   byCategory: {
-    security: allFindings.filter(f => f.issue.includes('security') || f.file.includes('auth')).length,
-    performance: allFindings.filter(f => f.issue.includes('performance') || f.issue.includes('query')).length,
-    style: allFindings.filter(f => f.severity === 'low').length,
-    logic: allFindings.filter(f => f.issue.includes('logic') || f.issue.includes('edge')).length
-  }
+    security: allFindings.filter((f) => f.issue.includes('security') || f.file.includes('auth'))
+      .length,
+    performance: allFindings.filter(
+      (f) => f.issue.includes('performance') || f.issue.includes('query')
+    ).length,
+    style: allFindings.filter((f) => f.severity === 'low').length,
+    logic: allFindings.filter((f) => f.issue.includes('logic') || f.issue.includes('edge')).length,
+  },
 };
 
 console.log('Review Summary:', summary);

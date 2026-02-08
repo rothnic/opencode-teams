@@ -32,6 +32,7 @@ For documentation on how AI agents USE this plugin's features (teams, coordinati
 - **No .ts extensions in imports**: TypeScript handles this
 
 Example:
+
 ```typescript
 import { join } from 'node:path';
 import type { TeamConfig } from '../types/index';
@@ -96,6 +97,7 @@ try {
 - **Setup/Teardown**: Use `beforeAll`, `afterAll`, `beforeEach`, `afterEach`
 
 Example:
+
 ```typescript
 import { describe, it, expect, beforeAll } from 'bun:test';
 
@@ -159,10 +161,12 @@ export const spawnTeam = tool({
   description: 'Create a new team of AI agents',
   args: {
     teamName: z.string().describe('Unique name for the team'),
-    leaderInfo: z.object({
-      agentId: z.string().optional(),
-      agentName: z.string().optional(),
-    }).optional(),
+    leaderInfo: z
+      .object({
+        agentId: z.string().optional(),
+        agentName: z.string().optional(),
+      })
+      .optional(),
   },
   async execute({ teamName, leaderInfo }, context) {
     // Implementation using operations modules

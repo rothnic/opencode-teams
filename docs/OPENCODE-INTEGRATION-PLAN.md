@@ -3,12 +3,14 @@
 ## Executive Summary
 
 This document outlines the refined architecture for opencode-teams as a **native OpenCode plugin** with an **optional Bun-based tmux session manager**. This approach:
+
 - Uses OpenCode's native plugin system (custom tools via `tool()` helper)
 - Adds robust state management from claude-code-teams-mcp (file locking, long-polling)
 - Provides optional project-based tmux session spawning (inspired by oh-my-opencode)
 - Stays Bun-native for all tooling and process management
 
 **Key Decisions**:
+
 - ✅ Native OpenCode plugin with custom tools (NOT separate MCP server)
 - ✅ Bun/TypeScript for all implementation
 - ✅ Optional CLI tool for project-specific OpenCode server + tmux management
@@ -22,6 +24,7 @@ This document outlines the refined architecture for opencode-teams as a **native
 **What it is**: The existing opencode-teams plugin with enhanced state management
 
 **Features**:
+
 - 11+ custom tools registered via OpenCode's `tool()` helper
 - File-based coordination in `~/.config/opencode/opencode-teams/`
 - **NEW**: fcntl-based file locking for concurrency safety
@@ -30,6 +33,7 @@ This document outlines the refined architecture for opencode-teams as a **native
 - **NEW**: Graceful shutdown protocol
 
 **Installation**: Standard OpenCode plugin installation
+
 ```bash
 opencode plugin install opencode-teams
 ```
@@ -39,6 +43,7 @@ opencode plugin install opencode-teams
 **What it is**: Bun-based CLI tool for project-specific OpenCode server management
 
 **Features**:
+
 - Detects if OpenCode server is running for current project
 - Spawns OpenCode server in tmux session if needed
 - Creates tmux panes for multi-agent visualization
@@ -46,11 +51,13 @@ opencode plugin install opencode-teams
 - Similar to oh-my-opencode but project-scoped
 
 **Installation**: Optional global CLI tool
+
 ```bash
 bun install -g opencode-teams
 ```
 
 **Usage**:
+
 ```bash
 # In your project directory
 opencode-teams init
@@ -66,6 +73,7 @@ opencode-teams init
 ### Storage Structure (Global vs Project-Specific)
 
 **Global Configuration** (`~/.config/opencode/opencode-teams/`):
+
 ```
 ~/.config/opencode/opencode-teams/
 ├── config.json              # User preferences, default settings
@@ -77,6 +85,7 @@ opencode-teams init
 ```
 
 **Project-Specific State** (`<project>/.opencode/opencode-teams/`):
+
 ```
 <project-root>/.opencode/opencode-teams/
 ├── teams/<team-name>/
@@ -92,6 +101,7 @@ opencode-teams init
 ```
 
 **Rationale**:
+
 - **Teams are project-specific** - Each project has its own teams working on that codebase
 - **Messages are project-specific** - Communication tied to project context
 - **Tasks are project-specific** - Work items belong to the project
@@ -143,6 +153,7 @@ export function getGlobalUserConfig(): string {
 ### File Locking with Bun FFI
 
 **Concept** (from claude-code-teams-mcp):
+
 - Use `fcntl` for exclusive file locks
 - Ensures atomic read-modify-write operations
 - Prevents race conditions with concurrent agents
@@ -174,13 +185,10 @@ const F_RDLCK = 0;
 const F_WRLCK = 1;
 const F_UNLCK = 2;
 
-export async function withFileLock<T>(
-  lockPath: string,
-  fn: () => Promise<T>
-): Promise<T> {
+export async function withFileLock<T>(lockPath: string, fn: () => Promise<T>): Promise<T> {
   // Ensure lock file exists
   await Bun.write(lockPath, '');
-  
+
   // Open file for locking
   const fd = libc.symbols.open(Buffer.from(lockPath + '\0'), 2); // O_RDWR
   if (fd < 0) {
@@ -223,20 +231,13 @@ export async function readInbox(
   markAsRead: boolean = true
 ): Promise<Message[]> {
   const teamsDir = getProjectTeamsDir();
-  const inboxPath = join(
-    teamsDir,
-    teamName,
-    'inboxes',
-    `${agentId}.json`
-  );
+  const inboxPath = join(teamsDir, teamName, 'inboxes', `${agentId}.json`);
   const lockPath = join(teamsDir, teamName, 'inboxes', '.lock');
 
   return await withFileLock(lockPath, async () => {
     // Read current inbox
     const file = Bun.file(inboxPath);
-    const messages: Message[] = await file.exists()
-      ? await file.json()
-      : [];
+    const messages: Message[] = (await file.exists()) ? await file.json() : [];
 
     if (markAsRead) {
       // Mark all as read
@@ -405,7 +406,7 @@ interface SessionInfo {
 async function getTmuxSessions(): Promise<SessionInfo[]> {
   const proc = spawn(['tmux', 'list-sessions', '-F', '#{session_name}']);
   const text = await new Response(proc.stdout).text();
-  
+
   return text
     .trim()
     .split('\n')
@@ -420,9 +421,7 @@ async function isOpenCodeRunning(projectDir: string): Promise<boolean> {
   return await Bun.file(sessionFile).exists();
 }
 
-export async function ensureOpenCodeSession(
-  projectDir: string
-): Promise<string> {
+export async function ensureOpenCodeSession(projectDir: string): Promise<string> {
   const sessionName = `opencode-${basename(projectDir)}`;
 
   // Check if session already exists
@@ -440,7 +439,7 @@ export async function ensureOpenCodeSession(
 
   // Create new tmux session with OpenCode
   console.log(`Creating tmux session '${sessionName}'...`);
-  
+
   await spawn([
     'tmux',
     'new-session',
@@ -492,14 +491,7 @@ export async function createAgentPane(
   ]).exited;
 
   // Rename pane
-  await spawn([
-    'tmux',
-    'select-pane',
-    '-t',
-    sessionName,
-    '-T',
-    agentName,
-  ]).exited;
+  await spawn(['tmux', 'select-pane', '-t', sessionName, '-T', agentName]).exited;
 
   // Send command to pane
   await spawn([
@@ -512,13 +504,7 @@ export async function createAgentPane(
   ]).exited;
 
   // Reapply layout
-  await spawn([
-    'tmux',
-    'select-layout',
-    '-t',
-    sessionName,
-    'main-vertical',
-  ]).exited;
+  await spawn(['tmux', 'select-layout', '-t', sessionName, 'main-vertical']).exited;
 }
 ```
 
@@ -528,9 +514,7 @@ export async function createAgentPane(
 
 ```typescript
 // cli/session-cleanup.ts
-export async function cleanupSession(
-  projectDir: string
-): Promise<void> {
+export async function cleanupSession(projectDir: string): Promise<void> {
   const sessionFile = join(projectDir, '.opencode-session');
   const file = Bun.file(sessionFile);
 
@@ -547,7 +531,7 @@ export async function cleanupSession(
 
   if (!hasClients) {
     console.log(`No clients connected, cleaning up session '${sessionName}'...`);
-    
+
     // Kill tmux session
     await spawn(['tmux', 'kill-session', '-t', sessionName]).exited;
 
@@ -617,24 +601,28 @@ User can configure tmux layout in `~/.config/opencode-teams/config.json`:
 The plugin now provides these custom tools (registered via OpenCode's `tool()` helper):
 
 ### Team Operations
+
 1. **spawn-team** - Create new team with configuration
 2. **discover-teams** - List all available teams
 3. **join-team** - Add agent to team
 4. **get-team-info** - Get team configuration and members
 
 ### Communication (with file locking)
+
 5. **send-message** - Send direct/broadcast message
 6. **broadcast-message** - Send to all team members
 7. **read-messages** - Read inbox (marks as read)
 8. **poll-inbox** - Long-poll for new messages (NEW)
 
 ### Task Management (with dependencies)
+
 9. **create-task** - Create task with optional dependencies (NEW)
 10. **get-tasks** - List tasks with filters
 11. **claim-task** - Claim task for execution
 12. **update-task** - Update task status/dependencies (NEW)
 
 ### Lifecycle (NEW)
+
 13. **request-shutdown** - Request graceful team shutdown
 14. **approve-shutdown** - Approve shutdown request
 
@@ -643,36 +631,42 @@ All tools automatically integrate with OpenCode's permission system.
 ## Implementation Phases
 
 ### Phase 1: Enhanced State Management (2 weeks)
+
 - [ ] Implement file locking with Bun FFI
 - [ ] Add atomic write operations
 - [ ] Update all operations to use locks
 - [ ] Add comprehensive concurrency tests
 
 ### Phase 2: Long-Polling & Dependencies (2 weeks)
+
 - [ ] Implement poll-inbox tool
 - [ ] Add task dependency fields
 - [ ] Implement cycle detection
 - [ ] Add dependency enforcement tests
 
 ### Phase 3: CLI Tool Foundation (1 week)
+
 - [ ] Create Bun-based CLI project structure
 - [ ] Implement session detection
 - [ ] Implement OpenCode spawning in tmux
 - [ ] Add basic cleanup logic
 
 ### Phase 4: Tmux Layout Management (1 week)
+
 - [ ] Implement pane creation/management
 - [ ] Add layout configuration
 - [ ] Implement auto-cleanup on disconnect
 - [ ] Test with multiple agents
 
 ### Phase 5: Integration & Testing (1 week)
+
 - [ ] End-to-end workflow testing
 - [ ] Performance testing with concurrent agents
 - [ ] Documentation and examples
 - [ ] User acceptance testing
 
 ### Phase 6: Polish & Release (1 week)
+
 - [ ] Error handling and edge cases
 - [ ] User documentation
 - [ ] Video tutorials

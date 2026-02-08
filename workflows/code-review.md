@@ -24,12 +24,14 @@ This workflow distributes code review across multiple specialist agents working 
 ## Roles
 
 ### Leader (1 agent)
+
 - Creates review team
 - Breaks review into specialized tasks
 - Coordinates reviewers
 - Synthesizes final review
 
 ### Members (2-4 agents)
+
 - Join as specialists (security, performance, style, logic)
 - Claim relevant tasks
 - Perform focused reviews
@@ -47,7 +49,7 @@ This workflow distributes code review across multiple specialist agents working 
      priority: "high"
    })
 3. create-task("review-pr-{number}", {
-     title: "Performance Review", 
+     title: "Performance Review",
      description: "Analyze queries, caching, algorithm complexity",
      priority: "medium"
    })
@@ -99,17 +101,20 @@ Each specialist agent:
 ## Customization
 
 ### Add More Review Types
+
 - Architecture review
 - Documentation review
 - Test coverage review
 - Accessibility review
 
 ### Adjust Team Size
+
 - Small PRs: 2 reviewers (security + quality)
 - Medium PRs: 3 reviewers (security + performance + quality)
 - Large PRs: 4+ reviewers (add architecture, testing)
 
 ### Priority Tuning
+
 - Critical PRs: All tasks "high" priority
 - Feature PRs: Mixed priorities
 - Refactoring PRs: Focus on quality and testing
@@ -132,7 +137,7 @@ Each specialist agent:
 - Action: Use parameterized queries
 - Status: Critical - must fix
 
-## Performance (Medium Priority) ✓  
+## Performance (Medium Priority) ✓
 - Found: N+1 query in comment loading
 - Action: Add eager loading
 - Status: Important - should fix

@@ -150,11 +150,13 @@ describe('MyFeature', () => {
 Git hooks are automatically installed via `mise run setup` or `npm run setup`:
 
 **Pre-commit hooks:**
+
 - Linting (auto-fix enabled)
 - Formatting (auto-fix enabled)
 - Type checking
 
 **Pre-push hooks:**
+
 - Run all tests
 - Build verification
 
@@ -216,6 +218,7 @@ mise run build
 ```
 
 This compiles TypeScript from `src/` to JavaScript in `dist/` with:
+
 - Source maps
 - Declaration files (.d.ts)
 - Declaration maps
@@ -292,6 +295,7 @@ footer
 Types: `feat`, `fix`, `docs`, `style`, `refactor`, `test`, `chore`
 
 Examples:
+
 ```
 feat: add message filtering to readMessages
 fix: handle race condition in claimTask
@@ -303,6 +307,7 @@ docs: update installation instructions
 ### Bun not found
 
 Install Bun:
+
 ```bash
 curl -fsSL https://bun.sh/install | bash
 ```
@@ -310,6 +315,7 @@ curl -fsSL https://bun.sh/install | bash
 ### mise not found
 
 Install mise:
+
 ```bash
 curl https://mise.jdx.dev/install.sh | sh
 ```
@@ -317,6 +323,7 @@ curl https://mise.jdx.dev/install.sh | sh
 ### Git hooks not working
 
 Reinstall hooks:
+
 ```bash
 npx lefthook install
 ```
@@ -324,6 +331,7 @@ npx lefthook install
 ### Build failures
 
 1. Clean and rebuild:
+
 ```bash
 rm -rf dist node_modules
 bun install
@@ -331,6 +339,7 @@ mise run build
 ```
 
 2. Check TypeScript errors:
+
 ```bash
 mise run typecheck
 ```
@@ -338,11 +347,13 @@ mise run typecheck
 ### Test failures
 
 1. Run tests with verbose output:
+
 ```bash
 bun test --verbose
 ```
 
 2. Run specific failing test:
+
 ```bash
 bun test tests/specific-test.test.ts
 ```

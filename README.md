@@ -77,6 +77,7 @@ Then reference in your `opencode.json`:
 ### Verification
 
 After installation, OpenCode should recognize:
+
 - `TeamOperations` and `TaskOperations` global objects
 - Skills: spawn-team, team-communicate, team-coordinate
 - Agent templates: team-leader, team-worker, code-reviewer
@@ -212,6 +213,7 @@ See [examples/](examples/) for more workflow patterns.
 ### Git Hooks
 
 Lefthook ensures quality:
+
 - **pre-commit**: Runs linting, formatting, type-checking
 - **pre-push**: Runs tests and build
 

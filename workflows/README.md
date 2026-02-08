@@ -5,6 +5,7 @@ Reusable workflow templates for common multi-agent collaboration patterns.
 ## Available Workflows
 
 ### [code-review.md](./code-review.md)
+
 Parallel code review across specialized reviewers (security, performance, quality).
 
 **Roles**: 1 leader + 2-4 members  
@@ -14,9 +15,11 @@ Parallel code review across specialized reviewers (security, performance, qualit
 ## Using Workflows
 
 ### 1. Choose a Workflow
+
 Select a workflow that matches your task pattern.
 
 ### 2. Configure Agent Roles
+
 Assign agents with appropriate permissions (see `examples/opencode-config-example.json`):
 
 ```json
@@ -29,14 +32,18 @@ Assign agents with appropriate permissions (see `examples/opencode-config-exampl
 ```
 
 ### 3. Follow the Steps
+
 Each workflow provides:
+
 - Role definitions
 - Step-by-step instructions
 - Example commands
 - Success criteria
 
 ### 4. Customize as Needed
+
 Workflows are templates - adapt them:
+
 - Add/remove review types
 - Adjust team sizes
 - Change priorities
@@ -61,21 +68,27 @@ duration: estimated-time
 # Workflow Name
 
 ## Overview
+
 What this workflow does
 
 ## Roles
+
 Who does what
 
 ## Workflow Steps
+
 Detailed steps with examples
 
 ## Expected Outcomes
+
 What you should achieve
 
 ## Customization
+
 How to adapt it
 
 ## Success Metrics
+
 How to measure success
 ```
 
@@ -106,6 +119,7 @@ Workflows complement the `team-coordination` skill:
 - **Agent**: Provides role-specific permissions and responsibilities
 
 Use together for best results:
+
 1. Agent has permissions (what they CAN do)
 2. Skill provides tool reference (what tools EXIST)
 3. Workflow provides pattern (HOW to accomplish a goal)

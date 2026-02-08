@@ -3,7 +3,7 @@
   "sessionId": "2742772f-f49b-4163-acdc-d865f862e840",
   "status": "running",
   "startedAt": "2026-02-08T17:40:41.995Z",
-  "updatedAt": "2026-02-08T17:41:44.251Z",
+  "updatedAt": "2026-02-08T17:45:46.455Z",
   "currentIteration": 0,
   "maxIterations": 0,
   "tasksCompleted": 0,
@@ -61,6 +61,6 @@
   "iterations": [],
   "skippedTaskIds": [],
   "cwd": "/data/projects/opencode-teams",
-  "activeTaskIds": ["ralph-tui-us002"],
+  "activeTaskIds": [],
   "subagentPanelVisible": false
 }

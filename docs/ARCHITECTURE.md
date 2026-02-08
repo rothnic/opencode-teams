@@ -24,18 +24,18 @@ Our implementation follows the patterns documented in Claude Code's TeammateTool
 
 ### Core Operations
 
-| Operation | Purpose | Permissions |
-|-----------|---------|-------------|
-| `spawn-team` | Create team, become leader | Leader only |
-| `discover-teams` | List available teams | All agents |
-| `join-team` | Join existing team | Members only |
-| `send-message` | Direct message | All agents |
-| `broadcast-message` | Message all members | Leaders, Members |
-| `read-messages` | Check inbox | All agents |
-| `create-task` | Add to queue | Leaders, Task Managers |
-| `get-tasks` | View tasks | All agents |
-| `claim-task` | Take ownership | Members, Task Managers |
-| `update-task` | Change status | Task owners |
+| Operation           | Purpose                    | Permissions            |
+| ------------------- | -------------------------- | ---------------------- |
+| `spawn-team`        | Create team, become leader | Leader only            |
+| `discover-teams`    | List available teams       | All agents             |
+| `join-team`         | Join existing team         | Members only           |
+| `send-message`      | Direct message             | All agents             |
+| `broadcast-message` | Message all members        | Leaders, Members       |
+| `read-messages`     | Check inbox                | All agents             |
+| `create-task`       | Add to queue               | Leaders, Task Managers |
+| `get-tasks`         | View tasks                 | All agents             |
+| `claim-task`        | Take ownership             | Members, Task Managers |
+| `update-task`       | Change status              | Task owners            |
 
 ### Environment Variables
 
@@ -55,6 +55,7 @@ Instead of creating many specific agent types, we define **three core roles** wi
 **Responsibilities**: Strategy, coordination, synthesis
 
 **Allowed Tools**:
+
 - `spawn-team` ✓
 - `create-task` ✓
 - `broadcast-message` ✓
@@ -63,6 +64,7 @@ Instead of creating many specific agent types, we define **three core roles** wi
 - `read-messages` ✓
 
 **Denied Tools**:
+
 - `join-team` ✗ (leaders create, not join)
 - `claim-task` ✗ (leaders coordinate, not execute)
 
@@ -71,6 +73,7 @@ Instead of creating many specific agent types, we define **three core roles** wi
 **Responsibilities**: Task execution, reporting
 
 **Allowed Tools**:
+
 - `join-team` ✓
 - `claim-task` ✓
 - `update-task` ✓ (own tasks)
@@ -79,6 +82,7 @@ Instead of creating many specific agent types, we define **three core roles** wi
 - `read-messages` ✓
 
 **Denied Tools**:
+
 - `spawn-team` ✗ (members don't create teams)
 - `create-task` ✗ (members don't create work)
 
@@ -87,6 +91,7 @@ Instead of creating many specific agent types, we define **three core roles** wi
 **Responsibilities**: Queue management, progress tracking
 
 **Allowed Tools**:
+
 - `create-task` ✓
 - `update-task` ✓
 - `claim-task` ✓ (if needed)
@@ -94,6 +99,7 @@ Instead of creating many specific agent types, we define **three core roles** wi
 - `read-messages` ✓
 
 **Denied Tools**:
+
 - `spawn-team` ✗ (manages tasks, not teams)
 - `broadcast-message` ✗ (targeted communication only)
 
@@ -120,6 +126,7 @@ Rather than hardcoding specialist agents, we combine:
 ```
 
 The agent has:
+
 - **team-member** permissions (can join, claim, update)
 - **security-review** skill (knows security patterns)
 - Uses **code-review workflow** (follows established process)
@@ -222,6 +229,7 @@ Reusable patterns in `workflows/`:
 - **feature-factory.md**: Multi-phase with dependencies
 
 Each workflow specifies:
+
 - Required roles
 - Tool usage patterns
 - Success criteria
@@ -232,6 +240,7 @@ Each workflow specifies:
 ### 1. Flexible Specialization
 
 Don't need separate agent types for every specialty. Combine:
+
 - Base role (permissions)
 - Skills (capabilities)
 - Workflows (processes)
@@ -243,6 +252,7 @@ Leaders can't claim tasks. Members can't spawn teams. Enforced at tool level.
 ### 3. Reusable Workflows
 
 Same workflow template works for different specializations:
+
 - Code review: security, performance, style
 - Testing: unit, integration, e2e
 - Documentation: API, guide, README
@@ -262,19 +272,21 @@ File-based storage makes coordination visible and debuggable.
 All state stored in `~/.config/opencode/opencode-teams/`:
 
 **Team Configuration** (`teams/{team-name}/team.json`):
+
 ```json
 {
   "name": "review-pr-456",
   "leader": "agent-1",
   "members": [
-    {"agentId": "agent-2", "agentName": "Security Specialist", "agentType": "security"},
-    {"agentId": "agent-3", "agentName": "Perf Specialist", "agentType": "performance"}
+    { "agentId": "agent-2", "agentName": "Security Specialist", "agentType": "security" },
+    { "agentId": "agent-3", "agentName": "Perf Specialist", "agentType": "performance" }
   ],
   "createdAt": "2026-01-25T23:00:00Z"
 }
 ```
 
 **Task** (`tasks/{team-name}/{task-id}.json`):
+
 ```json
 {
   "id": "task-abc123",
@@ -288,6 +300,7 @@ All state stored in `~/.config/opencode/opencode-teams/`:
 ```
 
 **Message** (`teams/{team-name}/messages/{msg-id}.json`):
+
 ```json
 {
   "id": "msg-xyz789",
@@ -364,8 +377,8 @@ Tasks can block on other tasks:
 
 ```typescript
 TaskOperations.createTask(teamName, {
-  title: "Integration Tests",
-  blockedBy: ["task-backend", "task-frontend"]
+  title: 'Integration Tests',
+  blockedBy: ['task-backend', 'task-frontend'],
 });
 ```
 

@@ -86,6 +86,7 @@ npm run build  # Compile TypeScript to JavaScript
 ```
 
 This creates the `dist/` directory with compiled JavaScript files.
+
 ## Verification
 
 Start OpenCode and verify the plugin loaded:
@@ -119,7 +120,6 @@ The plugin stores all data in `~/.config/opencode/opencode-teams/`:
 
 You can override this location by setting the `OPENCODE_TEAMS_DIR` environment variable.
 
-
 ## Configuration
 
 ### Environment Variables
@@ -148,7 +148,7 @@ Create a simple test to verify everything works:
 const team = global.TeamOperations.spawnTeam('test-team', {
   agentId: 'test-leader',
   agentName: 'Test Leader',
-  agentType: 'leader'
+  agentType: 'leader',
 });
 console.log('Created team:', team.name);
 
@@ -156,7 +156,7 @@ console.log('Created team:', team.name);
 const task = global.TaskOperations.createTask('test-team', {
   title: 'Test task',
   description: 'This is a test',
-  priority: 'normal'
+  priority: 'normal',
 });
 console.log('Created task:', task.title);
 
@@ -171,7 +171,7 @@ console.log('Claimed task:', claimed.title);
 // 5. Complete the task
 const updated = global.TaskOperations.updateTask('test-team', task.id, {
   status: 'completed',
-  result: 'Test successful'
+  result: 'Test successful',
 });
 console.log('Updated task:', updated.status);
 
@@ -205,6 +205,7 @@ Try the example workflows in the `examples/` directory:
 **Problem**: TeamOperations is undefined
 
 **Solutions**:
+
 1. Check `opencode.json` has correct plugin path
 2. Verify plugin file exists at specified path
 3. Check OpenCode console for error messages
@@ -215,6 +216,7 @@ Try the example workflows in the `examples/` directory:
 **Problem**: Skills not showing in OpenCode
 
 **Solutions**:
+
 1. Verify skills directories in `opencode.json`
 2. Check SKILL.md files have correct YAML frontmatter
 3. Ensure skills are in subdirectories (e.g., `skills/spawn-team/SKILL.md`)
@@ -225,6 +227,7 @@ Try the example workflows in the `examples/` directory:
 **Problem**: Agents not available
 
 **Solutions**:
+
 1. Verify agents directories in `opencode.json`
 2. Check AGENT.md files have correct YAML frontmatter
 3. Ensure agents are in subdirectories (e.g., `agent/team-leader/AGENT.md`)
@@ -234,6 +237,7 @@ Try the example workflows in the `examples/` directory:
 **Problem**: Cannot create teams or tasks
 
 **Solutions**:
+
 1. Check write permissions on `~/.opencode/` directory
 2. Verify OPENCODE_TEAMS_DIR and OPENCODE_TASKS_DIR are writable
 3. Check disk space availability
@@ -243,6 +247,7 @@ Try the example workflows in the `examples/` directory:
 **Problem**: Agent context not set correctly
 
 **Solutions**:
+
 1. Export environment variables before starting OpenCode
 2. Use full variable names (e.g., `OPENCODE_TEAM_NAME` not `TEAM_NAME`)
 3. Verify variables with `echo $OPENCODE_TEAM_NAME`

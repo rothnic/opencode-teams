@@ -38,7 +38,7 @@ process.env.OPENCODE_AGENT_ID = 'leader';
 // Create the team
 const team = global.TeamOperations.spawnTeam('demo-team', {
   agentId: 'leader',
-  agentName: 'Demo Leader'
+  agentName: 'Demo Leader',
 });
 
 console.log('✓ Team created:', team.name);
@@ -48,16 +48,14 @@ console.log('✓ Team created:', team.name);
 
 ```javascript
 // Create a few demo tasks
-const tasks = [
-  'Review authentication code',
-  'Check database queries',
-  'Update documentation'
-].map(title => {
-  return global.TaskOperations.createTask('demo-team', {
-    title: title,
-    priority: 'normal'
-  });
-});
+const tasks = ['Review authentication code', 'Check database queries', 'Update documentation'].map(
+  (title) => {
+    return global.TaskOperations.createTask('demo-team', {
+      title: title,
+      priority: 'normal',
+    });
+  }
+);
 
 console.log(`✓ Created ${tasks.length} tasks`);
 ```
@@ -71,12 +69,12 @@ process.env.OPENCODE_AGENT_ID = 'worker-1';
 // Join the team
 global.TeamOperations.requestJoin('demo-team', {
   agentId: 'worker-1',
-  agentName: 'Demo Worker'
+  agentName: 'Demo Worker',
 });
 
 // Get pending tasks
-const pending = global.TaskOperations.getTasks('demo-team', { 
-  status: 'pending' 
+const pending = global.TaskOperations.getTasks('demo-team', {
+  status: 'pending',
 });
 
 console.log(`✓ Found ${pending.length} pending tasks`);
@@ -90,7 +88,7 @@ console.log(`✓ Claimed: ${claimed.title}`);
 // Complete the task
 global.TaskOperations.updateTask('demo-team', task.id, {
   status: 'completed',
-  result: 'Task done!'
+  result: 'Task done!',
 });
 
 console.log('✓ Task completed!');
@@ -100,20 +98,13 @@ console.log('✓ Task completed!');
 
 ```javascript
 // Worker sends message to leader
-global.TeamOperations.write(
-  'demo-team',
-  'leader',
-  'First task complete! Ready for more.'
-);
+global.TeamOperations.write('demo-team', 'leader', 'First task complete! Ready for more.');
 
 console.log('✓ Message sent to leader');
 
 // Leader broadcasts to team
 process.env.OPENCODE_AGENT_ID = 'leader';
-global.TeamOperations.broadcast(
-  'demo-team',
-  'Great work everyone! Keep it up.'
-);
+global.TeamOperations.broadcast('demo-team', 'Great work everyone! Keep it up.');
 
 console.log('✓ Broadcast sent to team');
 
@@ -177,6 +168,7 @@ See detailed docs in `agent/*/AGENT.md`
 ### Common Patterns
 
 **Leader Pattern**
+
 ```javascript
 // One orchestrator + multiple specialists
 const team = global.TeamOperations.spawnTeam('my-team');
@@ -186,6 +178,7 @@ const team = global.TeamOperations.spawnTeam('my-team');
 ```
 
 **Swarm Pattern**
+
 ```javascript
 // Workers self-organize around queue
 // Create many tasks
@@ -194,6 +187,7 @@ const team = global.TeamOperations.spawnTeam('my-team');
 ```
 
 **Pipeline Pattern**
+
 ```javascript
 // Sequential with dependencies
 const task1 = global.TaskOperations.createTask('team', {...});
@@ -234,16 +228,19 @@ console.log(Object.keys(global.TaskOperations));
 ## Troubleshooting
 
 **TeamOperations is undefined**
+
 - Check plugin path in `opencode.json`
 - Verify plugin file exists
 - Restart OpenCode
 
 **Skills not loading**
+
 - Check skills directory path
 - Verify SKILL.md files have YAML frontmatter
 - Check file permissions
 
 **Can't create teams**
+
 - Check write permissions on `~/.opencode/`
 - Verify disk space
 - Check error messages in console
@@ -266,6 +263,7 @@ console.log(Object.keys(global.TaskOperations));
 ## Summary
 
 You now have:
+
 - ✅ Multi-agent team coordination
 - ✅ Shared task queues
 - ✅ Inter-agent messaging
