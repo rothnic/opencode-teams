@@ -254,6 +254,64 @@ export const TeamOperations = {
   },
 
   /**
+   * Request team shutdown
+   */
+  requestShutdown: (teamName: string, agentId?: string): TeamConfig => {
+    const teamsDir = getTeamsDir();
+    const configPath = join(teamsDir, teamName, 'config.json');
+
+    if (!dirExists(configPath)) {
+      throw new Error(`Team "${teamName}" does not exist`);
+    }
+
+    const config = safeReadJSONSync(configPath) as TeamConfig;
+    const currentAgentId = agentId || process.env.OPENCODE_AGENT_ID || 'unknown';
+
+    if (!config.shutdownApprovals) {
+      config.shutdownApprovals = [];
+    }
+
+    if (!config.shutdownApprovals.includes(currentAgentId)) {
+      config.shutdownApprovals.push(currentAgentId);
+    }
+
+    writeJSONSync(configPath, config);
+    return config;
+  },
+
+  /**
+   * Approve team shutdown
+   */
+  approveShutdown: (teamName: string, agentId?: string): TeamConfig => {
+    return TeamOperations.requestShutdown(teamName, agentId);
+  },
+
+  /**
+   * Check if team should shutdown
+   */
+  shouldShutdown: (teamName: string): boolean => {
+    const teamsDir = getTeamsDir();
+    const configPath = join(teamsDir, teamName, 'config.json');
+
+    if (!dirExists(configPath)) {
+      return false;
+    }
+
+    const config = safeReadJSONSync(configPath) as TeamConfig;
+    if (!config.shutdownApprovals || config.shutdownApprovals.length === 0) {
+      return false;
+    }
+
+    // If leader approved, or if all members approved
+    const isLeaderApproved = config.shutdownApprovals.includes(config.leader);
+    const areAllMembersApproved = config.members.every((m) =>
+      config.shutdownApprovals?.includes(m.agentId)
+    );
+
+    return isLeaderApproved || areAllMembersApproved;
+  },
+
+  /**
    * Clean up team data
    */
   cleanup: (teamName: string): void => {

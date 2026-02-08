@@ -221,6 +221,33 @@ export const OpenCodeTeamsPlugin = async (ctx: any) => {
           return TaskOperations.updateTask(args.teamName, args.taskId, args.updates);
         },
       }),
+      'request-shutdown': tool({
+        description: 'Request graceful team shutdown',
+        args: {
+          teamName: tool.schema.string().describe('Team name'),
+          agentId: tool.schema.string().optional().describe('Agent ID (optional)'),
+        },
+        async execute(args: any, _ctx: any): Promise<TeamConfig> {
+          return TeamOperations.requestShutdown(args.teamName, args.agentId);
+        },
+      }),
+      'approve-shutdown': tool({
+        description: 'Approve a shutdown request for a team',
+        args: {
+          teamName: tool.schema.string().describe('Team name'),
+          agentId: tool.schema.string().optional().describe('Agent ID (optional)'),
+        },
+        async execute(args: any, _ctx: any): Promise<TeamConfig> {
+          const config = TeamOperations.approveShutdown(args.teamName, args.agentId);
+          if (TeamOperations.shouldShutdown(args.teamName)) {
+            console.log(
+              `[OpenCode Teams] Shutdown approved for team: ${args.teamName}. Cleaning up...`
+            );
+            TeamOperations.cleanup(args.teamName);
+          }
+          return config;
+        },
+      }),
     },
 
     // Hook into session events
@@ -232,6 +259,18 @@ export const OpenCodeTeamsPlugin = async (ctx: any) => {
       const teamName = process.env.OPENCODE_TEAM_NAME;
       if (teamName) {
         console.log(`[OpenCode Teams] Session ended - team: ${teamName}`);
+      }
+    },
+
+    'session.idle': async (_event: any) => {
+      console.log('[OpenCode Teams] Session idle - performing maintenance');
+      // Fallback logic for idle sessions: check if any teams should be cleaned up
+      const teams = TeamOperations.discoverTeams();
+      for (const team of teams) {
+        if (TeamOperations.shouldShutdown(team.name)) {
+          console.log(`[OpenCode Teams] Idle session cleanup for team: ${team.name}`);
+          TeamOperations.cleanup(team.name);
+        }
       }
     },
 

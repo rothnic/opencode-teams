@@ -20,6 +20,7 @@ export interface TeamConfig {
   created: string;
   leader: string;
   members: TeamMember[];
+  shutdownApprovals?: string[]; // Array of agent IDs who approved shutdown
 }
 
 export interface Message {

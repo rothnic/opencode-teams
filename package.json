@@ -47,7 +47,8 @@
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "format": "prettier --write .",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "postinstall": "bun run build && chmod +x dist/cli.js"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.1",

@@ -80,35 +80,22 @@ after each iteration and it's included in prompts for context.
 
 ---
 
-## 2026-02-08 - ralph-tui-us003
+## 2026-02-08 - ralph-tui-us007
 
-- Implemented task dependency tracking and validation.
-- Enhanced Task CRUD operations with dependency checks.
-- Added circular dependency detection.
-- Prevented claiming tasks until all dependencies are completed.
-- Prevented deleting tasks that are dependencies for other tasks.
+- Implemented graceful shutdown protocol with `request-shutdown` and `approve-shutdown` tools.
+- Added `session.idle` hook for fallback maintenance and cleanup.
+- Added `postinstall` script to `package.json` for binary linking and build automation.
+- Updated `TeamConfig` type to track shutdown approvals.
+- Added comprehensive lifecycle tests in `tests/lifecycle.test.ts`.
 - Files changed:
-  - `src/types/index.ts`: Added `dependencies` field to `Task` interface.
-  - `src/operations/task.ts`: Implemented `getTask`, `deleteTask`, `areDependenciesMet`, and `checkCircularDependency`. Updated `createTask`, `updateTask`, and `claimTask` to handle dependencies.
-  - `tests/task-operations.test.ts`: Added comprehensive tests for task dependencies and validation.
+  - `src/types/index.ts`: Added `shutdownApprovals` to `TeamConfig`.
+  - `src/operations/team.ts`: Implemented `requestShutdown`, `approveShutdown`, and `shouldShutdown`.
+  - `src/index.ts`: Registered new shutdown tools and `session.idle` hook.
+  - `package.json`: Added `postinstall` script.
+  - `tests/lifecycle.test.ts`: New tests for shutdown logic.
 - **Learnings:**
-  - **Circular Dependency Detection:** When checking for circular dependencies during an update, you must account for the "pending" state of the task being updated, as disk-based reads will only show the old state. Checking if a dependency exists in the current `visited` set before recursing is an effective way to detect cycles.
-  - **CRUD Integrity:** Enforcing referential integrity (preventing deletion of tasks that are dependencies) is crucial for a stable task system.
-
----
-
-## 2026-02-08 - ralph-tui-us004
-
-- Implemented Soft Blocking in `claim_task` tool.
-- Replaced hard failure for unmet dependencies with a warning message.
-- Updated `Task` interface to explicitly include a `warning` field.
-- Updated `TaskOperations.claimTask` to set a warning when dependencies are not met.
-- Files changed:
-  - `src/types/index.ts`: Added `warning` field to `Task` interface.
-  - `src/operations/task.ts`: Modified `claimTask` to implement soft blocking with warnings.
-  - `tests/task-operations.test.ts`: Updated tests to verify soft blocking behavior and warning persistence.
-- **Learnings:**
-  - **Soft Blocking Pattern:** Implementing "Soft Blocking" allows for more flexible agent coordination where agents can be notified of potential issues (like unmet dependencies) without being strictly prevented from proceeding if they deem it necessary.
-  - **Task Metadata:** Adding a `warning` field to the task itself is an effective way to communicate non-fatal issues that persist across tool calls.
+  - **Graceful Shutdown:** Implementing a multi-agent approval system for shutdown ensures that all agents are ready before resources are cleaned up. Leader approval or unanimous member approval provides a flexible but safe exit strategy.
+  - **OpenCode Hooks:** The `session.idle` hook is a powerful place for maintenance tasks like cleaning up abandoned team data or stale locks.
+  - **Binary Permissions:** In Bun/Node environments, ensuring that `dist/` binaries are executable (`chmod +x`) during `postinstall` is crucial for a smooth user experience when installing via git or local links.
 
 ---
