@@ -1,25 +1,26 @@
 /**
  * Advisory File Locking via Bun FFI
  *
- * Uses the flock() system call via Bun's Foreign Function Interface
+ * Uses the fcntl() system call via Bun's Foreign Function Interface
  * for cross-process advisory file locking. This ensures concurrent
  * agent operations on shared state files are serialized correctly.
- *
- * flock() is preferred over fcntl() for locking because:
- * - It is not a variadic function, making FFI bindings reliable
- * - It provides whole-file advisory locking (which is what we need)
- * - It is simpler and equally correct for our use case
  */
 
 import { dlopen, FFIType } from 'bun:ffi';
-import { openSync, closeSync, existsSync, mkdirSync } from 'node:fs';
+import { openSync, closeSync, existsSync, mkdirSync, constants as fsConstants } from 'node:fs';
 import { dirname } from 'node:path';
 
-// POSIX flock() operation constants
-const LOCK_SH = 1; // Shared (read) lock
-const LOCK_EX = 2; // Exclusive (write) lock
-const LOCK_NB = 4; // Non-blocking flag (OR with SH/EX)
-const LOCK_UN = 8; // Unlock
+// POSIX fcntl() command constants
+const F_SETLK = process.platform === 'darwin' ? 8 : 6;
+const F_SETLKW = process.platform === 'darwin' ? 9 : 7;
+
+// POSIX fcntl() lock types
+const F_RDLCK = process.platform === 'darwin' ? 1 : 0;
+const F_WRLCK = process.platform === 'darwin' ? 3 : 1;
+const F_UNLCK = 2;
+
+// POSIX l_whence values
+const SEEK_SET = 0;
 
 // Determine libc path based on platform
 const LIBC_PATH = process.platform === 'darwin' ? 'libSystem.B.dylib' : 'libc.so.6';
@@ -31,7 +32,7 @@ const LIBC_PATH = process.platform === 'darwin' ? 'libSystem.B.dylib' : 'libc.so
  */
 interface FlockLib {
   symbols: {
-    flock: (fd: number, op: number) => number;
+    fcntl: (fd: number, cmd: number, lock: Uint8Array) => number;
   };
   close(): void;
 }
@@ -45,13 +46,35 @@ let _libc: FlockLib | null = null;
 function getLibc(): FlockLib {
   if (!_libc) {
     _libc = dlopen(LIBC_PATH, {
-      flock: {
-        args: [FFIType.i32, FFIType.i32],
+      fcntl: {
+        args: [FFIType.i32, FFIType.i32, FFIType.ptr],
         returns: FFIType.i32,
       },
     }) as unknown as FlockLib;
   }
   return _libc;
+}
+
+function buildFlock(type: number): Uint8Array {
+  // struct flock layout (Linux/macOS):
+  // short l_type; short l_whence; off_t l_start; off_t l_len; pid_t l_pid;
+  // Use a 32-byte buffer for alignment safety.
+  const buffer = new ArrayBuffer(32);
+  const view = new DataView(buffer);
+
+  view.setInt16(0, type, true);
+  view.setInt16(2, SEEK_SET, true);
+  view.setBigInt64(4, 0n, true); // l_start
+  view.setBigInt64(12, 0n, true); // l_len (0 = to EOF)
+  view.setInt32(20, 0, true); // l_pid (ignored when setting)
+
+  return new Uint8Array(buffer);
+}
+
+function ensurePosixPlatform(): void {
+  if (process.platform === 'win32') {
+    throw new Error('Advisory file locks are not supported on Windows');
+  }
 }
 
 /**
@@ -75,21 +98,22 @@ export interface FileLock {
  * @throws Error if the lock cannot be acquired
  */
 export function acquireLock(lockPath: string, exclusive = true): FileLock {
+  ensurePosixPlatform();
   // Ensure parent directory exists
   const dir = dirname(lockPath);
   if (!existsSync(dir)) {
     mkdirSync(dir, { recursive: true });
   }
 
-  // Open (or create) the lock file. Use 'a' mode to avoid truncation
-  // while still creating the file if it doesn't exist.
-  const fd = openSync(lockPath, 'a');
+  // Open (or create) the lock file. Use O_RDWR to ensure we can lock it.
+  const fd = openSync(lockPath, fsConstants.O_RDWR | fsConstants.O_CREAT, 0o644);
 
   // Acquire the lock (blocking)
-  const op = exclusive ? LOCK_EX : LOCK_SH;
-  const ret = getLibc().symbols.flock(fd, op);
+  const type = exclusive ? F_WRLCK : F_RDLCK;
+  const lock = buildFlock(type);
+  const ret = getLibc().symbols.fcntl(fd, F_SETLKW, lock);
 
-  if (ret !== 0) {
+  if (ret === -1) {
     closeSync(fd);
     throw new Error(`Failed to acquire lock on ${lockPath}`);
   }
@@ -103,7 +127,8 @@ export function acquireLock(lockPath: string, exclusive = true): FileLock {
       if (released) return;
       released = true;
       try {
-        getLibc().symbols.flock(fd, LOCK_UN);
+        const unlock = buildFlock(F_UNLCK);
+        getLibc().symbols.fcntl(fd, F_SETLK, unlock);
       } finally {
         closeSync(fd);
       }
@@ -117,17 +142,19 @@ export function acquireLock(lockPath: string, exclusive = true): FileLock {
  * @returns A FileLock if acquired, or null if the lock is held by another process
  */
 export function tryAcquireLock(lockPath: string, exclusive = true): FileLock | null {
+  ensurePosixPlatform();
   const dir = dirname(lockPath);
   if (!existsSync(dir)) {
     mkdirSync(dir, { recursive: true });
   }
 
-  const fd = openSync(lockPath, 'a');
+  const fd = openSync(lockPath, fsConstants.O_RDWR | fsConstants.O_CREAT, 0o644);
 
-  const op = (exclusive ? LOCK_EX : LOCK_SH) | LOCK_NB;
-  const ret = getLibc().symbols.flock(fd, op);
+  const type = exclusive ? F_WRLCK : F_RDLCK;
+  const lock = buildFlock(type);
+  const ret = getLibc().symbols.fcntl(fd, F_SETLK, lock);
 
-  if (ret !== 0) {
+  if (ret === -1) {
     // Lock is held by another process
     closeSync(fd);
     return null;
@@ -142,7 +169,8 @@ export function tryAcquireLock(lockPath: string, exclusive = true): FileLock | n
       if (released) return;
       released = true;
       try {
-        getLibc().symbols.flock(fd, LOCK_UN);
+        const unlock = buildFlock(F_UNLCK);
+        getLibc().symbols.fcntl(fd, F_SETLK, unlock);
       } finally {
         closeSync(fd);
       }

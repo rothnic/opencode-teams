@@ -1,0 +1,9 @@
+vcs:
+  type: git
+agents:
+  available:
+  - opencode
+  selection:
+    strategy: preferred
+    preferred_implementer: opencode
+    preferred_reviewer: opencode

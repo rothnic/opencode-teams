@@ -4,6 +4,11 @@
 # Strategy:
 #   pre-commit  = progress-friendly (auto-fix, parallel, fast)
 #   pre-push    = strict gate (all checks must pass before push)
+#
+# Branch awareness:
+#   Markdownlint messaging adapts to the current branch.
+#   On main: strongly recommends resolving issues before pushing.
+#   On feature branches: advisory tone, non-blocking.
 
 pre-commit:
   parallel: true
@@ -28,7 +33,20 @@ pre-commit:
     markdownlint:
       glob: '*.md'
       run: |
-        bun run markdownlint 2>&1 || printf '\n⚠️  Markdown issues found (non-blocking on commit).\n   These WILL block push/merge to main.\n   Run: bun run markdownlint:fix\n'
+        if bun run markdownlint 2>&1; then
+          exit 0
+        fi
+        branch=$(git branch --show-current 2>/dev/null || echo "unknown")
+        if [ "$branch" = "main" ] || [ "$branch" = "master" ]; then
+          printf '\n\e[33m  WARNING: Markdown issues found on %s.\e[0m\n' "$branch"
+          printf '  Strongly recommend fixing before push (push WILL be blocked).\n'
+          printf '  Run: bun run markdownlint:fix\n\n'
+        else
+          printf '\n\e[36m  Info: Markdown issues found (non-blocking on commit).\e[0m\n'
+          printf '  These will need fixing before merging to main.\n'
+          printf '  Run: bun run markdownlint:fix\n\n'
+        fi
+        exit 0
 
 pre-push:
   parallel: false

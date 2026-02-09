@@ -12,3 +12,30 @@ coverage/
 
 # bv (beads viewer) local config and caches
 .bv/
+
+# Agent runtime directories (credentials, sessions, caches)
+.claude/
+.codex/
+.opencode/
+.windsurf/
+.gemini/
+.cursor/
+.qwen/
+.kilocode/
+.augment/
+.roo/
+.amazonq/
+.github/copilot/
+
+# Tool runtime state (not source code)
+.ralph-tui/
+.sisyphus/
+.ntm/
+.beads/
+
+# Python bytecode (from kittify scripts)
+__pycache__/
+*.pyc
+
+# Spec Kitty dashboard cache
+.kittify/.dashboard

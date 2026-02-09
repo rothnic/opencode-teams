@@ -1,0 +1,86 @@
+# ls-lint: File and directory naming conventions
+# https://ls-lint.org
+#
+# This config doubles as a root-file allowlist. The .* wildcard catches any
+# file extension not explicitly listed, so unexpected file types (test.txt,
+# session-notes.md with wrong casing, etc.) will fail ls-lint. Combined with
+# the ignore list, this ensures only known file types and names exist in the
+# project root.
+
+ls:
+  # Catch-all: any extension not listed below must still be kebab-case.
+  # This prevents stray files from accumulating unnoticed.
+  .*: kebab-case
+
+  # Directory names
+  .dir: kebab-case
+
+  # Source and config extensions
+  .ts: kebab-case
+  .js: kebab-case
+  .json: kebab-case
+  .yml: kebab-case
+  .yaml: kebab-case
+  .toml: kebab-case
+
+  # Sub-extensions (e.g., eslint.config.js, file-lock.test.ts)
+  .*.ts: kebab-case
+  .*.js: kebab-case
+  .*.json: kebab-case
+
+  # Markdown: UPPERCASE in root and most directories
+  .md: 'regex:[A-Z][A-Z0-9-]*'
+
+  # tests/: compound .test.ts extension + shell scripts
+  tests:
+    .test.ts: kebab-case
+    .sh: kebab-case
+
+  # examples/: kebab-case markdown and JSON (overrides global UPPERCASE .md)
+  examples:
+    .md: kebab-case
+    .json: kebab-case
+
+  # tasks/: kebab-case markdown (overrides global UPPERCASE .md)
+  tasks:
+    .md: kebab-case
+
+  # workflows/: allow both kebab-case and UPPERCASE markdown
+  workflows:
+    .md: 'kebab-case | regex:[A-Z][A-Z0-9-]*'
+
+  # .github/: CI workflow files
+  .github:
+    .yml: kebab-case
+    .yaml: kebab-case
+
+  # .config/: tool configuration files (kebab-case, various extensions)
+  .config:
+    .*: kebab-case
+    .yml: kebab-case
+    .yaml: kebab-case
+    .jsonc: kebab-case
+    .json: kebab-case
+    .*.jsonc: kebab-case
+
+ignore:
+  # Build artifacts and dependencies
+  - node_modules
+  - dist
+  - .git
+
+  # Tool/agent runtime directories (not source code)
+  - .kittify
+  - .opencode
+  - .mise
+  - .ralph-tui
+  - .sisyphus
+  - .ntm
+  - .beads
+
+  # Extensionless files (ls-lint cannot match files without extensions)
+  - LICENSE
+
+  # Root files with non-kebab-case naming required by external tools
+  - bun.lock
+  - hk.pkl

@@ -2,15 +2,17 @@
 
 ## Document Purpose
 
-This document provides a deep, line-by-line comparison between two implementations of multi-agent team coordination, both inspired by Claude Code's hidden TeammateTool feature (discovered via binary analysis of Claude Code v2.1.19):
+This document provides a deep, line-by-line comparison between two implementations of
+multi-agent team coordination, both inspired by Claude Code's hidden TeammateTool feature
+(discovered via binary analysis of Claude Code v2.1.19):
 
 1. **opencode-teams** (this project) - TypeScript/Bun native OpenCode plugin
 2. **claude-code-teams-mcp** (reference) - Python FastMCP server by cs50victor
 
 Both derive from the same source material: Kieran Klaassen's gist analyzing Claude Code's
 internal 13-operation TeammateTool protocol. The expected difference is that opencode-teams
-is OpenCode-native. This analysis focuses on the _meaningful behavioral, architectural, and
-data model divergences_ beyond that surface-level distinction.
+is OpenCode-native. This analysis focuses on the \*meaningful behavioral, architectural, and
+data model divergences\_ beyond that surface-level distinction.
 
 ---
 
@@ -32,11 +34,11 @@ can use it without modification. The TypeScript project is a **host-first** desi
 coupled to OpenCode's plugin lifecycle, tool registration, and permission system. This is a
 fundamental architectural trade-off: portability vs. integration depth.
 
-**Claude Code alignment**: The Python project is _more aligned_ with Claude Code's approach.
+**Claude Code alignment**: The Python project is *more aligned* with Claude Code's approach.
 Claude Code's TeammateTool is an internal tool registered within the Claude Code process, but
 it operates via file-based IPC that is process-agnostic. The MCP server approach preserves
 this process-agnostic quality. The opencode-teams plugin, being in-process, is closer to how
-Claude Code's internal tool is actually _loaded_, but farther from how it _communicates_.
+Claude Code's internal tool is actually *loaded*, but farther from how it *communicates*.
 
 ### 1.2 Framework Dependencies
 
@@ -301,7 +303,9 @@ export function writeJSONSync(filePath: string, data: any): void {
 }
 ```
 
-**Analysis**: This is a _major behavioral gap_. The Python implementation ensures that when two agents simultaneously try to read and update the same inbox or task, one waits for the other's lock to release, preventing data loss. The TypeScript implementation has classic TOCTOU race conditions:
+**Analysis**: This is a *major behavioral gap*. The Python implementation ensures that when two agents
+simultaneously try to read and update the same inbox or task, one waits for the other's lock to release,
+preventing data loss. The TypeScript implementation has classic TOCTOU race conditions:
 
 1. Agent A reads task status = "pending"
 2. Agent B reads task status = "pending"
@@ -362,7 +366,8 @@ Bun FFI-based `fcntl` locking, but none of this code exists in the actual source
 
 **Present in TypeScript but missing from Python**:
 
-1. **Explicit `claim-task`** - Python handles ownership via `task_update(owner=...)`, TypeScript has a dedicated claim operation with dependency warnings
+1. **Explicit `claim-task`** - Python handles ownership via `task_update(owner=...)`,
+   TypeScript has a dedicated claim operation with dependency warnings
 
 ### 4.3 Tool Behavior Deep-Dive: `send_message` vs `send-message`
 
@@ -406,7 +411,8 @@ broadcast: (teamName, message, fromAgentId?) => {
 
 - Python validates sender membership; TypeScript does not
 - Python delivers broadcast to each agent's individual inbox; TypeScript creates one shared file
-- Python supports structured message types (shutdown, task assignment); TypeScript only supports plain text
+- Python supports structured message types (shutdown, task assignment);
+  TypeScript only supports plain text
 - Python returns delivery confirmation with routing details; TypeScript returns just the message data
 
 ---
@@ -415,11 +421,11 @@ broadcast: (teamName, message, fromAgentId?) => {
 
 ### 5.1 Agent Spawning
 
-```text
+````text
 
 **TypeScript** - No spawning capability:
 
-```
+```text
 
 Not implemented. The TypeScript plugin has no mechanism to spawn new agent
 processes. Team creation only records configuration. Members must manually
@@ -437,7 +443,8 @@ external orchestration (like ntm or manual tmux management) to achieve the same 
 **Python** supports two backends:
 
 1. **Claude Code CLI** - Spawns `claude` binary with `--agent-id`, `--team-name`, etc.
-2. **OpenCode CLI** - Creates session via HTTP API, sends prompt via `prompt_async`, attaches via `opencode attach`
+2. **OpenCode CLI** - Creates session via HTTP API, sends prompt via `prompt_async`,
+   attaches via `opencode attach`
 
 The OpenCode backend in Python:
 
@@ -453,7 +460,7 @@ opencode_client.send_prompt_async(server_url, session_id, wrapped_prompt)
 
 # 4. Attach tmux pane to the session
 cmd = f"opencode attach {server_url} -s {session_id}"
-````
+```
 
 **TypeScript** has no backend support - it is purely a data layer.
 
@@ -516,7 +523,7 @@ teams/{team}/inboxes/
 
 **TypeScript** - Shared message directory:
 
-```
+```text
 teams/{team}/messages/
 ├── 1738000000000-a1b2c3d4-worker-1.json   # Direct message
 ├── 1738000001000-e5f6a7b8-broadcast.json  # Broadcast
@@ -768,17 +775,30 @@ writeJSONSync(taskPath, updatedTask);
 Despite the Python project being a more feature-complete reimplementation, the TypeScript
 project aligns with Claude Code's design in several specific ways:
 
-1. **In-process tool registration**: Claude Code's TeammateTool is registered internally, not as a separate server. The TypeScript plugin follows this pattern.
+1. **In-process tool registration**: Claude Code's TeammateTool is registered internally,
+   not as a separate server.
+   The TypeScript plugin follows this pattern.
 
-2. **Per-message file storage**: Claude Code uses `messages/{session-id}/` with individual message files. TypeScript's `messages/{id}-{target}.json` is closer to this than Python's per-agent inbox arrays.
+2. **Per-message file storage**: Claude Code uses `messages/{session-id}/` with individual message files.
+   TypeScript's `messages/{id}-{target}.json` is closer to this than Python's per-agent inbox arrays.
 
-3. **Flat member model**: Claude Code's binary shows a simpler member concept without the Lead/Teammate discrimination that Python introduces. TypeScript's flat `TeamMember` is closer to the binary's representation.
+3. **Flat member model**: Claude Code's binary shows a simpler member concept without
+   the Lead/Teammate discrimination that Python introduces.
+   TypeScript's flat `TeamMember` is closer to this than the binary's representation.
 
-4. **Environment variable naming**: TypeScript uses `OPENCODE_*` which mirrors Claude Code's `CLAUDE_CODE_*` pattern (just different prefix). Python doesn't use environment variables for context.
+4. **Environment variable naming**: TypeScript uses `OPENCODE_*` which mirrors Claude Code's `CLAUDE_CODE_*`
+   pattern (just different prefix).
+   Python doesn't use environment variables for context.
 
-5. **Operation naming**: TypeScript's tool names (`spawn-team`, `discover-teams`, `join-team`, `send-message`, `broadcast-message`, `read-messages`) are direct kebab-case translations of Claude Code's camelCase operations (`spawnTeam`, `discoverTeams`, `requestJoin`, `write`, `broadcast`). Python uses different names (`team_create`, `send_message`).
+5. **Operation naming**: TypeScript's tool names (`spawn-team`, `discover-teams`, `join-team`, `send-message`,
+   `broadcast-message`, `read-messages`)
+   are direct kebab-case translations of Claude Code's camelCase operations
+   (`spawnTeam`, `discoverTeams`, `requestJoin`, `write`, `broadcast`).
+   Python uses different names (`team_create`, `send_message`).
 
-6. **Soft blocking on claim**: TypeScript's `claimTask` checks dependencies and returns a warning but allows the claim (matching the PRD's "Soft Blocking" requirement). Python's `task_update` hard-blocks status transitions when blockers are incomplete.
+6. **Soft blocking on claim**: TypeScript's `claimTask` checks dependencies and returns a warning
+   but allows the claim (matching the PRD's "Soft Blocking" requirement).
+   Python's `task_update` hard-blocks status transitions when blockers are incomplete.
 
 ---
 
@@ -811,23 +831,34 @@ project aligns with Claude Code's design in several specific ways:
 
 ### High Priority (Behavioral Gaps)
 
-1. **Implement file locking** - The single most important missing feature. Without it, concurrent agent operations can corrupt state. The PRD and integration plan both specify this requirement.
+1. **Implement file locking** - The single most important missing feature. Without it,
+   concurrent agent operations can corrupt state.
+   The PRD and integration plan both specify this requirement.
 
-2. **Add per-agent inbox files** - The current shared-directory scan is O(n) and doesn't support read tracking. Switch to the per-agent inbox model used by Python and planned in the integration docs.
+2. **Add per-agent inbox files** - The current shared-directory scan is O(n) and doesn't
+   support read tracking.
+   Switch to the per-agent inbox model used by Python and planned in the integration docs.
 
-3. **Implement atomic writes** - Use Bun's `Bun.write` to a temp file, then rename. This prevents partial writes from corrupting JSON state.
+3. **Implement atomic writes** - Use Bun's `Bun.write` to a temp file, then rename.
+   This prevents partial writes from corrupting JSON state.
 
-4. **Add status transition enforcement** - Prevent backwards state transitions (completed -> pending) which can cause confusion in multi-agent workflows.
+4. **Add status transition enforcement** - Prevent backwards state transitions (completed -> pending)
+   which can cause confusion in multi-agent workflows.
 
 ### Medium Priority (Feature Gaps)
 
-1. **Implement agent spawning** - This is the core value proposition. Without it, team coordination requires external orchestration.
+1. **Implement agent spawning** - This is the core value
+   proposition.
+   Without it, team coordination requires external orchestration.
 
-2. **Add bidirectional dependency tracking** - When task A blocks task B, both should know about it, and completing A should automatically unblock B.
+2. **Add bidirectional dependency tracking** - When task A blocks task B,
+   both should know about it, and completing A should automatically unblock B.
 
-3. **Add structured message types** - Support shutdown requests, task assignments, and idle notifications as typed messages.
+3. **Add structured message types** - Support shutdown requests, task assignments,
+   and idle notifications as typed messages.
 
-4. **Add Pydantic-equivalent validation** - Use Zod or TypeBox for runtime schema validation of all data structures.
+4. **Add Pydantic-equivalent validation** - Use Zod or TypeBox for runtime schema validation
+   of all data structures.
 
 ### Lower Priority (Polish)
 

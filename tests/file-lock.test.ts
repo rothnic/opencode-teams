@@ -72,16 +72,16 @@ describe('file-lock', () => {
       lock!.release();
     });
 
-    it('returns null when exclusive lock is already held (same-process different fd)', () => {
+    it('allows re-lock within the same process', () => {
       // Acquire an exclusive lock on the file
       const lock1 = acquireLock(lockPath, true);
 
       // Try to acquire a second exclusive lock on the same file (non-blocking).
-      // On Linux, flock() treats different file descriptors independently even
-      // within the same process, so this should be denied.
+      // POSIX fcntl locks are per-process, so this may succeed within the same process.
       const lock2 = tryAcquireLock(lockPath, true);
-      expect(lock2).toBeNull();
+      expect(lock2).not.toBeNull();
 
+      lock2!.release();
       lock1.release();
     });
 

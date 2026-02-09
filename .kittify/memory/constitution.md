@@ -86,13 +86,21 @@ Enforced automatically via Lefthook pre-commit hooks (parallel execution):
   - `@typescript-eslint/no-explicit-any`: warn (avoid `any`, never suppress with `as any` or `@ts-ignore`)
   - `@typescript-eslint/no-unused-vars`: error (underscore prefix `_` allowed)
   - `no-console`: error (except `warn`, `error`, `log`)
-- **ls-lint**: File and directory naming conventions (`.ls-lint.yml`)
+- **ls-lint**: File and directory naming conventions (`.config/ls-lint.yml`)
   - Source files: `kebab-case` for `.ts`, `.js`, `.json`, `.yml`
   - Directories: `kebab-case`
   - Root markdown: `UPPERCASE` (e.g., `README.md`, `AGENTS.md`)
-- **markdownlint-cli2**: Markdown standards (`.markdownlint-cli2.jsonc`)
+  - Catch-all `.*` wildcard enforces kebab-case on unknown extensions (root-file allowlist)
+- **markdownlint-cli2**: Markdown standards (`.config/.markdownlint-cli2.jsonc`)
   - ATX headings, dash lists, 100-char lines, fenced code blocks
   - Scoped to `docs/`, `skills/`, `agent/`, `examples/`, root markdown files
+
+### Config Directory Convention
+
+CLI-only tool configurations that support `--config` flags live in `.config/`
+to keep the project root clean. Configs required by IDE extensions (ESLint,
+Prettier, TypeScript) remain in root. When adding a new tool, check if its
+CLI supports a custom config path before placing the config in root.
 
 ### Pull Request Requirements
 
@@ -109,15 +117,17 @@ progress-friendly; pushes and merges enforce strict compliance.
 
 - `lint:fix` + `format` - auto-fix and re-stage (non-blocking)
 - `typecheck` - type errors block commit (no `any` in production code)
-- `ls-lint` - naming violations block commit
-- `markdownlint` - warn only (shows issues, does not block commit)
+- `ls-lint` - naming violations block commit (acts as root-file allowlist)
+- `markdownlint` - warn only, branch-aware messaging:
+  - On `main`/`master`: yellow warning, strongly recommends fixing before push
+  - On feature branches: cyan info, advisory tone
 
 **Tier 2 - Pre-push** (Lefthook, sequential, strict gate):
 
 - `test` - full test suite must pass
 - `build` - TypeScript compilation must succeed
 - `ls-lint` - naming conventions re-checked
-- `markdownlint` - markdown standards re-checked
+- `markdownlint` - markdown standards re-checked (blocking)
 
 **Tier 3 - CI** (GitHub Actions):
 
@@ -125,7 +135,7 @@ progress-friendly; pushes and merges enforce strict compliance.
 - PR title: Semantic/conventional commit format
 
 > See `skills/quality-guards/SKILL.md` for the full reference on all quality tools,
-> naming conventions, and how to fix common violations.
+> naming conventions, config directory layout, and how to fix common violations.
 
 ### TypeScript Standards
 
@@ -162,6 +172,8 @@ progress-friendly; pushes and merges enforce strict compliance.
 - **Keep the plugin lean**: Resist feature creep. If something can be an agent behavior instead of a plugin feature, make it an agent behavior.
 - **Test in isolation**: Tests must not depend on global state. Use temp directories and clean up.
 - **Conventional commits**: Every commit message must follow the format. release-please automates versioning and changelogs from these.
+- **Clean root directory**: Do not leave scratch files, session dumps, or temp outputs in the project root. The ls-lint `.*` wildcard catches unexpected files. Delete stray files rather than adding them to ignore lists.
+- **Configs in `.config/`**: Tool configs that support CLI `--config` flags belong in `.config/`, not the project root. Only configs required by IDE extensions stay in root.
 
 ### Lessons Learned
 

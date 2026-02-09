@@ -48,9 +48,9 @@
     "lint:fix": "eslint . --fix",
     "format": "prettier --write .",
     "typecheck": "tsc --noEmit",
-    "ls-lint": "ls-lint",
-    "markdownlint": "markdownlint-cli2",
-    "markdownlint:fix": "markdownlint-cli2 --fix",
+    "ls-lint": "ls-lint --config .config/ls-lint.yml",
+    "markdownlint": "markdownlint-cli2 --config .config/.markdownlint-cli2.jsonc",
+    "markdownlint:fix": "markdownlint-cli2 --config .config/.markdownlint-cli2.jsonc --fix",
     "postinstall": "bun run build && chmod +x dist/cli.js"
   },
   "devDependencies": {

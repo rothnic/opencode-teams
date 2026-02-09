@@ -117,6 +117,7 @@ describe('Feature Name', () => {
 
 ```text
 opencode-teams/
+├── .config/            # CLI tool configs (ls-lint, markdownlint)
 ├── src/
 │   ├── types/          # TypeScript interfaces
 │   ├── utils/          # Utility functions (Bun APIs)
