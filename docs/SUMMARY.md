@@ -2,9 +2,11 @@
 
 ## Project Overview
 
-Successfully implemented a comprehensive OpenCode plugin for multi-agent team coordination, based on research of Claude Code's TeammateTool feature.
+Successfully implemented a comprehensive OpenCode plugin for multi-agent team coordination,
+based on research of Claude Code's TeammateTool feature.
 
-**Now built with TypeScript** following the [bun-module](https://github.com/zenobi-us/bun-module) structure for modern tooling, type safety, and publishing capabilities.
+**Now built with TypeScript** following the [bun-module](https://github.com/zenobi-us/bun-module) structure
+for modern tooling, type safety, and publishing capabilities.
 
 ## Deliverables
 
@@ -76,7 +78,7 @@ Each agent includes:
 
 ### File-Based Coordination
 
-```
+```text
 ~/.config/opencode/opencode-teams/
 ├── teams/
 │   └── {team-name}/
@@ -180,7 +182,7 @@ const task2 = global.TaskOperations.createTask('team', {
 
 ## File Structure
 
-```
+```text
 opencode-teams/
 ├── src/                   # TypeScript source code
 │   ├── index.ts          # Main plugin (13+5 operations)
@@ -315,7 +317,8 @@ Contributions welcome! Areas for future enhancement:
 
 ## Conclusion
 
-Successfully created a production-ready OpenCode plugin that enables sophisticated multi-agent coordination. The plugin is:
+Successfully created a production-ready OpenCode plugin that enables sophisticated multi-agent coordination.
+The plugin is:
 
 - ✅ Feature-complete
 - ✅ Well-documented

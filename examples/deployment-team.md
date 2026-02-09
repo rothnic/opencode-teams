@@ -1,10 +1,12 @@
 # Deployment Team Example
 
-This example demonstrates the **Watchdog Pattern** where multiple verification agents run checks in parallel before allowing deployment to proceed.
+This example demonstrates the **Watchdog Pattern** where multiple verification agents
+run checks in parallel before allowing deployment to proceed.
 
 ## Scenario
 
-Deploy a new version to production with comprehensive pre-flight checks. All checks must pass before deployment proceeds.
+Deploy a new version to production with comprehensive pre-flight checks.
+All checks must pass before deployment proceeds.
 
 ## Team Structure
 

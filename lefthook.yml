@@ -1,5 +1,9 @@
-# Lefthook configuration for pre-commit hooks
+# Lefthook configuration for git hooks
 # See: https://github.com/evilmartians/lefthook
+#
+# Strategy:
+#   pre-commit  = progress-friendly (auto-fix, parallel, fast)
+#   pre-push    = strict gate (all checks must pass before push)
 
 pre-commit:
   parallel: true
@@ -18,6 +22,14 @@ pre-commit:
       glob: '*.ts'
       run: bun run typecheck
 
+    ls-lint:
+      run: bun run ls-lint
+
+    markdownlint:
+      glob: '*.md'
+      run: |
+        bun run markdownlint 2>&1 || printf '\n⚠️  Markdown issues found (non-blocking on commit).\n   These WILL block push/merge to main.\n   Run: bun run markdownlint:fix\n'
+
 pre-push:
   parallel: false
   commands:
@@ -26,3 +38,9 @@ pre-push:
 
     build:
       run: bun run build
+
+    ls-lint:
+      run: bun run ls-lint
+
+    markdownlint:
+      run: bun run markdownlint

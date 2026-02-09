@@ -1,10 +1,13 @@
 # opencode-teams
 
-Multi-agent team coordination plugin for [OpenCode](https://opencode.ai), inspired by Claude Code's TeammateTool feature.
+Multi-agent team coordination plugin for [OpenCode](https://opencode.ai),
+inspired by Claude Code's TeammateTool feature.
 
-**For AI Agents**: This plugin enables you to collaborate with other AI agents through teams, shared task queues, and inter-agent messaging.
+**For AI Agents**: This plugin enables you to collaborate with other AI agents
+through teams, shared task queues, and inter-agent messaging.
 
-**For Developers**: This plugin adds team coordination capabilities to OpenCode, allowing AI agents to work together on complex tasks.
+**For Developers**: This plugin adds team coordination capabilities to OpenCode,
+allowing AI agents to work together on complex tasks.
 
 Built with TypeScript and Bun following modern best practices.
 
@@ -84,7 +87,7 @@ After installation, OpenCode should recognize:
 
 ## Project Structure
 
-```
+```text
 opencode-teams/
 ├── src/                # Plugin source code
 │   ├── types/          # TypeScript interfaces
@@ -162,9 +165,7 @@ npm run lint        # Lint
 
 ## Example Use Case
 
-**Scenario**: Code review by specialized agents
-
-```
+```text
 1. Leader Agent creates team:
    - Uses spawn-team skill to create 'review-pr-123'
    - Creates tasks: security-review, performance-review, style-review

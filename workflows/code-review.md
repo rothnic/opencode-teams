@@ -19,7 +19,8 @@ Parallel code review workflow using specialized reviewer agents.
 
 ## Overview
 
-This workflow distributes code review across multiple specialist agents working in parallel, then synthesizes their findings into a comprehensive review.
+This workflow distributes code review across multiple specialist agents working in parallel,
+then synthesizes their findings into a comprehensive review.
 
 ## Roles
 
@@ -41,7 +42,7 @@ This workflow distributes code review across multiple specialist agents working 
 
 ### Phase 1: Setup (Leader)
 
-```
+```text
 1. spawn-team("review-pr-{number}")
 2. create-task("review-pr-{number}", {
      title: "Security Review",
@@ -64,7 +65,7 @@ This workflow distributes code review across multiple specialist agents working 
 
 ### Phase 2: Parallel Review (Members)
 
-```
+```text
 Each specialist agent:
 1. discover-teams()
 2. join-team("review-pr-{number}", {agentType: "{specialty}-reviewer"})
@@ -82,7 +83,7 @@ Each specialist agent:
 
 ### Phase 3: Synthesis (Leader)
 
-```
+```text
 1. get-tasks("review-pr-{number}", {status: "completed"})
 2. read-messages("review-pr-{number}")
 3. // Synthesize all findings
@@ -129,7 +130,7 @@ Each specialist agent:
 
 ## Example Output
 
-```
+```text
 # PR Review Summary
 
 ## Security (High Priority) ✓

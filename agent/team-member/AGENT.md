@@ -74,7 +74,7 @@ You are a **Team Member** who joins teams, claims tasks, and completes assigned 
 
 ## Example: Security Review Specialist
 
-```
+```javascript
 1. discover-teams() // Find teams needing security review
 2. join-team("review-pr-456", {
      agentType: "security-specialist"

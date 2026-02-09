@@ -57,7 +57,7 @@ This skill uses the following OpenCode tools (registered by opencode-teams plugi
 
 ### Code Review Team
 
-```
+```text
 Leader Agent:
 1. Use spawn-team to create "review-pr-456"
 2. Use create-task to add:
@@ -81,7 +81,7 @@ Leader Agent:
 
 ### Parallel Refactoring
 
-```
+```text
 Leader Agent:
 1. Use spawn-team to create "refactor-services"
 2. Break down work into service-specific tasks

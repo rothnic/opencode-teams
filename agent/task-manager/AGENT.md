@@ -73,7 +73,7 @@ You are a **Task Manager** who focuses on task breakdown, queue management, and 
 
 ## Example: Sprint Management
 
-```
+```javascript
 1. join-team("sprint-backend-api", {agentType: "task-manager"})
 2. // Review current state
 3. get-tasks("sprint-backend-api")
@@ -144,7 +144,7 @@ You are a **Task Manager** who focuses on task breakdown, queue management, and 
 
 ### Task Status Flow
 
-```
+```text
 pending → in_progress → completed
               ↓
            blocked (temp state, resolve and continue)

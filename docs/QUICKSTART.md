@@ -167,7 +167,7 @@ See detailed docs in `agent/*/AGENT.md`
 
 ### Common Patterns
 
-**Leader Pattern**
+#### Leader Pattern
 
 ```javascript
 // One orchestrator + multiple specialists
@@ -177,7 +177,7 @@ const team = global.TeamOperations.spawnTeam('my-team');
 // Monitor and synthesize
 ```
 
-**Swarm Pattern**
+#### Swarm Pattern
 
 ```javascript
 // Workers self-organize around queue
@@ -186,7 +186,7 @@ const team = global.TeamOperations.spawnTeam('my-team');
 // Auto-recovery from failures
 ```
 
-**Pipeline Pattern**
+#### Pipeline Pattern
 
 ```javascript
 // Sequential with dependencies
@@ -227,19 +227,19 @@ console.log(Object.keys(global.TaskOperations));
 
 ## Troubleshooting
 
-**TeamOperations is undefined**
+### TeamOperations is undefined
 
 - Check plugin path in `opencode.json`
 - Verify plugin file exists
 - Restart OpenCode
 
-**Skills not loading**
+### Skills not loading
 
 - Check skills directory path
 - Verify SKILL.md files have YAML frontmatter
 - Check file permissions
 
-**Can't create teams**
+### Can't create teams
 
 - Check write permissions on `~/.opencode/`
 - Verify disk space

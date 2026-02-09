@@ -2,7 +2,10 @@
 
 ## Executive Summary
 
-This document outlines the refined architecture for opencode-teams as a **native OpenCode plugin** with an **optional Bun-based tmux session manager**. This approach:
+This document outlines the refined architecture for opencode-teams
+as a **native OpenCode plugin** with an
+**optional Bun-based tmux session manager**.
+This approach:
 
 - Uses OpenCode's native plugin system (custom tools via `tool()` helper)
 - Adds robust state management from claude-code-teams-mcp (file locking, long-polling)
@@ -74,7 +77,7 @@ opencode-teams init
 
 **Global Configuration** (`~/.config/opencode/opencode-teams/`):
 
-```
+```text
 ~/.config/opencode/opencode-teams/
 ├── config.json              # User preferences, default settings
 ├── templates/               # Reusable team/workflow templates
@@ -86,7 +89,7 @@ opencode-teams init
 
 **Project-Specific State** (`<project>/.opencode/opencode-teams/`):
 
-```
+```text
 <project-root>/.opencode/opencode-teams/
 ├── teams/<team-name>/
 │   ├── config.json          # Team configuration + members
@@ -609,22 +612,22 @@ The plugin now provides these custom tools (registered via OpenCode's `tool()` h
 
 ### Communication (with file locking)
 
-5. **send-message** - Send direct/broadcast message
-6. **broadcast-message** - Send to all team members
-7. **read-messages** - Read inbox (marks as read)
-8. **poll-inbox** - Long-poll for new messages (NEW)
+1. **send-message** - Send direct/broadcast message
+2. **broadcast-message** - Send to all team members
+3. **read-messages** - Read inbox (marks as read)
+4. **poll-inbox** - Long-poll for new messages (NEW)
 
 ### Task Management (with dependencies)
 
-9. **create-task** - Create task with optional dependencies (NEW)
-10. **get-tasks** - List tasks with filters
-11. **claim-task** - Claim task for execution
-12. **update-task** - Update task status/dependencies (NEW)
+1. **create-task** - Create task with optional dependencies (NEW)
+2. **get-tasks** - List tasks with filters
+3. **claim-task** - Claim task for execution
+4. **update-task** - Update task status/dependencies (NEW)
 
 ### Lifecycle (NEW)
 
-13. **request-shutdown** - Request graceful team shutdown
-14. **approve-shutdown** - Approve shutdown request
+1. **request-shutdown** - Request graceful team shutdown
+2. **approve-shutdown** - Approve shutdown request
 
 All tools automatically integrate with OpenCode's permission system.
 

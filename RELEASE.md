@@ -43,7 +43,8 @@ While version is `0.x.x`, breaking changes bump **minor** version.
 
 ### Force a Specific Version
 
-Use the `Release-As` footer in your commit message to force a specific version, bypassing conventional commit analysis:
+Use the `Release-As` footer in your commit message to force a specific version,
+bypassing conventional commit analysis:
 
 ```bash
 git commit --allow-empty -m "chore: release 2.0.0" -m "Release-As: 2.0.0"
@@ -51,7 +52,7 @@ git commit --allow-empty -m "chore: release 2.0.0" -m "Release-As: 2.0.0"
 
 This creates a commit:
 
-```
+```text
 chore: release 2.0.0
 
 Release-As: 2.0.0
@@ -128,7 +129,8 @@ Releases are automatically published to NPM when the Release Please PR is merged
 
 ### NPM Trusted Publishing
 
-This project uses [NPM Trusted Publishing](https://docs.npmjs.com/trusted-publishers) with GitHub Actions. No npm tokens are needed - authentication is handled automatically via OIDC (OpenID Connect).
+This project uses [NPM Trusted Publishing](https://docs.npmjs.com/trusted-publishers) with GitHub Actions.
+No npm tokens are needed - authentication is handled automatically via OIDC (OpenID Connect).
 
 **How it works:**
 
@@ -144,7 +146,8 @@ This project uses [NPM Trusted Publishing](https://docs.npmjs.com/trusted-publis
    - **Organization or user**: Your GitHub username/org
    - **Repository**: Your repository name
    - **Workflow filename**: `publish.yml` (the release workflow filename)
-3. Optionally, [restrict token access](https://docs.npmjs.com/trusted-publishers#recommended-restrict-token-access-when-using-trusted-publishers) for maximum security
+3. Optionally, [restrict token access](https://docs.npmjs.com/trusted-publishers#recommended-restrict-token-access-when-using-trusted-publishers)
+   for maximum security
 
 When you merge a release PR, the GitHub Actions workflow will automatically:
 
@@ -174,4 +177,5 @@ Use manual releases for:
 - Bypassing Release Please when needed
 - Direct version control over releases
 
-**Learn more:** See the [NPM Trusted Publishing documentation](https://docs.npmjs.com/trusted-publishers) for complete setup and best practices.
+**Learn more:** See the [NPM Trusted Publishing documentation](https://docs.npmjs.com/trusted-publishers)
+for complete setup and best practices.

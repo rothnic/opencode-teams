@@ -65,7 +65,7 @@ npm run typecheck   # Type check
 
 ## Project Structure
 
-```
+```text
 opencode-teams/
 ├── src/
 │   ├── types/              # TypeScript type definitions
@@ -225,7 +225,8 @@ This compiles TypeScript from `src/` to JavaScript in `dist/` with:
 
 ### Production Build
 
-The same build command is used for production. The build output is optimized by TypeScript compiler settings in `tsconfig.json`.
+The same build command is used for production.
+The build output is optimized by TypeScript compiler settings in `tsconfig.json`.
 
 ## Bun Best Practices
 
@@ -284,7 +285,7 @@ Releases are automated via release-please:
 
 ### Commit Message Format
 
-```
+```text
 type(scope): subject
 
 body
@@ -296,7 +297,7 @@ Types: `feat`, `fix`, `docs`, `style`, `refactor`, `test`, `chore`
 
 Examples:
 
-```
+```text
 feat: add message filtering to readMessages
 fix: handle race condition in claimTask
 docs: update installation instructions
@@ -338,7 +339,7 @@ bun install
 mise run build
 ```
 
-2. Check TypeScript errors:
+1. Check TypeScript errors:
 
 ```bash
 mise run typecheck
@@ -352,7 +353,7 @@ mise run typecheck
 bun test --verbose
 ```
 
-2. Run specific failing test:
+1. Run specific failing test:
 
 ```bash
 bun test tests/specific-test.test.ts

@@ -2,7 +2,8 @@
 
 ## Overview
 
-OpenCode Teams implements multi-agent coordination inspired by Claude Code's TeammateTool, following OpenCode's plugin architecture and permission-based role system.
+OpenCode Teams implements multi-agent coordination inspired by Claude Code's TeammateTool,
+following OpenCode's plugin architecture and permission-based role system.
 
 ## Alignment with Claude Code TeammateTool
 
@@ -10,7 +11,7 @@ Our implementation follows the patterns documented in Claude Code's TeammateTool
 
 ### File-Based Storage
 
-```
+```text
 ~/.config/opencode/opencode-teams/
 ├── teams/
 │   └── {team-name}/
@@ -135,7 +136,7 @@ The agent has:
 
 ### 1. Leader Pattern
 
-```
+```text
 Leader → spawn team → create tasks → monitor → synthesize
 Workers → discover → join → claim → execute → report
 ```
@@ -144,7 +145,7 @@ Most common. One orchestrator, many specialists.
 
 ### 2. Swarm Pattern
 
-```
+```text
 Leader → spawn team → create 100 tasks
 Workers → self-assign from queue
 ```
@@ -153,7 +154,7 @@ For embarrassingly parallel work. Workers are interchangeable.
 
 ### 3. Pipeline Pattern
 
-```
+```text
 Agent A → complete task 1
 Agent B (blocked until A done) → complete task 2
 Agent C (blocked until B done) → complete task 3
@@ -163,7 +164,7 @@ Sequential with handoffs.
 
 ### 4. Council Pattern
 
-```
+```text
 Leader → spawn team → broadcast question
 Members → each research and propose
 Leader → synthesize best answer

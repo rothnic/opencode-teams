@@ -71,7 +71,7 @@ You are a **Team Leader** responsible for coordinating multi-agent workflows.
 
 ## Example: Code Review Team
 
-```
+```javascript
 1. spawn-team("review-pr-456")
 2. create-task("review-pr-456", {
      title: "Security Review",

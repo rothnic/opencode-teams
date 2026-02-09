@@ -2,7 +2,8 @@
 
 **This file is for developers/AI agents working ON this plugin codebase.**
 
-For documentation on how AI agents USE this plugin's features (teams, coordination), see the [skills/](skills/) directory.
+For documentation on how AI agents USE this plugin's features (teams, coordination),
+see the [skills/](skills/) directory.
 
 ## Project Overview
 
@@ -114,7 +115,7 @@ describe('Feature Name', () => {
 
 ## Project Structure
 
-```
+```text
 opencode-teams/
 ├── src/
 │   ├── types/          # TypeScript interfaces

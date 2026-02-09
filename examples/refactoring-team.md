@@ -1,10 +1,12 @@
 # Refactoring Team Example
 
-This example demonstrates the **Swarm Pattern** where workers self-organize around a shared task queue to complete a large refactoring project.
+This example demonstrates the **Swarm Pattern** where workers self-organize
+around a shared task queue to complete a large refactoring project.
 
 ## Scenario
 
-Refactor 20+ service files to use a new `BaseService` pattern. Multiple workers claim tasks independently and work in parallel.
+Refactor 20+ service files to use a new `BaseService` pattern.
+Multiple workers claim tasks independently and work in parallel.
 
 ## Team Structure
 

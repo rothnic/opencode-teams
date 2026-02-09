@@ -2,11 +2,12 @@
 
 ## Overview
 
-This document contains research findings on Claude Code's TeammateTool feature and how to implement it as an OpenCode plugin.
+This document contains research findings on Claude Code's TeammateTool feature
+and how to implement it as an OpenCode plugin.
 
 ## Source Material
 
-Based on analysis from: https://gist.github.com/kieranklaassen/d2b35569be2c7f1412c64861a219d51f
+Based on analysis from: <https://gist.github.com/kieranklaassen/d2b35569be2c7f1412c64861a219d51f>
 
 ## Claude Code TeammateTool Analysis
 
@@ -54,7 +55,7 @@ TeammateTool uses environment variables for context:
 
 TeammateTool uses a file-based coordination system:
 
-```
+```text
 ~/.claude/
 ├── teams/
 │   └── {team-name}/
@@ -272,7 +273,7 @@ Key hooks for team coordination:
 
 ## References
 
-- Claude Code TeammateTool Analysis: https://gist.github.com/kieranklaassen/d2b35569be2c7f1412c64861a219d51f
-- OpenCode Plugins: https://opencode.ai/docs/plugins/
-- OpenCode Skills: https://opencode.ai/docs/skills
-- OpenCode Config: https://opencode.ai/docs/config/
+- Claude Code TeammateTool Analysis: <https://gist.github.com/kieranklaassen/d2b35569be2c7f1412c64861a219d51f>
+- OpenCode Plugins: <https://opencode.ai/docs/plugins/>
+- OpenCode Skills: <https://opencode.ai/docs/skills>
+- OpenCode Config: <https://opencode.ai/docs/config/>

@@ -112,7 +112,7 @@ global.TeamOperations.cleanup('test-team');
 
 The plugin stores all data in `~/.config/opencode/opencode-teams/`:
 
-```
+```text
 ~/.config/opencode/opencode-teams/
 ├── teams/           # Team configurations and messages
 └── tasks/           # Task queues
