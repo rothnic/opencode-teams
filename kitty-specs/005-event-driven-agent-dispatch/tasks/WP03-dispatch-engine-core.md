@@ -1,13 +1,15 @@
 ---
 work_package_id: WP03
 title: Dispatch Engine Core
-lane: "for_review"
+lane: "planned"
 dependencies: [WP01]
 base_branch: 005-event-driven-agent-dispatch-WP01
 base_commit: 9e0208de35bf27bc2d81f88edee0c0e2b9b53ff7
 created_at: '2026-02-10T21:01:33.238557+00:00'
 subtasks: [T017, T018, T019, T020, T021, T022]
 shell_pid: "16625"
+review_status: "has_feedback"
+reviewed_by: "Nick Roth"
 history:
 - date: '2026-02-10'
   action: created
@@ -323,3 +325,4 @@ export function initDispatchEngine(): void {
 ## Activity Log
 
 - 2026-02-10T21:07:42Z – unknown – shell_pid=16625 – lane=for_review – Ready for review: dispatch engine core
+- 2026-02-10T21:10:16Z – unknown – shell_pid=16625 – lane=planned – Moved to planned
