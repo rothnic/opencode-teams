@@ -15,6 +15,7 @@ describe('Event Emission', () => {
   let events: DispatchEvent[] = [];
 
   beforeEach(() => {
+    EventBus.clear();
     savedEnv.OPENCODE_TEAMS_DIR = process.env.OPENCODE_TEAMS_DIR;
     
     tempDir = mkdtempSync(join(tmpdir(), 'opencode-events-test-'));

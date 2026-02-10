@@ -1,9 +1,13 @@
-import { describe, it, expect, beforeEach } from 'bun:test';
+import { describe, it, expect, beforeEach, afterAll } from 'bun:test';
 import { EventBus } from '../src/operations/event-bus';
 import type { DispatchEvent } from '../src/types/schemas';
 
 describe('EventBus', () => {
   beforeEach(() => {
+    EventBus.clear();
+  });
+
+  afterAll(() => {
     EventBus.clear();
   });
 
