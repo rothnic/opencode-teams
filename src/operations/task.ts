@@ -33,6 +33,7 @@ import {
   getTeamConfigPath,
   getTeamTasksDir,
 } from '../utils/storage-paths';
+import { EventBus } from './event-bus';
 import { getAgentRole } from './role-permissions';
 import { WorkflowMonitor } from './workflow-monitor';
 
@@ -140,6 +141,14 @@ export const TaskOperations = {
       // Validate and write atomically
       const taskPath = getTaskFilePath(teamName, taskId);
       writeAtomicJSON(taskPath, task, TaskSchema);
+
+      EventBus.emit({
+        id: globalThis.crypto.randomUUID(),
+        type: 'task.created',
+        teamName,
+        timestamp: new Date().toISOString(),
+        payload: { taskId: task.id, title: task.title, priority: task.priority },
+      });
 
       // Sync blocks: add this task to each dependency's blocks array (FR-009)
       if (task.dependencies.length > 0) {
@@ -328,6 +337,35 @@ export const TaskOperations = {
       };
 
       writeAtomicJSON(taskPath, updatedTask, TaskSchema);
+
+      if (updates.status === 'completed') {
+        EventBus.emit({
+          id: globalThis.crypto.randomUUID(),
+          type: 'task.completed',
+          teamName,
+          timestamp: new Date().toISOString(),
+          payload: { taskId, title: updatedTask.title },
+        });
+
+        const allTasks = TaskOperations.getTasks(teamName);
+        for (const t of allTasks) {
+          if (t.dependencies.includes(taskId) && t.status === 'pending') {
+            const allDepsComplete = t.dependencies.every((depId) => {
+              const dep = allTasks.find((d) => d.id === depId);
+              return dep?.status === 'completed';
+            });
+            if (allDepsComplete) {
+              EventBus.emit({
+                id: globalThis.crypto.randomUUID(),
+                type: 'task.unblocked',
+                teamName,
+                timestamp: new Date().toISOString(),
+                payload: { taskId: t.id, title: t.title },
+              });
+            }
+          }
+        }
+      }
 
       // Cascade unblock on completion (FR-010)
       if (updatedTask.status === 'completed' && task.status !== 'completed') {

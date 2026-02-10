@@ -33,6 +33,7 @@ import {
   getTeamConfigPath,
   getTeamLockPath,
 } from '../utils/storage-paths';
+import { EventBus } from './event-bus';
 import { ServerManager } from './server-manager';
 import { TaskOperations } from './task';
 import { TeamOperations } from './team';
@@ -394,6 +395,18 @@ export const AgentOperations = {
 
     AgentOperations._removeFromTeam(teamName, agentId, projectRoot);
 
+    EventBus.emit({
+      id: globalThis.crypto.randomUUID(),
+      type: 'agent.terminated',
+      teamName,
+      timestamp: new Date().toISOString(),
+      payload: {
+        agentId,
+        reason: reason || 'Force killed',
+        reassignedTasks,
+      },
+    });
+
     return { success: true, reassignedTasks };
   },
 
@@ -530,6 +543,16 @@ export const AgentOperations = {
     };
 
     const updated = AgentOperations.updateAgentState(agentId, updates, projectRoot);
+
+    if (statusUpdate === 'idle') {
+      EventBus.emit({
+        id: globalThis.crypto.randomUUID(),
+        type: 'agent.idle',
+        teamName: agent.teamName,
+        timestamp: new Date().toISOString(),
+        payload: { agentId: agent.id, agentName: agent.name },
+      });
+    }
 
     return {
       success: true,
