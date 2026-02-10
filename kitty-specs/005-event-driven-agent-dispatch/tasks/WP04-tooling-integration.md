@@ -1,14 +1,14 @@
 ---
 work_package_id: WP04
 title: Tooling and Integration
-lane: "for_review"
+lane: "doing"
 dependencies: [WP02, WP03]
 base_branch: 005-event-driven-agent-dispatch-WP03
 base_commit: 5bd56eaf070b9bcb311b66a6df544056cd75ef2d
 created_at: '2026-02-10T21:29:19.897187+00:00'
 subtasks: [T023, T024, T025, T026, T027, T028, T029, T030]
 shell_pid: "16625"
-agent: "Implementer"
+agent: "Reviewer"
 review_status: "has_feedback"
 reviewed_by: "Nick Roth"
 history:
@@ -352,3 +352,4 @@ describe('Event-Driven Dispatch E2E', () => {
 - 2026-02-10T21:38:18Z – Reviewer – shell_pid=16625 – lane=doing – Started review via workflow command
 - 2026-02-10T21:39:06Z – Reviewer – shell_pid=16625 – lane=planned – Moved to planned
 - 2026-02-10T21:45:44Z – Implementer – shell_pid=16625 – lane=for_review – Added 4 missing E2E tests per review feedback
+- 2026-02-10T21:48:11Z – Reviewer – shell_pid=16625 – lane=doing – Started review via workflow command
