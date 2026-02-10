@@ -1,7 +1,7 @@
 ---
 work_package_id: 'WP09'
 title: 'Integration Tests'
-lane: 'planned'
+lane: "doing"
 subtasks:
   - 'T051'
   - 'T052'
@@ -341,3 +341,7 @@ describe('Error Recovery E2E', () => {
 - [ ] No hardcoded paths — all use temp directories
 - [ ] Full test suite still passes: `bun test`
 - [ ] No `as any` or type suppression in test code
+
+## Activity Log
+
+- 2026-02-10T14:37:36Z – unknown – lane=doing – Code already on main
