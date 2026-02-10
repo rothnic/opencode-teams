@@ -15,6 +15,7 @@ import {
   type TaskFilters,
   TaskSchema,
   type TaskStatus,
+  TeamConfigSchema,
 } from '../types/schemas';
 import { withLock } from '../utils/file-lock';
 import {
@@ -32,6 +33,8 @@ import {
   getTeamConfigPath,
   getTeamTasksDir,
 } from '../utils/storage-paths';
+import { getAgentRole } from './role-permissions';
+import { WorkflowMonitor } from './workflow-monitor';
 
 /**
  * Forward-only status transitions (FR-011).
@@ -245,7 +248,7 @@ export const TaskOperations = {
       throw new Error(`Task ${taskId} not found in team ${teamName}`);
     }
 
-    return withLock(lockPath, () => {
+    const result = withLock(lockPath, () => {
       const task = readValidatedJSON(taskPath, TaskSchema);
 
       // If updating dependencies, validate them
@@ -367,6 +370,19 @@ export const TaskOperations = {
 
       return updatedTask;
     });
+
+    if (updates.status === 'completed') {
+      try {
+        const suggestion = WorkflowMonitor.evaluate(teamName);
+        if (suggestion) {
+          WorkflowMonitor.emitSuggestion(teamName, suggestion);
+        }
+      } catch {
+        // Non-fatal: workflow check must not fail task update
+      }
+    }
+
+    return result;
   },
 
   /**
@@ -486,6 +502,26 @@ export const TaskOperations = {
 
     if (!fileExists(taskPath)) {
       throw new Error(`Task ${taskId} not found in team ${teamName}`);
+    }
+
+    const teamConfigPath = getTeamConfigPath(teamName);
+    if (fileExists(teamConfigPath)) {
+      try {
+        const teamConfig = readValidatedJSON(teamConfigPath, TeamConfigSchema);
+        if (teamConfig.topology === 'hierarchical') {
+          if (currentAgentId !== teamConfig.leader) {
+            const role = getAgentRole(currentAgentId);
+            if (role !== 'leader' && role !== 'task-manager') {
+              throw new Error(
+                'Hierarchical topology: only leader or task-manager can assign tasks. ' +
+                  'Request task assignment via message to the leader.',
+              );
+            }
+          }
+        }
+      } catch (e) {
+        if (e instanceof Error && e.message.includes('Hierarchical topology')) throw e;
+      }
     }
 
     return withLock(lockPath, () => {

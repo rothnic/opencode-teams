@@ -21,6 +21,7 @@ import {
   type TeamMember,
   TeamMemberSchema,
   type TeamSummary,
+  type TopologyType,
 } from '../types/schemas';
 import { withLock } from '../utils/file-lock';
 import { lockedUpdate, lockedUpsert, readValidatedJSON, writeAtomicJSON } from '../utils/fs-atomic';
@@ -37,6 +38,8 @@ import {
   getTeamsDir,
   getTeamTasksDir,
 } from '../utils/storage-paths';
+import { TaskOperations } from './task';
+import { TemplateOperations } from './template';
 
 /**
  * Team coordination operations
@@ -45,7 +48,11 @@ export const TeamOperations = {
   /**
    * Create a new team
    */
-  spawnTeam: (teamName: string, leaderInfo: LeaderInfo = {}): TeamConfig => {
+  spawnTeam: (
+    teamName: string,
+    leaderInfo: LeaderInfo = {},
+    options?: { description?: string; topology?: TopologyType },
+  ): TeamConfig => {
     // Validate team name format via schema
     const nameResult = TeamConfigSchema.shape.name.safeParse(teamName);
     if (!nameResult.success) {
@@ -78,6 +85,8 @@ export const TeamOperations = {
           joinedAt: now,
         },
       ],
+      ...(options?.description ? { description: options.description } : {}),
+      ...(options?.topology ? { topology: options.topology } : {}),
     };
 
     // Validate and write atomically
@@ -455,6 +464,63 @@ export const TeamOperations = {
     );
 
     return isLeaderApproved || areAllMembersApproved;
+  },
+
+  /**
+   * Create a team from a template, pre-configuring roles and default tasks
+   */
+  spawnTeamFromTemplate: (
+    teamName: string,
+    templateName: string,
+    leaderInfo: LeaderInfo = {},
+    options?: { description?: string },
+  ): TeamConfig => {
+    const template = TemplateOperations.load(templateName);
+
+    const config = TeamOperations.spawnTeam(teamName, leaderInfo, {
+      description: options?.description || template.description,
+      topology: template.topology,
+    });
+
+    const updatedConfig: TeamConfig = {
+      ...config,
+      templateSource: templateName,
+      roles: template.roles,
+      workflowConfig: template.workflowConfig,
+    };
+
+    const configPath = getTeamConfigPath(teamName);
+    writeAtomicJSON(configPath, updatedConfig, TeamConfigSchema);
+
+    if (template.defaultTasks) {
+      for (const taskInput of template.defaultTasks) {
+        TaskOperations.createTask(teamName, taskInput);
+      }
+    }
+
+    return updatedConfig;
+  },
+
+  /**
+   * Delete a team and all its resources
+   */
+  deleteTeam: (teamName: string): void => {
+    const teamDir = getTeamDir(teamName);
+    if (!dirExists(teamDir)) {
+      throw new Error(`Team "${teamName}" does not exist`);
+    }
+
+    const configPath = getTeamConfigPath(teamName);
+    if (!fileExists(configPath)) {
+      throw new Error(`Team "${teamName}" has no config file`);
+    }
+
+    const tasksDir = getTeamTasksDir(teamName);
+    if (dirExists(tasksDir)) {
+      rmSync(tasksDir, { recursive: true, force: true });
+    }
+
+    rmSync(teamDir, { recursive: true, force: true });
   },
 
   /**

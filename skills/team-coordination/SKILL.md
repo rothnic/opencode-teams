@@ -35,16 +35,19 @@ This skill uses the following OpenCode tools (registered by opencode-teams plugi
 
 ### Team Management
 
-- **spawn-team**: Create a new team
+- **spawn-team**: Create a new team. Accepts optional `templateName` and
+  `description` parameters.
 - **discover-teams**: List available teams to join
 - **join-team**: Join an existing team as a member
 - **get-team-info**: Get details about team members
+- **delete-team**: Delete a team and all its resources (tasks, inboxes, config)
 
 ### Task Coordination
 
 - **create-task**: Add a task to the team's queue
 - **get-tasks**: View available or assigned tasks
-- **claim-task**: Claim a pending task to work on
+- **claim-task**: Claim a pending task. In hierarchical topology,
+  only leader/task-manager can assign.
 - **update-task**: Update task status or details
 
 ### Communication
@@ -53,17 +56,24 @@ This skill uses the following OpenCode tools (registered by opencode-teams plugi
 - **broadcast-message**: Send a message to all team members
 - **read-messages**: Check messages from teammates
 
+### Templates
+
+- **save-template**: Save a team template for reuse (topology, roles, default tasks)
+- **list-templates**: List all available team templates (project-local and global)
+- **delete-template**: Delete a project-local team template
+
+### Permissions
+
+- **check-permission**: Check if a role is allowed to use a specific tool
+
 ## Example Workflows
 
 ### Code Review Team
 
 ```text
 Leader Agent:
-1. Use spawn-team to create "review-pr-456"
-2. Use create-task to add:
-   - Security review task
-   - Performance review task
-   - Style review task
+1. Use spawn-team with templateName="code-review" to create "review-pr-456"
+   (auto-creates Security Review, Performance Review, Style Review tasks)
 
 Specialist Agents:
 1. Use discover-teams to find "review-pr-456"
@@ -77,6 +87,23 @@ Specialist Agents:
 Leader Agent:
 1. Use read-messages to collect all findings
 2. Synthesize final review
+3. Use delete-team when done
+```
+
+### Hierarchical Team with Template
+
+```text
+Leader Agent:
+1. Use spawn-team with templateName="leader-workers" to create "build-features"
+   (creates hierarchical topology - workers cannot self-assign tasks)
+2. Use create-task to add work items
+3. Assign tasks to workers by claiming on their behalf
+
+Workers:
+1. Use join-team to join
+2. Wait for task assignment via poll-inbox
+3. Work on assigned task
+4. Use update-task to mark completed
 ```
 
 ### Parallel Refactoring

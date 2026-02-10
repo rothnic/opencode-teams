@@ -6,9 +6,10 @@
  */
 
 import { AgentOperations } from '../operations/agent';
-import { guardToolPermission } from '../operations/role-permissions';
+import { checkPermissionByRoleName, guardToolPermission } from '../operations/role-permissions';
 import { TaskOperations } from '../operations/task';
 import { TeamOperations } from '../operations/team';
+import { TemplateOperations } from '../operations/template';
 import type {
   AgentState,
   LeaderInfo,
@@ -18,15 +19,20 @@ import type {
   TeamConfig,
   TeamMember,
   TeamSummary,
+  TeamTemplate,
 } from '../types/index';
 import { type ToolDefinition, tool } from './tool-helper';
 
 /**
  * Create a new team
  */
-export const spawnTeam = tool<{ teamName: string; leaderInfo?: LeaderInfo }, TeamConfig>({
+export const spawnTeam = tool<
+  { teamName: string; leaderInfo?: LeaderInfo; templateName?: string; description?: string },
+  TeamConfig
+>({
   name: 'spawn-team',
-  description: 'Create a new team of AI agents for collaborative work',
+  description:
+    'Create a new team of AI agents. Optionally use a template for pre-configured roles.',
   parameters: {
     teamName: {
       type: 'string',
@@ -43,10 +49,25 @@ export const spawnTeam = tool<{ teamName: string; leaderInfo?: LeaderInfo }, Tea
         agentType: { type: 'string', description: 'Agent type', required: false },
       },
     },
+    templateName: {
+      type: 'string',
+      description: 'Name of a template to create the team from',
+      required: false,
+    },
+    description: {
+      type: 'string',
+      description: 'Team description/purpose',
+      required: false,
+    },
   },
-  execute: async ({ teamName, leaderInfo }) => {
+  execute: async ({ teamName, leaderInfo, templateName, description }) => {
     guardToolPermission('spawn-team');
-    return TeamOperations.spawnTeam(teamName, leaderInfo);
+    if (templateName) {
+      return TeamOperations.spawnTeamFromTemplate(teamName, templateName, leaderInfo, {
+        description,
+      });
+    }
+    return TeamOperations.spawnTeam(teamName, leaderInfo, { description });
   },
 });
 
@@ -456,6 +477,118 @@ export const getAgentStatus = tool<
   },
 });
 
+export const saveTemplate = tool<{ template: TeamTemplate }, TeamTemplate>({
+  name: 'save-template',
+  description: 'Save a team template for reuse',
+  parameters: {
+    template: {
+      type: 'object',
+      description: 'Template configuration to save',
+      required: true,
+      properties: {
+        name: { type: 'string', description: 'Unique template name (kebab-case)', required: true },
+        description: { type: 'string', description: 'Template description', required: false },
+        topology: {
+          type: 'string',
+          description: 'Team topology: flat or hierarchical',
+          required: false,
+        },
+        roles: {
+          type: 'array',
+          description: 'Role definitions',
+          required: true,
+          items: {
+            type: 'object',
+            description: 'Role definition',
+            properties: {
+              name: { type: 'string', description: 'Role name', required: true },
+              allowedTools: {
+                type: 'array',
+                description: 'Allowed tool names',
+                required: false,
+              },
+              deniedTools: {
+                type: 'array',
+                description: 'Denied tool names',
+                required: false,
+              },
+            },
+          },
+        },
+      },
+    },
+  },
+  execute: async ({ template }) => TemplateOperations.save(template),
+});
+
+export const listTemplates = tool<
+  Record<string, never>,
+  Array<{ name: string; description?: string; source: string }>
+>({
+  name: 'list-templates',
+  description: 'List all available team templates',
+  parameters: {},
+  execute: async () => TemplateOperations.list(),
+});
+
+export const deleteTemplate = tool<{ templateName: string }, { deleted: boolean }>({
+  name: 'delete-template',
+  description: 'Delete a project-local team template',
+  parameters: {
+    templateName: {
+      type: 'string',
+      description: 'Name of the template to delete',
+      required: true,
+    },
+  },
+  execute: async ({ templateName }) => {
+    TemplateOperations.delete(templateName);
+    return { deleted: true };
+  },
+});
+
+export const checkPermissionTool = tool<
+  { roleName: string; toolName: string },
+  { allowed: boolean; roleName: string; toolName: string }
+>({
+  name: 'check-permission',
+  description: 'Check if a role is allowed to use a specific tool',
+  parameters: {
+    roleName: {
+      type: 'string',
+      description: 'Role name to check (leader, worker, reviewer, task-manager)',
+      required: true,
+    },
+    toolName: {
+      type: 'string',
+      description: 'Tool name to check permission for',
+      required: true,
+    },
+  },
+  execute: async ({ roleName, toolName }) => ({
+    allowed: checkPermissionByRoleName(roleName, toolName),
+    roleName,
+    toolName,
+  }),
+});
+
+export const deleteTeamTool = tool<{ teamName: string }, { deleted: boolean; teamName: string }>({
+  name: 'delete-team',
+  description: 'Delete a team and all its resources (tasks, inboxes, config)',
+  parameters: {
+    teamName: {
+      type: 'string',
+      description: 'Name of the team to delete',
+      required: true,
+    },
+  },
+  execute: async ({ teamName }) => {
+    guardToolPermission('delete-team', teamName);
+    TeamOperations.deleteTeam(teamName);
+    return { deleted: true, teamName };
+  },
+});
+
 export const tools: Record<string, ToolDefinition> = {
   'spawn-team': spawnTeam,
   'discover-teams': discoverTeams,
@@ -473,4 +606,9 @@ export const tools: Record<string, ToolDefinition> = {
   'kill-agent': killAgent,
   heartbeat: heartbeatTool,
   'get-agent-status': getAgentStatus,
+  'save-template': saveTemplate,
+  'list-templates': listTemplates,
+  'delete-template': deleteTemplate,
+  'check-permission': checkPermissionTool,
+  'delete-team': deleteTeamTool,
 };

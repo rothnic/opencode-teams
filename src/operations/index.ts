@@ -19,3 +19,5 @@ export { TaskOperations } from './task';
 export { TeamOperations } from './team';
 export { getBuiltinTemplates, TemplateOperations } from './template';
 export { TmuxOperations } from './tmux';
+export type { WorkflowSuggestion } from './workflow-monitor';
+export { WorkflowMonitor } from './workflow-monitor';
