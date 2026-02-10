@@ -1,13 +1,17 @@
 ---
-work_package_id: "WP02"
-title: "Event Emission"
-lane: "planned"
-dependencies: ["WP01"]
-subtasks: ["T010", "T011", "T012", "T013", "T014", "T015", "T016"]
+work_package_id: WP02
+title: Event Emission
+lane: "doing"
+dependencies: [WP01]
+base_branch: 005-event-driven-agent-dispatch-WP01
+base_commit: eab8a91628b5a1b349ba72535a75b701ec0600c1
+created_at: '2026-02-10T21:01:04.772843+00:00'
+subtasks: [T010, T011, T012, T013, T014, T015, T016]
+shell_pid: "16625"
 history:
-  - date: "2026-02-10"
-    action: "created"
-    by: "planner"
+- date: '2026-02-10'
+  action: created
+  by: planner
 ---
 
 # WP02: Event Emission
