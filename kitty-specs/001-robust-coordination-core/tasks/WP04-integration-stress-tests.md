@@ -1,22 +1,26 @@
 ---
-work_package_id: "WP04"
-title: "Integration and Stress Tests"
-lane: "planned"
+work_package_id: WP04
+title: Integration and Stress Tests
+lane: "doing"
+dependencies: []
+base_branch: main
+base_commit: 600be332758ca23d725cd063c2f3bf945bd9b852
+created_at: '2026-02-10T04:27:18.020100+00:00'
 subtasks:
-  - "T015"
-  - "T016"
-  - "T017"
-phase: "Phase 3 - Verification"
-assignee: ""
-agent: ""
-shell_pid: ""
-review_status: ""
-reviewed_by: ""
+- T015
+- T016
+- T017
+phase: Phase 3 - Verification
+assignee: ''
+agent: ''
+shell_pid: "1368003"
+review_status: ''
+reviewed_by: ''
 history:
-  - timestamp: "2026-02-10T16:24:00Z"
-    lane: "planned"
-    agent: "system"
-    action: "Prompt generated via /spec-kitty.tasks"
+- timestamp: '2026-02-10T16:24:00Z'
+  lane: planned
+  agent: system
+  action: Prompt generated via /spec-kitty.tasks
 ---
 
 # Work Package Prompt: WP04 -- Integration and Stress Tests
