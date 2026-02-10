@@ -1,26 +1,30 @@
 ---
-work_package_id: 'WP04'
-title: 'Tmux Operations Extensions'
-lane: 'planned'
+work_package_id: WP04
+title: Tmux Operations Extensions
+lane: "doing"
+dependencies: []
+base_branch: main
+base_commit: 34b25804a106255042feec7a83556929c5326aef
+created_at: '2026-02-10T06:29:13.333001+00:00'
 subtasks:
-  - 'T021'
-  - 'T022'
-  - 'T023'
-  - 'T024'
-  - 'T025'
-  - 'T026'
-  - 'T027'
-phase: 'Phase 1 - Foundation'
+- T021
+- T022
+- T023
+- T024
+- T025
+- T026
+- T027
+phase: Phase 1 - Foundation
 assignee: ''
 agent: ''
-shell_pid: ''
+shell_pid: "1368003"
 review_status: ''
 reviewed_by: ''
 history:
-  - timestamp: '2026-02-10T06:00:00Z'
-    lane: 'planned'
-    agent: 'system'
-    action: 'Prompt generated via /spec-kitty.tasks'
+- timestamp: '2026-02-10T06:00:00Z'
+  lane: planned
+  agent: system
+  action: Prompt generated via /spec-kitty.tasks
 ---
 # Work Package Prompt: WP04 – Tmux Operations Extensions
 
