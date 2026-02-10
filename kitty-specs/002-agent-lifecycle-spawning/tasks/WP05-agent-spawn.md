@@ -1,7 +1,7 @@
 ---
 work_package_id: 'WP05'
 title: 'Agent Spawn Operations'
-lane: "for_review"
+lane: "done"
 subtasks:
   - 'T028'
   - 'T029'
@@ -13,8 +13,8 @@ phase: 'Phase 2 - Core Operations'
 assignee: ''
 agent: ''
 shell_pid: ''
-review_status: ''
-reviewed_by: ''
+review_status: "approved"
+reviewed_by: "Nick Roth"
 history:
   - timestamp: '2026-02-10T06:00:00Z'
     lane: 'planned'
@@ -372,3 +372,4 @@ describe('AgentOperations', () => {
 
 - 2026-02-10T14:37:04Z – unknown – lane=doing – Code already on main
 - 2026-02-10T14:37:06Z – unknown – lane=for_review – Code already on main, verified
+- 2026-02-10T14:37:09Z – unknown – lane=done – Code verified on main, 357 tests pass
