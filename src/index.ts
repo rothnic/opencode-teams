@@ -21,6 +21,7 @@ try {
 
 import { AgentOperations } from './operations/agent';
 import { initDispatchEngine } from './operations/dispatch-engine';
+import { EventBus } from './operations/event-bus';
 import { SessionManager } from './operations/session-manager-cli';
 import { TaskOperations } from './operations/task';
 import { TeamOperations } from './operations/team';
@@ -352,6 +353,18 @@ export const OpenCodeTeamsPlugin = async (ctx: any) => {
 
     'session.idle': async (_event: any) => {
       console.log('[OpenCode Teams] Session idle - performing maintenance');
+
+      const teamNameForEvent = process.env.OPENCODE_TEAM_NAME;
+      if (teamNameForEvent) {
+        EventBus.emit({
+          id: globalThis.crypto.randomUUID(),
+          type: 'session.idle',
+          teamName: teamNameForEvent,
+          timestamp: new Date().toISOString(),
+          payload: {},
+        });
+      }
+
       // Fallback logic for idle sessions: check if any teams should be cleaned up
       const teams = TeamOperations.discoverTeams();
       for (const team of teams) {
