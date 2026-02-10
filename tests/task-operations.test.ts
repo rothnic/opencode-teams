@@ -265,11 +265,11 @@ describe('TaskOperations', () => {
         dependencies: [depA.id, depB.id],
       });
 
-      // Initially not met
       expect(TaskOperations.areDependenciesMet(teamName, task.id)).toBe(false);
 
-      // Complete both dependencies
+      TaskOperations.claimTask(teamName, depA.id, 'worker-1');
       TaskOperations.updateTask(teamName, depA.id, { status: 'completed' });
+      TaskOperations.claimTask(teamName, depB.id, 'worker-2');
       TaskOperations.updateTask(teamName, depB.id, { status: 'completed' });
 
       expect(TaskOperations.areDependenciesMet(teamName, task.id)).toBe(true);
@@ -283,7 +283,7 @@ describe('TaskOperations', () => {
         dependencies: [depA.id, depB.id],
       });
 
-      // Complete only one
+      TaskOperations.claimTask(teamName, depA.id, 'worker-1');
       TaskOperations.updateTask(teamName, depA.id, { status: 'completed' });
 
       expect(TaskOperations.areDependenciesMet(teamName, task.id)).toBe(false);
@@ -310,6 +310,9 @@ describe('TaskOperations', () => {
         title: 'Original',
         priority: 'normal',
       });
+
+      // First transition to in_progress (FR-011: forward-only)
+      TaskOperations.claimTask(teamName, task.id, 'worker-1');
 
       const updated = TaskOperations.updateTask(teamName, task.id, {
         title: 'Updated Title',
@@ -522,6 +525,7 @@ describe('TaskOperations', () => {
       const dep = TaskOperations.createTask(teamName, {
         title: 'Finished Dep',
       });
+      TaskOperations.claimTask(teamName, dep.id, 'worker-1');
       TaskOperations.updateTask(teamName, dep.id, { status: 'completed' });
 
       const task = TaskOperations.createTask(teamName, {
@@ -730,11 +734,11 @@ describe('TaskOperations', () => {
         dependencies: [dep1.id, dep2.id],
       });
 
-      // Dependencies not met
       expect(TaskOperations.areDependenciesMet(teamName, main.id)).toBe(false);
 
-      // Complete dependencies
+      TaskOperations.claimTask(teamName, dep1.id, 'worker-1');
       TaskOperations.updateTask(teamName, dep1.id, { status: 'completed' });
+      TaskOperations.claimTask(teamName, dep2.id, 'worker-2');
       TaskOperations.updateTask(teamName, dep2.id, { status: 'completed' });
 
       // Now dependencies are met
