@@ -50,8 +50,8 @@
     // MD048: Code fence style - backticks
     "MD048": { "style": "backtick" },
 
-    // MD049: Emphasis style - asterisks (match existing codebase)
-    "MD049": { "style": "asterisk" },
+    // MD049: Emphasis style - underscores (match Prettier output)
+    "MD049": { "style": "underscore" },
 
     // MD050: Strong emphasis style - asterisks
     "MD050": { "style": "asterisk" },
