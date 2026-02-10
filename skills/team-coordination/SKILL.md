@@ -56,6 +56,13 @@ This skill uses the following OpenCode tools (registered by opencode-teams plugi
 - **broadcast-message**: Send a message to all team members
 - **read-messages**: Check messages from teammates
 
+### Event-Driven Dispatch
+
+- **add-dispatch-rule**: Add a new rule to trigger actions (assign task, notify) based on events (task created, agent idle)
+- **remove-dispatch-rule**: Remove a dispatch rule by ID
+- **list-dispatch-rules**: View all active dispatch rules for a team
+- **get-dispatch-log**: View the execution log of dispatch rules
+
 ### Templates
 
 - **save-template**: Save a team template for reuse (topology, roles, default tasks)
@@ -121,6 +128,25 @@ Worker Agents:
 4. Use claim-task for a service
 5. Perform refactoring
 6. Use broadcast-message to announce completion
+```
+
+### Event-Driven Workflow
+
+```text
+Leader Agent:
+1. Use spawn-team to create "auto-dispatch-team"
+2. Use add-dispatch-rule to auto-assign tasks:
+   - Event: task.created
+   - Condition: type=simple_match, field=priority, value=high
+   - Action: notify_leader
+3. Use add-dispatch-rule to handle idle agents:
+   - Event: agent.idle
+   - Action: assign_task (from pending queue)
+
+Workers:
+1. Join team
+2. Receive tasks automatically when they become idle
+3. High priority tasks trigger immediate notifications to leader
 ```
 
 ## Environment Variables
