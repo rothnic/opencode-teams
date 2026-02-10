@@ -347,7 +347,19 @@ export const TaskOperations = {
           payload: { taskId, title: updatedTask.title },
         });
 
-        const allTasks = TaskOperations.getTasks(teamName);
+        // Use internal read to avoid re-entrant locking issues with getTasks()
+        // (Closing the FD in getTasks would release the lock held by updateTask)
+        const allTasks: Task[] = [];
+        const files = listJSONFiles(getTeamTasksDir(teamName));
+        for (const file of files) {
+          try {
+            const t = readValidatedJSON(join(getTeamTasksDir(teamName), file), TaskSchema);
+            allTasks.push(t);
+          } catch {
+            // skip unreadable
+          }
+        }
+
         for (const t of allTasks) {
           if (t.dependencies.includes(taskId) && t.status === 'pending') {
             const allDepsComplete = t.dependencies.every((depId) => {
