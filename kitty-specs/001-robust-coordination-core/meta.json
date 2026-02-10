@@ -1,0 +1,10 @@
+{
+  "feature_number": "001",
+  "slug": "001-robust-coordination-core",
+  "friendly_name": "Robust Coordination Core",
+  "mission": "software-dev",
+  "source_description": "File locking, atomic writes, Zod validation, per-agent inboxes, structured messages, bidirectional task dependencies, state machine enforcement - derived from comparison analysis against claude-code-teams-mcp reference implementation",
+  "created_at": "2026-02-10T16:30:00Z",
+  "target_branch": "main",
+  "vcs": "git"
+}

@@ -45,6 +45,10 @@ ls:
   tasks:
     .md: kebab-case
 
+  # kitty-specs/: spec-kitty feature specs use kebab-case markdown, plus README
+  kitty-specs:
+    .md: 'kebab-case | regex:[A-Z][A-Z0-9-]*'
+
   # workflows/: allow both kebab-case and UPPERCASE markdown
   workflows:
     .md: 'kebab-case | regex:[A-Z][A-Z0-9-]*'

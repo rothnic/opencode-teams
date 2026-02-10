@@ -34,11 +34,11 @@ can use it without modification. The TypeScript project is a **host-first** desi
 coupled to OpenCode's plugin lifecycle, tool registration, and permission system. This is a
 fundamental architectural trade-off: portability vs. integration depth.
 
-**Claude Code alignment**: The Python project is *more aligned* with Claude Code's approach.
+**Claude Code alignment**: The Python project is _more aligned_ with Claude Code's approach.
 Claude Code's TeammateTool is an internal tool registered within the Claude Code process, but
 it operates via file-based IPC that is process-agnostic. The MCP server approach preserves
 this process-agnostic quality. The opencode-teams plugin, being in-process, is closer to how
-Claude Code's internal tool is actually *loaded*, but farther from how it *communicates*.
+Claude Code's internal tool is actually _loaded_, but farther from how it _communicates_.
 
 ### 1.2 Framework Dependencies
 
@@ -303,7 +303,7 @@ export function writeJSONSync(filePath: string, data: any): void {
 }
 ```
 
-**Analysis**: This is a *major behavioral gap*. The Python implementation ensures that when two agents
+**Analysis**: This is a _major behavioral gap_. The Python implementation ensures that when two agents
 simultaneously try to read and update the same inbox or task, one waits for the other's lock to release,
 preventing data loss. The TypeScript implementation has classic TOCTOU race conditions:
 
