@@ -1,10 +1,24 @@
 {
+  "accept_commit": null,
+  "acceptance_history": [
+    {
+      "accepted_at": "2026-02-10T15:20:28Z",
+      "accepted_by": "ubuntu",
+      "accepted_from_commit": "620eed818753dcf1aee347c880d2bfafe0cd8b64",
+      "branch": "main",
+      "mode": "pr"
+    }
+  ],
+  "acceptance_mode": "pr",
+  "accepted_at": "2026-02-10T15:20:28Z",
+  "accepted_by": "ubuntu",
+  "accepted_from_commit": "620eed818753dcf1aee347c880d2bfafe0cd8b64",
+  "created_at": "2026-02-10T16:30:00Z",
   "feature_number": "003",
-  "slug": "003-cli-tmux-session-manager",
   "friendly_name": "CLI and Tmux Session Manager",
   "mission": "software-dev",
+  "slug": "003-cli-tmux-session-manager",
   "source_description": "Standalone CLI binary for tmux session management, pane layouts, server spawning, dashboard, attach/detach - derived from Phase 6 plan and oh-my-opencode inspiration",
-  "created_at": "2026-02-10T16:30:00Z",
   "target_branch": "main",
   "vcs": "git"
 }
