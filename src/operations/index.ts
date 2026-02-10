@@ -5,6 +5,7 @@
  */
 
 export { AgentOperations } from './agent';
+export { EventBus } from './event-bus';
 export {
   checkPermission,
   checkPermissionByRoleName,
