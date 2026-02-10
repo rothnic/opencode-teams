@@ -6,6 +6,7 @@
  */
 
 import { AgentOperations } from '../operations/agent';
+import { guardToolPermission } from '../operations/role-permissions';
 import { TaskOperations } from '../operations/task';
 import { TeamOperations } from '../operations/team';
 import type {
@@ -43,7 +44,10 @@ export const spawnTeam = tool<{ teamName: string; leaderInfo?: LeaderInfo }, Tea
       },
     },
   },
-  execute: async ({ teamName, leaderInfo }) => TeamOperations.spawnTeam(teamName, leaderInfo),
+  execute: async ({ teamName, leaderInfo }) => {
+    guardToolPermission('spawn-team');
+    return TeamOperations.spawnTeam(teamName, leaderInfo);
+  },
 });
 
 /**
@@ -301,8 +305,10 @@ export const claimTask = tool<{ teamName: string; taskId: string; agentId?: stri
       required: false,
     },
   },
-  execute: async ({ teamName, taskId, agentId }) =>
-    TaskOperations.claimTask(teamName, taskId, agentId),
+  execute: async ({ teamName, taskId, agentId }) => {
+    guardToolPermission('claim-task', teamName);
+    return TaskOperations.claimTask(teamName, taskId, agentId);
+  },
 });
 
 /**
@@ -371,8 +377,10 @@ export const spawnAgent = tool<
     role: { type: 'string', description: 'Agent role: worker or reviewer', required: false },
     cwd: { type: 'string', description: 'Working directory', required: false },
   },
-  execute: async ({ teamName, prompt, name, model, providerId, role, cwd }) =>
-    AgentOperations.spawnAgent({ teamName, prompt, name, model, providerId, role, cwd }),
+  execute: async ({ teamName, prompt, name, model, providerId, role, cwd }) => {
+    guardToolPermission('spawn-agent', teamName);
+    return AgentOperations.spawnAgent({ teamName, prompt, name, model, providerId, role, cwd });
+  },
 });
 
 export const killAgent = tool<
@@ -392,6 +400,7 @@ export const killAgent = tool<
     reason: { type: 'string', description: 'Reason for termination', required: false },
   },
   execute: async ({ teamName, agentId, force, reason }) => {
+    guardToolPermission('kill-agent', teamName);
     if (force) {
       return AgentOperations.forceKill({ teamName, agentId, reason });
     }
