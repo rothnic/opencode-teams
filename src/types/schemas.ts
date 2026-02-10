@@ -48,6 +48,81 @@ export const WorkflowConfigSchema = z.object({
 
 export type WorkflowConfig = z.infer<typeof WorkflowConfigSchema>;
 
+// ─── Dispatch Event Types ──────────────────────────────────────────────────
+
+export const DispatchEventTypeSchema = z.enum([
+  'task.created',
+  'task.completed',
+  'task.unblocked',
+  'agent.idle',
+  'agent.active',
+  'agent.terminated',
+  'team.created',
+  'session.idle',
+]);
+
+export type DispatchEventType = z.infer<typeof DispatchEventTypeSchema>;
+
+// ─── Dispatch Event ────────────────────────────────────────────────────────
+
+export const DispatchEventSchema = z.object({
+  id: z.string().min(1, 'Event ID must be non-empty'),
+  type: DispatchEventTypeSchema,
+  teamName: z.string().min(1, 'Team name must be non-empty'),
+  timestamp: z.string().datetime({ message: 'timestamp must be ISO 8601' }),
+  payload: z.record(z.unknown()).default({}),
+});
+
+export type DispatchEvent = z.infer<typeof DispatchEventSchema>;
+
+// ─── Dispatch Condition ────────────────────────────────────────────────────
+
+export const DispatchConditionSchema = z.object({
+  type: z.enum(['simple_match', 'resource_count']),
+  field: z.string().optional(),
+  resource: z.enum(['unblocked_tasks', 'active_agents']).optional(),
+  operator: z.enum(['eq', 'neq', 'gt', 'lt', 'gte', 'lte']),
+  value: z.union([z.string(), z.number(), z.boolean()]),
+});
+
+export type DispatchCondition = z.infer<typeof DispatchConditionSchema>;
+
+// ─── Dispatch Action ───────────────────────────────────────────────────────
+
+export const DispatchActionSchema = z.object({
+  type: z.enum(['assign_task', 'notify_leader', 'log']),
+  params: z.record(z.unknown()).optional(),
+});
+
+export type DispatchAction = z.infer<typeof DispatchActionSchema>;
+
+// ─── Dispatch Rule ─────────────────────────────────────────────────────────
+
+export const DispatchRuleSchema = z.object({
+  id: z.string().min(1, 'Rule ID must be non-empty'),
+  eventType: DispatchEventTypeSchema,
+  condition: DispatchConditionSchema.optional(),
+  action: DispatchActionSchema,
+  priority: z.number().int().default(0),
+  enabled: z.boolean().default(true),
+});
+
+export type DispatchRule = z.infer<typeof DispatchRuleSchema>;
+
+// ─── Dispatch Log Entry ────────────────────────────────────────────────────
+
+export const DispatchLogEntrySchema = z.object({
+  id: z.string().min(1, 'Log entry ID must be non-empty'),
+  timestamp: z.string().datetime({ message: 'timestamp must be ISO 8601' }),
+  ruleId: z.string().min(1),
+  eventType: DispatchEventTypeSchema,
+  success: z.boolean(),
+  details: z.string().optional(),
+  actionResult: z.unknown().optional(),
+});
+
+export type DispatchLogEntry = z.infer<typeof DispatchLogEntrySchema>;
+
 // ─── Team Config ───────────────────────────────────────────────────────────
 
 export const TeamConfigSchema = z.object({
@@ -64,6 +139,8 @@ export const TeamConfigSchema = z.object({
   templateSource: z.string().optional(),
   roles: z.array(RoleDefinitionSchema).optional(),
   workflowConfig: WorkflowConfigSchema.optional(),
+  dispatchRules: z.array(DispatchRuleSchema).default([]),
+  dispatchLog: z.array(DispatchLogEntrySchema).default([]),
 });
 
 export type TeamConfig = z.infer<typeof TeamConfigSchema>;
