@@ -1,12 +1,12 @@
-import { describe, it, expect } from 'bun:test';
+import { describe, expect, it } from 'bun:test';
 import {
-  DispatchEventTypeSchema,
-  DispatchEventSchema,
-  DispatchConditionSchema,
   DispatchActionSchema,
-  DispatchRuleSchema,
+  DispatchConditionSchema,
+  DispatchEventSchema,
+  DispatchEventTypeSchema,
   DispatchLogEntrySchema,
-  TeamConfigSchema
+  DispatchRuleSchema,
+  TeamConfigSchema,
 } from '../src/types/schemas';
 
 describe('Dispatch Schemas', () => {
@@ -28,7 +28,7 @@ describe('Dispatch Schemas', () => {
         type: 'task.created' as const,
         teamName: 'team-a',
         timestamp: new Date().toISOString(),
-        payload: { taskId: 't-1' }
+        payload: { taskId: 't-1' },
       };
       expect(DispatchEventSchema.parse(event)).toEqual(event);
     });
@@ -55,7 +55,7 @@ describe('Dispatch Schemas', () => {
         type: 'simple_match' as const,
         field: 'priority',
         operator: 'eq' as const,
-        value: 'high'
+        value: 'high',
       };
       expect(DispatchConditionSchema.parse(cond)).toEqual(cond);
     });
@@ -65,7 +65,7 @@ describe('Dispatch Schemas', () => {
         type: 'resource_count' as const,
         resource: 'active_agents' as const,
         operator: 'gt' as const,
-        value: 2
+        value: 2,
       };
       expect(DispatchConditionSchema.parse(cond)).toEqual(cond);
     });
@@ -74,7 +74,7 @@ describe('Dispatch Schemas', () => {
       const cond = {
         type: 'simple_match',
         operator: 'invalid',
-        value: 'high'
+        value: 'high',
       };
       expect(() => DispatchConditionSchema.parse(cond)).toThrow();
     });
@@ -84,7 +84,7 @@ describe('Dispatch Schemas', () => {
     it('should parse assign_task action', () => {
       const action = {
         type: 'assign_task' as const,
-        params: { strategy: 'round_robin' }
+        params: { strategy: 'round_robin' },
       };
       expect(DispatchActionSchema.parse(action)).toEqual(action);
     });
@@ -99,13 +99,13 @@ describe('Dispatch Schemas', () => {
       const rule = {
         id: 'rule-1',
         eventType: 'task.created' as const,
-        action: { type: 'log' as const }
+        action: { type: 'log' as const },
       };
       const parsed = DispatchRuleSchema.parse(rule);
       expect(parsed).toEqual({
         ...rule,
         priority: 0,
-        enabled: true
+        enabled: true,
       });
     });
 
@@ -116,7 +116,7 @@ describe('Dispatch Schemas', () => {
         condition: { type: 'simple_match' as const, operator: 'eq' as const, value: true },
         action: { type: 'log' as const },
         priority: 10,
-        enabled: false
+        enabled: false,
       };
       expect(DispatchRuleSchema.parse(rule)).toEqual(rule);
     });
@@ -130,7 +130,7 @@ describe('Dispatch Schemas', () => {
         ruleId: 'rule-1',
         eventType: 'task.created' as const,
         success: true,
-        details: 'executed'
+        details: 'executed',
       };
       expect(DispatchLogEntrySchema.parse(entry)).toEqual(entry);
     });
@@ -142,15 +142,24 @@ describe('Dispatch Schemas', () => {
         name: 'team-dispatch',
         created: new Date().toISOString(),
         leader: 'leader-1',
-        members: [{ agentId: 'a1', agentName: 'A1', agentType: 'worker', joinedAt: new Date().toISOString() }],
-        dispatchRules: [{
-          id: 'r1',
-          eventType: 'task.created' as const,
-          action: { type: 'log' as const },
-          priority: 0,
-          enabled: true
-        }],
-        dispatchLog: []
+        members: [
+          {
+            agentId: 'a1',
+            agentName: 'A1',
+            agentType: 'worker',
+            joinedAt: new Date().toISOString(),
+          },
+        ],
+        dispatchRules: [
+          {
+            id: 'r1',
+            eventType: 'task.created' as const,
+            action: { type: 'log' as const },
+            priority: 0,
+            enabled: true,
+          },
+        ],
+        dispatchLog: [],
       };
       expect(TeamConfigSchema.parse(config)).toEqual(config);
     });
@@ -160,7 +169,14 @@ describe('Dispatch Schemas', () => {
         name: 'team-legacy',
         created: new Date().toISOString(),
         leader: 'leader-1',
-        members: [{ agentId: 'a1', agentName: 'A1', agentType: 'worker', joinedAt: new Date().toISOString() }]
+        members: [
+          {
+            agentId: 'a1',
+            agentName: 'A1',
+            agentType: 'worker',
+            joinedAt: new Date().toISOString(),
+          },
+        ],
       };
       const parsed = TeamConfigSchema.parse(config);
       expect(parsed.dispatchRules).toEqual([]);

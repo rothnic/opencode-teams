@@ -1,8 +1,9 @@
-import { existsSync, mkdtempSync, rmSync } from 'node:fs';
+import { existsSync, mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { TaskOperations } from '../operations/task';
 import { TeamOperations } from '../operations/team';
+import { TmuxOperations } from '../operations/tmux';
 import type { TeamConfig } from '../types/index';
 import type { E2EAgentRole, E2EHarnessConfig } from './scenarios/types';
 
@@ -66,14 +67,11 @@ export function destroyTestEnvironment(env: {
 export function setupTeamWithAgents(
   teamName: string,
   agents: E2EAgentRole[],
-  projectRoot?: string,
+  _projectRoot?: string,
 ): {
   team: TeamConfig;
   registeredAgents: Array<{ agentId: string; name: string; role: string }>;
 } {
-  if (projectRoot) {
-    const _p = projectRoot;
-  }
   if (agents.length === 0) {
     throw new Error('At least one agent is required');
   }
@@ -125,11 +123,8 @@ export async function waitForCondition(
 
 export function assertAllTasksCompleted(
   teamName: string,
-  projectRoot?: string,
+  _projectRoot?: string,
 ): { allCompleted: boolean; tasks: Array<{ id: string; title: string; status: string }> } {
-  if (projectRoot) {
-    const _p = projectRoot;
-  }
   const tasks = TaskOperations.getTasks(teamName);
 
   const allCompleted = tasks.length > 0 && tasks.every((t) => t.status === 'completed');
@@ -154,4 +149,49 @@ export function assertNoResidualState(tempDir: string): {
     clean: issues.length === 0,
     issues,
   };
+}
+
+/**
+ * Capture terminal output from a tmux pane and write to a recording file.
+ *
+ * @param paneId - tmux pane ID (e.g., "%42")
+ * @param outputDir - directory to write recording files
+ * @param label - descriptive label for the recording file name
+ * @param lines - number of lines to capture (default: 500)
+ * @returns path to the recording file, or null if capture failed
+ */
+export function captureRecording(
+  paneId: string,
+  outputDir: string,
+  label: string,
+  lines = 500,
+): string | null {
+  try {
+    mkdirSync(outputDir, { recursive: true });
+    const output = TmuxOperations.capturePaneOutput(paneId, lines);
+    if (!output) return null;
+    const filename = `${label}-${Date.now()}.txt`;
+    const filepath = join(outputDir, filename);
+    writeFileSync(filepath, output, 'utf-8');
+    return filepath;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Capture recordings for all agents with pane IDs.
+ * Returns array of recording file paths.
+ */
+export function captureAllRecordings(
+  agents: Array<{ name: string; paneId?: string }>,
+  outputDir: string,
+): string[] {
+  const recordings: string[] = [];
+  for (const agent of agents) {
+    if (!agent.paneId) continue;
+    const path = captureRecording(agent.paneId, outputDir, agent.name);
+    if (path) recordings.push(path);
+  }
+  return recordings;
 }

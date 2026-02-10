@@ -12,14 +12,21 @@ beforeEach(() => {
   testDir = mkdtempSync(join(tmpdir(), 'opencode-teams-template-'));
   savedEnv.OPENCODE_PROJECT_ROOT = process.env.OPENCODE_PROJECT_ROOT;
   savedEnv.OPENCODE_TEAMS_GLOBAL_DIR = process.env.OPENCODE_TEAMS_GLOBAL_DIR;
+  savedEnv.OPENCODE_TEAMS_DIR = process.env.OPENCODE_TEAMS_DIR;
   process.env.OPENCODE_PROJECT_ROOT = testDir;
   process.env.OPENCODE_TEAMS_GLOBAL_DIR = join(testDir, 'global-config');
+  delete process.env.OPENCODE_TEAMS_DIR;
 });
 
 afterEach(() => {
   rmSync(testDir, { recursive: true, force: true });
   process.env.OPENCODE_PROJECT_ROOT = savedEnv.OPENCODE_PROJECT_ROOT;
   process.env.OPENCODE_TEAMS_GLOBAL_DIR = savedEnv.OPENCODE_TEAMS_GLOBAL_DIR;
+  if (savedEnv.OPENCODE_TEAMS_DIR === undefined) {
+    delete process.env.OPENCODE_TEAMS_DIR;
+  } else {
+    process.env.OPENCODE_TEAMS_DIR = savedEnv.OPENCODE_TEAMS_DIR;
+  }
 });
 
 function validTemplate(overrides: Record<string, unknown> = {}) {

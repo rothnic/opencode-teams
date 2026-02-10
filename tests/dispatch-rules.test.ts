@@ -6,12 +6,12 @@ import { afterEach, beforeEach, describe, expect, it } from 'bun:test';
 import { existsSync, mkdtempSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { DispatchRuleOperations } from '../src/operations/dispatch-rules';
-import { TeamOperations } from '../src/operations/team';
-import { TaskOperations } from '../src/operations/task';
 import { AgentOperations } from '../src/operations/agent';
-import { EventBus } from '../src/operations/event-bus';
 import { initDispatchEngine } from '../src/operations/dispatch-engine';
+import { DispatchRuleOperations } from '../src/operations/dispatch-rules';
+import { EventBus } from '../src/operations/event-bus';
+import { TaskOperations } from '../src/operations/task';
+import { TeamOperations } from '../src/operations/team';
 import type { DispatchRule } from '../src/types/schemas';
 
 describe('DispatchRuleOperations', () => {
@@ -107,7 +107,7 @@ describe('DispatchRuleOperations', () => {
         },
         action: {
           type: 'log',
-          params: { message: 'High priority task detected' }
+          params: { message: 'High priority task detected' },
         },
         priority: 10,
         enabled: true,
@@ -117,10 +117,10 @@ describe('DispatchRuleOperations', () => {
 
       TaskOperations.createTask(teamName, {
         title: 'Urgent Task',
-        priority: 'high'
+        priority: 'high',
       });
 
-      await new Promise(resolve => setTimeout(resolve, 50));
+      await new Promise((resolve) => setTimeout(resolve, 50));
 
       const logs = DispatchRuleOperations.getDispatchLog(teamName);
       expect(logs).toHaveLength(1);
@@ -141,7 +141,7 @@ describe('DispatchRuleOperations', () => {
         },
         action: {
           type: 'log',
-          params: { message: 'High priority task detected' }
+          params: { message: 'High priority task detected' },
         },
         priority: 10,
         enabled: true,
@@ -151,10 +151,10 @@ describe('DispatchRuleOperations', () => {
 
       TaskOperations.createTask(teamName, {
         title: 'Normal Task',
-        priority: 'normal'
+        priority: 'normal',
       });
 
-      await new Promise(resolve => setTimeout(resolve, 50));
+      await new Promise((resolve) => setTimeout(resolve, 50));
 
       const logs = DispatchRuleOperations.getDispatchLog(teamName);
       expect(logs).toHaveLength(0);
@@ -163,7 +163,7 @@ describe('DispatchRuleOperations', () => {
 
   describe('E2E Integration', () => {
     it('should auto-assign unblocked task to idle agent via dispatch rule', async () => {
-      const task = TaskOperations.createTask(teamName, {
+      TaskOperations.createTask(teamName, {
         title: 'Pending Task',
         priority: 'high',
       });
@@ -197,7 +197,7 @@ describe('DispatchRuleOperations', () => {
           value: 'high',
         },
         action: {
-          type: 'assign_task'
+          type: 'assign_task',
         },
         priority: 10,
         enabled: true,
@@ -209,15 +209,15 @@ describe('DispatchRuleOperations', () => {
         priority: 'high',
       });
 
-      await new Promise(resolve => setTimeout(resolve, 50));
+      await new Promise((resolve) => setTimeout(resolve, 50));
 
       const tasks = TaskOperations.getTasks(teamName, { status: 'in_progress' });
-      const assigned = tasks.find(t => t.owner === workerId);
+      const assigned = tasks.find((t) => t.owner === workerId);
       expect(assigned).toBeDefined();
       expect(assigned?.status).toBe('in_progress');
-      
+
       const logs = DispatchRuleOperations.getDispatchLog(teamName);
-      expect(logs.some(l => l.ruleId === 'auto-assign-rule' && l.success)).toBe(true);
+      expect(logs.some((l) => l.ruleId === 'auto-assign-rule' && l.success)).toBe(true);
     });
 
     it('should notify leader when agent terminates', async () => {
@@ -231,7 +231,7 @@ describe('DispatchRuleOperations', () => {
           value: 'test',
         },
         action: {
-          type: 'notify_leader'
+          type: 'notify_leader',
         },
         priority: 10,
         enabled: true,
@@ -258,14 +258,16 @@ describe('DispatchRuleOperations', () => {
       });
 
       await AgentOperations.forceKill({ teamName, agentId: workerId, reason: 'test' });
-      
-      await new Promise(resolve => setTimeout(resolve, 100));
+
+      await new Promise((resolve) => setTimeout(resolve, 100));
 
       const logs = DispatchRuleOperations.getDispatchLog(teamName);
-      expect(logs.some(l => l.ruleId === 'notify-term' && l.success)).toBe(true);
+      expect(logs.some((l) => l.ruleId === 'notify-term' && l.success)).toBe(true);
 
       const messages = TeamOperations.readMessages(teamName, 'leader-1');
-      const termMsg = messages.find(m => m.from === 'dispatch-engine' && m.message.includes('terminated'));
+      const termMsg = messages.find(
+        (m) => m.from === 'dispatch-engine' && m.message.includes('terminated'),
+      );
       expect(termMsg).toBeDefined();
     });
 
@@ -281,7 +283,7 @@ describe('DispatchRuleOperations', () => {
         },
         action: {
           type: 'log',
-          params: { message: 'Fail' }
+          params: { message: 'Fail' },
         },
         priority: 10,
         enabled: false,
@@ -293,10 +295,10 @@ describe('DispatchRuleOperations', () => {
         priority: 'low',
       });
 
-      await new Promise(resolve => setTimeout(resolve, 50));
+      await new Promise((resolve) => setTimeout(resolve, 50));
 
       const logs = DispatchRuleOperations.getDispatchLog(teamName);
-      expect(logs.find(l => l.ruleId === 'disabled-rule')).toBeUndefined();
+      expect(logs.find((l) => l.ruleId === 'disabled-rule')).toBeUndefined();
     });
 
     it('should handle multiple rules in priority order', async () => {
@@ -311,7 +313,7 @@ describe('DispatchRuleOperations', () => {
         },
         action: {
           type: 'log',
-          params: { message: 'First' }
+          params: { message: 'First' },
         },
         priority: 1,
         enabled: true,
@@ -327,7 +329,7 @@ describe('DispatchRuleOperations', () => {
         },
         action: {
           type: 'log',
-          params: { message: 'Second' }
+          params: { message: 'Second' },
         },
         priority: 10,
         enabled: true,
@@ -341,11 +343,12 @@ describe('DispatchRuleOperations', () => {
         priority: 'normal',
       });
 
-      await new Promise(resolve => setTimeout(resolve, 50));
+      await new Promise((resolve) => setTimeout(resolve, 50));
 
-      const logs = DispatchRuleOperations.getDispatchLog(teamName)
-        .filter(l => l.ruleId === 'prio-1' || l.ruleId === 'prio-2');
-      
+      const logs = DispatchRuleOperations.getDispatchLog(teamName).filter(
+        (l) => l.ruleId === 'prio-1' || l.ruleId === 'prio-2',
+      );
+
       expect(logs).toHaveLength(2);
       // Rules fire in priority order (ascending): prio-1 (priority=1) before prio-2 (priority=10).
       // Both log entries share the same timestamp, so getDispatchLog's descending sort

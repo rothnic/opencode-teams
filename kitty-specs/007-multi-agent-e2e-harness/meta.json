@@ -1,0 +1,10 @@
+{
+  "feature_number": "007",
+  "slug": "007-multi-agent-e2e-harness",
+  "friendly_name": "Multi-Agent E2E Test Harness",
+  "mission": "software-dev",
+  "source_description": "Add a feature for E2E testing using an isolated tmp work environment that is cleaned up afterwards. It should allow us to see what would happen when building out test problems for various collections of agents. Start first with a planner and builder that can interact with each other. Then another one that has a planner and 2 builders and a reviewer where the planner handles planning out based on dependencies and tasking them and handles working in rework if a review comes back as needing adjustments. We want comprehensive e2e tests for key test cases that get increasingly complex and a way for us to capture screen recordings of the interactions. Make sure all of our testing using the gemini 3 flash model through antigravity.",
+  "created_at": "2026-02-10T22:31:00Z",
+  "target_branch": "main",
+  "vcs": "git"
+}

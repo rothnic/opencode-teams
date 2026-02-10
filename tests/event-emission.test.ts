@@ -17,7 +17,7 @@ describe('Event Emission', () => {
   beforeEach(() => {
     EventBus.clear();
     savedEnv.OPENCODE_TEAMS_DIR = process.env.OPENCODE_TEAMS_DIR;
-    
+
     tempDir = mkdtempSync(join(tmpdir(), 'opencode-events-test-'));
     process.env.OPENCODE_TEAMS_DIR = tempDir;
 
@@ -36,7 +36,7 @@ describe('Event Emission', () => {
       'task.unblocked',
       'agent.idle',
       'agent.terminated',
-      'session.idle'
+      'session.idle',
     ] as const;
 
     for (const type of eventTypes) {
@@ -80,7 +80,7 @@ describe('Event Emission', () => {
     it('emits task.completed when completing a task', () => {
       const task = TaskOperations.createTask(teamName, { title: 'To Complete' });
       TaskOperations.claimTask(teamName, task.id, 'worker-1');
-      
+
       // clear created event
       events = [];
 
@@ -102,18 +102,22 @@ describe('Event Emission', () => {
       });
 
       TaskOperations.claimTask(teamName, dep.id, 'worker-1');
-      
+
       // clear events
       events = [];
 
       TaskOperations.updateTask(teamName, dep.id, { status: 'completed' });
 
       // Should have task.completed for dep
-      const completedEvent = events.find((e) => e.type === 'task.completed' && e.payload.taskId === dep.id);
+      const completedEvent = events.find(
+        (e) => e.type === 'task.completed' && e.payload.taskId === dep.id,
+      );
       expect(completedEvent).toBeDefined();
 
       // Should have task.unblocked for dependent
-      const unblockedEvent = events.find((e) => e.type === 'task.unblocked' && e.payload.taskId === dependent.id);
+      const unblockedEvent = events.find(
+        (e) => e.type === 'task.unblocked' && e.payload.taskId === dependent.id,
+      );
       expect(unblockedEvent).toBeDefined();
       expect(unblockedEvent?.payload.title).toBe('Dependent');
     });
@@ -127,7 +131,7 @@ describe('Event Emission', () => {
       });
 
       TaskOperations.claimTask(teamName, dep1.id, 'worker-1');
-      
+
       events = [];
       TaskOperations.updateTask(teamName, dep1.id, { status: 'completed' });
 
@@ -170,7 +174,7 @@ describe('Event Emission', () => {
       });
 
       events = [];
-      
+
       // Update heartbeat with sdk_session_idle source
       AgentOperations.updateHeartbeat(agentId, 'sdk_session_idle');
 

@@ -1,6 +1,6 @@
 /**
  * Dispatch Rules Operations Module
- * 
+ *
  * Manages event-driven dispatch rules and logs for teams.
  * Uses file-lock and atomic writes for concurrency safety.
  */
@@ -95,16 +95,16 @@ export const DispatchRuleOperations = {
     }
 
     const config = withLock(lockPath, () => readValidatedJSON(configPath, TeamConfigSchema), false);
-    
+
     // Sort logs by timestamp descending (newest first)
-    const sortedLogs = [...config.dispatchLog].sort((a, b) => 
-      new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
+    const sortedLogs = [...config.dispatchLog].sort(
+      (a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime(),
     );
 
     if (limit && limit > 0) {
       return sortedLogs.slice(0, limit);
     }
-    
+
     return sortedLogs;
   },
 };

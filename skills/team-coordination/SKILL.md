@@ -58,7 +58,8 @@ This skill uses the following OpenCode tools (registered by opencode-teams plugi
 
 ### Event-Driven Dispatch
 
-- **add-dispatch-rule**: Add a new rule to trigger actions (assign task, notify) based on events (task created, agent idle)
+- **add-dispatch-rule**: Add a new rule to trigger actions (assign task, notify) based
+  on events (task created, agent idle)
 - **remove-dispatch-rule**: Remove a dispatch rule by ID
 - **list-dispatch-rules**: View all active dispatch rules for a team
 - **get-dispatch-log**: View the execution log of dispatch rules

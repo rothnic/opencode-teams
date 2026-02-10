@@ -9,7 +9,12 @@ import {
   TeamConfigSchema,
 } from '../types/schemas';
 import { lockedUpdate, readValidatedJSON } from '../utils/fs-atomic';
-import { fileExists, getTeamConfigPath, getTeamLockPath, getTeamTasksDir } from '../utils/storage-paths';
+import {
+  fileExists,
+  getTeamConfigPath,
+  getTeamLockPath,
+  getTeamTasksDir,
+} from '../utils/storage-paths';
 import { AgentOperations } from './agent';
 import { EventBus } from './event-bus';
 import { TaskOperations } from './task';
@@ -60,7 +65,7 @@ export const DispatchEngine = {
 
         if (conditionMet) {
           const result = await executeAction(rule.action, event, event.teamName);
-          
+
           const logEntry: DispatchLogEntry = {
             id: globalThis.crypto.randomUUID(),
             timestamp: new Date().toISOString(),
@@ -73,9 +78,8 @@ export const DispatchEngine = {
           appendDispatchLog(event.teamName, logEntry);
         }
       }
-
     } catch (error) {
-       console.error(`[DispatchEngine] Error evaluating event ${event.id}:`, error);
+      console.error(`[DispatchEngine] Error evaluating event ${event.id}:`, error);
     } finally {
       DispatchEngine._dispatchDepth--;
     }
@@ -102,36 +106,52 @@ function evaluateCondition(
 
 function getNestedField(obj: Record<string, unknown>, path: string): unknown {
   if (!path) return undefined;
-  return path.split('.').reduce((o, key) => (o && typeof o === 'object' ? (o as any)[key] : undefined), obj);
+  return path
+    .split('.')
+    .reduce((o, key) => (o && typeof o === 'object' ? (o as any)[key] : undefined), obj);
 }
 
 function compare(left: unknown, operator: string, right: unknown): boolean {
   if (typeof right === 'number') {
-      const numLeft = Number(left);
-      if (isNaN(numLeft)) return false;
-      
-      switch (operator) {
-        case 'eq': return numLeft === right;
-        case 'neq': return numLeft !== right;
-        case 'gt': return numLeft > right;
-        case 'lt': return numLeft < right;
-        case 'gte': return numLeft >= right;
-        case 'lte': return numLeft <= right;
-        default: return false;
-      }
+    const numLeft = Number(left);
+    if (isNaN(numLeft)) return false;
+
+    switch (operator) {
+      case 'eq':
+        return numLeft === right;
+      case 'neq':
+        return numLeft !== right;
+      case 'gt':
+        return numLeft > right;
+      case 'lt':
+        return numLeft < right;
+      case 'gte':
+        return numLeft >= right;
+      case 'lte':
+        return numLeft <= right;
+      default:
+        return false;
+    }
   }
 
   const strLeft = String(left);
   const strRight = String(right);
 
   switch (operator) {
-    case 'eq': return strLeft === strRight;
-    case 'neq': return strLeft !== strRight;
-    case 'gt': return strLeft > strRight;
-    case 'lt': return strLeft < strRight;
-    case 'gte': return strLeft >= strRight;
-    case 'lte': return strLeft <= strRight;
-    default: return false;
+    case 'eq':
+      return strLeft === strRight;
+    case 'neq':
+      return strLeft !== strRight;
+    case 'gt':
+      return strLeft > strRight;
+    case 'lt':
+      return strLeft < strRight;
+    case 'gte':
+      return strLeft >= strRight;
+    case 'lte':
+      return strLeft <= strRight;
+    default:
+      return false;
   }
 }
 
@@ -140,14 +160,14 @@ function getResourceCount(resource: string | undefined, teamName: string): numbe
     return countUnblockedPendingTasks(teamName);
   }
   if (resource === 'active_agents') {
-     const configPath = getTeamConfigPath(teamName);
-     if (!fileExists(configPath)) return 0;
-     try {
-       const config = readValidatedJSON(configPath, TeamConfigSchema);
-       return Math.max(0, config.members.length - 1);
-     } catch {
-       return 0;
-     }
+    const configPath = getTeamConfigPath(teamName);
+    if (!fileExists(configPath)) return 0;
+    try {
+      const config = readValidatedJSON(configPath, TeamConfigSchema);
+      return Math.max(0, config.members.length - 1);
+    } catch {
+      return 0;
+    }
   }
   return 0;
 }
@@ -157,34 +177,33 @@ function countUnblockedPendingTasks(teamName: string): number {
   let count = 0;
 
   try {
-     const files = readdirSync(tasksDir).filter((f) => f.endsWith('.json') && f !== '.lock');
-     for (const file of files) {
-       try {
-         const task = readValidatedJSON(`${tasksDir}/${file}`, TaskSchema);
-         if (task.status === 'pending') {
-            const allDepsComplete = task.dependencies.every((depId) => {
-                try {
-                   const depPath = `${tasksDir}/${depId}.json`;
-                   if (!fileExists(depPath)) return true;
-                   
-                   const dep = readValidatedJSON(depPath, TaskSchema);
-                   return dep.status === 'completed';
-                } catch {
-                   return true;
-                }
-            });
-            if (allDepsComplete) count++;
-         }
-       } catch {
-         // skip unreadable
-       }
-     }
+    const files = readdirSync(tasksDir).filter((f) => f.endsWith('.json') && f !== '.lock');
+    for (const file of files) {
+      try {
+        const task = readValidatedJSON(`${tasksDir}/${file}`, TaskSchema);
+        if (task.status === 'pending') {
+          const allDepsComplete = task.dependencies.every((depId) => {
+            try {
+              const depPath = `${tasksDir}/${depId}.json`;
+              if (!fileExists(depPath)) return true;
+
+              const dep = readValidatedJSON(depPath, TaskSchema);
+              return dep.status === 'completed';
+            } catch {
+              return true;
+            }
+          });
+          if (allDepsComplete) count++;
+        }
+      } catch {
+        // skip unreadable
+      }
+    }
   } catch {
     return 0;
   }
   return count;
 }
-
 
 async function executeAction(
   action: DispatchAction,
@@ -203,117 +222,112 @@ async function executeAction(
         return { success: false, details: `Unknown action type: ${(action as any).type}` };
     }
   } catch (error) {
-     const msg = error instanceof Error ? error.message : String(error);
-     return { success: false, details: `Action failed: ${msg}` };
+    const msg = error instanceof Error ? error.message : String(error);
+    return { success: false, details: `Action failed: ${msg}` };
   }
 }
 
 async function assignTaskAction(
   event: DispatchEvent,
-  teamName: string
+  teamName: string,
 ): Promise<{ success: boolean; details: string }> {
-    const agents = AgentOperations.listAgents({ teamName });
-    const idleAgents = agents.filter(a => a.status === 'idle' && a.isActive);
-    
-    if (idleAgents.length === 0) {
-        return { success: false, details: 'No idle agents available' };
-    }
-    
-    const tasks = TaskOperations.getTasks(teamName, { status: 'pending' });
-    const unblockedTasks = tasks.filter(task => TaskOperations.areDependenciesMet(teamName, task.id));
-    
-    if (unblockedTasks.length === 0) {
-        return { success: false, details: 'No unblocked pending tasks available' };
-    }
-    
-    const priorityMap: Record<string, number> = { high: 3, normal: 2, low: 1 };
-    unblockedTasks.sort((a, b) => {
-        const pA = priorityMap[a.priority] || 2;
-        const pB = priorityMap[b.priority] || 2;
-        if (pA !== pB) return pB - pA;
-        return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
-    });
-    
-    const taskToAssign = unblockedTasks[0];
-    const agentToAssign = idleAgents[0];
-    
-    try {
-        TaskOperations.claimTask(teamName, taskToAssign.id, agentToAssign.id);
-        
-        return { 
-            success: true, 
-            details: `Assigned task ${taskToAssign.id} to agent ${agentToAssign.id}` 
-        };
-    } catch (error) {
-        const msg = error instanceof Error ? error.message : String(error);
-        return { success: false, details: `Failed to claim task: ${msg}` };
-    }
+  const agents = AgentOperations.listAgents({ teamName });
+  const idleAgents = agents.filter((a) => a.status === 'idle' && a.isActive);
+
+  if (idleAgents.length === 0) {
+    return { success: false, details: 'No idle agents available' };
+  }
+
+  const tasks = TaskOperations.getTasks(teamName, { status: 'pending' });
+  const unblockedTasks = tasks.filter((task) =>
+    TaskOperations.areDependenciesMet(teamName, task.id),
+  );
+
+  if (unblockedTasks.length === 0) {
+    return { success: false, details: 'No unblocked pending tasks available' };
+  }
+
+  const priorityMap: Record<string, number> = { high: 3, normal: 2, low: 1 };
+  unblockedTasks.sort((a, b) => {
+    const pA = priorityMap[a.priority] || 2;
+    const pB = priorityMap[b.priority] || 2;
+    if (pA !== pB) return pB - pA;
+    return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
+  });
+
+  const taskToAssign = unblockedTasks[0];
+  const agentToAssign = idleAgents[0];
+
+  try {
+    TaskOperations.claimTask(teamName, taskToAssign.id, agentToAssign.id);
+
+    return {
+      success: true,
+      details: `Assigned task ${taskToAssign.id} to agent ${agentToAssign.id}`,
+    };
+  } catch (error) {
+    const msg = error instanceof Error ? error.message : String(error);
+    return { success: false, details: `Failed to claim task: ${msg}` };
+  }
 }
 
 function notifyLeaderAction(
-    event: DispatchEvent,
-    teamName: string,
-    params?: Record<string, unknown>
+  event: DispatchEvent,
+  teamName: string,
+  params?: Record<string, unknown>,
 ): { success: boolean; details: string } {
-    try {
-        const configPath = getTeamConfigPath(teamName);
-        if (!fileExists(configPath)) {
-            return { success: false, details: 'Team config not found' };
-        }
-        const config = readValidatedJSON(configPath, TeamConfigSchema);
-        
-        const message = (params?.message as string) || `Event ${event.type} occurred`;
-        
-        TeamOperations._sendTypedMessage(
-            teamName,
-            config.leader,
-            message,
-            'plain',
-             'dispatch-engine'
-        );
-        
-        return { success: true, details: `Notified leader ${config.leader}` };
-    } catch (error) {
-        const msg = error instanceof Error ? error.message : String(error);
-        return { success: false, details: `Failed to notify leader: ${msg}` };
+  try {
+    const configPath = getTeamConfigPath(teamName);
+    if (!fileExists(configPath)) {
+      return { success: false, details: 'Team config not found' };
     }
+    const config = readValidatedJSON(configPath, TeamConfigSchema);
+
+    const message = (params?.message as string) || `Event ${event.type} occurred`;
+
+    TeamOperations._sendTypedMessage(teamName, config.leader, message, 'plain', 'dispatch-engine');
+
+    return { success: true, details: `Notified leader ${config.leader}` };
+  } catch (error) {
+    const msg = error instanceof Error ? error.message : String(error);
+    return { success: false, details: `Failed to notify leader: ${msg}` };
+  }
 }
 
 function logAction(
-    event: DispatchEvent,
-    params?: Record<string, unknown>
+  event: DispatchEvent,
+  params?: Record<string, unknown>,
 ): { success: boolean; details: string } {
-    console.log(`[DispatchLog] Event: ${event.type} Team: ${event.teamName}`, params);
-    return { success: true, details: 'Logged to console' };
+  console.log(`[DispatchLog] Event: ${event.type} Team: ${event.teamName}`, params);
+  return { success: true, details: 'Logged to console' };
 }
 
-function appendDispatchLog(
-  teamName: string,
-  entry: DispatchLogEntry,
-  projectRoot?: string,
-): void {
+function appendDispatchLog(teamName: string, entry: DispatchLogEntry, projectRoot?: string): void {
   const configPath = getTeamConfigPath(teamName, projectRoot);
   const lockPath = getTeamLockPath(teamName, projectRoot);
 
   if (!fileExists(configPath)) return;
 
   try {
-      lockedUpdate(lockPath, configPath, TeamConfigSchema, (config) => {
-        const log = [...(config.dispatchLog || []), entry];
-        const trimmed = log.length > DISPATCH_LOG_MAX
-          ? log.slice(log.length - DISPATCH_LOG_MAX)
-          : log;
-        return { ...config, dispatchLog: trimmed };
-      });
+    lockedUpdate(lockPath, configPath, TeamConfigSchema, (config) => {
+      const log = [...(config.dispatchLog || []), entry];
+      const trimmed =
+        log.length > DISPATCH_LOG_MAX ? log.slice(log.length - DISPATCH_LOG_MAX) : log;
+      return { ...config, dispatchLog: trimmed };
+    });
   } catch (error) {
-      console.warn(`[DispatchEngine] Failed to append log: ${error}`);
+    console.warn(`[DispatchEngine] Failed to append log: ${error}`);
   }
 }
 
 export function initDispatchEngine(): void {
   const eventTypes: DispatchEventType[] = [
-    'task.created', 'task.completed', 'task.unblocked',
-    'agent.idle', 'agent.terminated', 'session.idle',
+    'task.created',
+    'task.completed',
+    'task.unblocked',
+    'agent.idle',
+    'agent.terminated',
+    'session.idle',
   ];
 
   for (const eventType of eventTypes) {
