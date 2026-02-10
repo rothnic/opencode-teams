@@ -28,11 +28,12 @@ describe('SessionManager (CLI)', () => {
     }
   });
 
-  const mockSpawnResult = (code: number, stdout = '', stderr = '') => ({
-    exitCode: code,
-    stdout: Buffer.from(stdout),
-    stderr: Buffer.from(stderr),
-  } as any);
+  const mockSpawnResult = (code: number, stdout = '', stderr = '') =>
+    ({
+      exitCode: code,
+      stdout: Buffer.from(stdout),
+      stderr: Buffer.from(stderr),
+    }) as any;
 
   // T027: deriveSessionName determinism and uniqueness
   describe('deriveSessionName', () => {
@@ -75,17 +76,17 @@ describe('SessionManager (CLI)', () => {
     it('should return metadata when file exists and tmux session is active', () => {
       const projectDir = '/test/project';
       const sessionName = SessionManager.deriveSessionName(projectDir);
-      
+
       const spawnSpy = spyOn(Bun, 'spawnSync').mockImplementation((args: any) => {
         const cmd = args.map((a: string) => a.toString());
         if (cmd[0] === 'which' && cmd[1] === 'tmux') return mockSpawnResult(0);
-        
+
         if (cmd[0] === 'tmux' && cmd[1] === 'has-session' && cmd[3] === sessionName) {
-            return mockSpawnResult(0);
+          return mockSpawnResult(0);
         }
-        
+
         if (cmd[0] === 'tmux' && cmd[1] === 'ls') {
-             return mockSpawnResult(1, '', 'no server running');
+          return mockSpawnResult(1, '', 'no server running');
         }
         if (cmd[0] === 'tmux' && cmd[1] === 'new-session') return mockSpawnResult(0);
         if (cmd[0] === 'tmux' && cmd[1] === 'select-layout') return mockSpawnResult(0);
@@ -94,46 +95,46 @@ describe('SessionManager (CLI)', () => {
       });
 
       SessionManager.launchSession(projectDir);
-      
+
       const detected = SessionManager.detectSession(projectDir);
       expect(detected).not.toBeNull();
       expect(detected?.sessionName).toBe(sessionName);
-      
+
       spawnSpy.mockRestore();
     });
 
     it('should clean up metadata when tmux session is gone', () => {
       const projectDir = '/test/project-dead';
       const sessionName = SessionManager.deriveSessionName(projectDir);
-      
+
       let sessionActive = true;
       const spawnSpy = spyOn(Bun, 'spawnSync').mockImplementation((args: any) => {
         const cmd = args.map((a: string) => a.toString());
         if (cmd[0] === 'which' && cmd[1] === 'tmux') return mockSpawnResult(0);
-        
+
         if (cmd[0] === 'tmux' && cmd[1] === 'ls') {
-             return mockSpawnResult(1, '', 'no server running');
+          return mockSpawnResult(1, '', 'no server running');
         }
         if (cmd[0] === 'tmux' && cmd[1] === 'new-session') return mockSpawnResult(0);
         if (cmd[0] === 'tmux' && cmd[1] === 'select-layout') return mockSpawnResult(0);
 
         if (cmd[0] === 'tmux' && cmd[1] === 'has-session' && cmd[3] === sessionName) {
-            return mockSpawnResult(sessionActive ? 0 : 1);
+          return mockSpawnResult(sessionActive ? 0 : 1);
         }
 
         return mockSpawnResult(1);
       });
 
       SessionManager.launchSession(projectDir);
-      
+
       sessionActive = false;
-      
+
       const detected = SessionManager.detectSession(projectDir);
       expect(detected).toBeNull();
-      
+
       const detected2 = SessionManager.detectSession(projectDir);
       expect(detected2).toBeNull();
-      
+
       spawnSpy.mockRestore();
     });
   });
@@ -141,52 +142,60 @@ describe('SessionManager (CLI)', () => {
   // T029: metadata read/write with Zod validation
   describe('Metadata Validation', () => {
     it('should validate metadata structure on read', () => {
-        const projectDir = '/test/project-valid';
-        
-        const spawnSpy = spyOn(Bun, 'spawnSync').mockImplementation((args: any) => {
-             const cmd = args.map((a: string) => a.toString());
-             if (cmd[0] === 'which' && cmd[1] === 'tmux') return mockSpawnResult(0);
-             if (cmd[0] === 'tmux' && cmd[1] === 'ls') return mockSpawnResult(1, '', 'no server running');
-             if (cmd[0] === 'tmux' && cmd[1] === 'new-session') return mockSpawnResult(0);
-             if (cmd[0] === 'tmux' && cmd[1] === 'select-layout') return mockSpawnResult(0);
-             if (cmd[0] === 'tmux' && cmd[1] === 'has-session') return mockSpawnResult(0);
-             return mockSpawnResult(0);
-        });
-        
-        const launched = SessionManager.launchSession(projectDir);
-        const detected = SessionManager.detectSession(projectDir);
-        
-        expect(detected).toEqual(launched);
-        
-        spawnSpy.mockRestore();
+      const projectDir = '/test/project-valid';
+
+      const spawnSpy = spyOn(Bun, 'spawnSync').mockImplementation((args: any) => {
+        const cmd = args.map((a: string) => a.toString());
+        if (cmd[0] === 'which' && cmd[1] === 'tmux') return mockSpawnResult(0);
+        if (cmd[0] === 'tmux' && cmd[1] === 'ls')
+          return mockSpawnResult(1, '', 'no server running');
+        if (cmd[0] === 'tmux' && cmd[1] === 'new-session') return mockSpawnResult(0);
+        if (cmd[0] === 'tmux' && cmd[1] === 'select-layout') return mockSpawnResult(0);
+        if (cmd[0] === 'tmux' && cmd[1] === 'has-session') return mockSpawnResult(0);
+        return mockSpawnResult(0);
+      });
+
+      const launched = SessionManager.launchSession(projectDir);
+      const detected = SessionManager.detectSession(projectDir);
+
+      expect(detected).toEqual(launched);
+
+      spawnSpy.mockRestore();
     });
 
     it('should fail validation for invalid metadata', () => {
-        const projectDir = '/test/project-invalid';
-        const sessionName = SessionManager.deriveSessionName(projectDir);
-        
-        const sessionsDir = join(tempDir, 'sessions');
-        try { require('fs').mkdirSync(sessionsDir, { recursive: true }); } catch {}
-        
-        const metadataPath = join(sessionsDir, `${sessionName}.json`);
-        writeFileSync(metadataPath, JSON.stringify({
-            foo: 'bar' 
-        }));
+      const projectDir = '/test/project-invalid';
+      const sessionName = SessionManager.deriveSessionName(projectDir);
 
-        const result = SessionManager.detectSession(projectDir);
-        expect(result).toBeNull();
+      const sessionsDir = join(tempDir, 'sessions');
+      try {
+        require('fs').mkdirSync(sessionsDir, { recursive: true });
+      } catch {
+        /* ignore if already exists */
+      }
+
+      const metadataPath = join(sessionsDir, `${sessionName}.json`);
+      writeFileSync(
+        metadataPath,
+        JSON.stringify({
+          foo: 'bar',
+        }),
+      );
+
+      const result = SessionManager.detectSession(projectDir);
+      expect(result).toBeNull();
     });
-    
+
     it('should apply default values correctly', () => {
-        const schema = SessionMetadataSchema;
-        const minimal = {
-            projectDir: '/p',
-            sessionName: 's',
-            createdAt: 'd'
-        };
-        const parsed = schema.parse(minimal);
-        expect(parsed.agentPanes).toEqual([]); 
-        expect(parsed.autoCleanupEnabled).toBe(true); 
+      const schema = SessionMetadataSchema;
+      const minimal = {
+        projectDir: '/p',
+        sessionName: 's',
+        createdAt: 'd',
+      };
+      const parsed = schema.parse(minimal);
+      expect(parsed.agentPanes).toEqual([]);
+      expect(parsed.autoCleanupEnabled).toBe(true);
     });
   });
 });
