@@ -40,3 +40,5 @@ __pycache__/
 # Spec Kitty runtime state
 .kittify/.dashboard
 .kittify/workspaces/
+# Excluded via sparse-checkout
+kitty-specs/

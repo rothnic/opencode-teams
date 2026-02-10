@@ -6,10 +6,17 @@
  */
 
 export type {
+  AgentState,
+  AgentStatus,
+  HeartbeatRecord,
+  HeartbeatSource,
   Inbox,
   LeaderInfo,
   Message,
   MessageType,
+  ServerInfo,
+  ShutdownPhase,
+  ShutdownRequest,
   Task,
   TaskCreateInput,
   TaskFilters,
@@ -21,10 +28,17 @@ export type {
 } from './schemas';
 
 export {
+  AgentStateSchema,
+  AgentStatusSchema,
+  HeartbeatRecordSchema,
+  HeartbeatSourceSchema,
   InboxSchema,
   LeaderInfoSchema,
   MessageSchema,
   MessageTypeSchema,
+  ServerInfoSchema,
+  ShutdownPhaseSchema,
+  ShutdownRequestSchema,
   TaskCreateInputSchema,
   TaskFiltersSchema,
   TaskSchema,
