@@ -1,23 +1,27 @@
 ---
-work_package_id: "WP03"
-title: "Status Transitions + Cascade Unblocking"
-lane: "planned"
+work_package_id: WP03
+title: Status Transitions + Cascade Unblocking
+lane: "doing"
+dependencies: []
+base_branch: main
+base_commit: e8c8da4de4adbc31c0b7e022d603c62e2ed1b7cd
+created_at: '2026-02-10T04:05:54.120420+00:00'
 subtasks:
-  - "T011"
-  - "T012"
-  - "T013"
-  - "T014"
-phase: "Phase 2 - Logic Hardening"
-assignee: ""
-agent: ""
-shell_pid: ""
-review_status: ""
-reviewed_by: ""
+- T011
+- T012
+- T013
+- T014
+phase: Phase 2 - Logic Hardening
+assignee: ''
+agent: ''
+shell_pid: "1368003"
+review_status: ''
+reviewed_by: ''
 history:
-  - timestamp: "2026-02-10T16:24:00Z"
-    lane: "planned"
-    agent: "system"
-    action: "Prompt generated via /spec-kitty.tasks"
+- timestamp: '2026-02-10T16:24:00Z'
+  lane: planned
+  agent: system
+  action: Prompt generated via /spec-kitty.tasks
 ---
 
 # Work Package Prompt: WP03 -- Status Transitions + Cascade Unblocking
