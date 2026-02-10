@@ -1,7 +1,7 @@
 ---
 work_package_id: 'WP05'
 title: 'Agent Spawn Operations'
-lane: "doing"
+lane: "for_review"
 subtasks:
   - 'T028'
   - 'T029'
@@ -371,3 +371,4 @@ describe('AgentOperations', () => {
 ## Activity Log
 
 - 2026-02-10T14:37:04Z – unknown – lane=doing – Code already on main
+- 2026-02-10T14:37:06Z – unknown – lane=for_review – Code already on main, verified
