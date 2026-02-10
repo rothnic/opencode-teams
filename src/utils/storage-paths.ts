@@ -228,6 +228,23 @@ export function getSessionMetadataPath(sessionName: string, projectRoot?: string
 }
 
 /**
+ * Get the project-local templates directory.
+ * <project-root>/.opencode/opencode-teams/templates/
+ */
+export function getProjectTemplatesDir(projectRoot?: string): string {
+  const dir = join(getProjectStorageDir(projectRoot), 'templates');
+  ensureDir(dir);
+  return dir;
+}
+
+/**
+ * Get a specific template file path (project-local).
+ */
+export function getTemplatePath(templateName: string, projectRoot?: string): string {
+  return join(getProjectTemplatesDir(projectRoot), `${templateName}.json`);
+}
+
+/**
  * Get the global templates directory.
  * ~/.config/opencode/opencode-teams/templates/
  */

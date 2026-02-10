@@ -16,6 +16,7 @@ export type {
   Message,
   MessageType,
   PaneInfo,
+  RoleDefinition,
   ServerInfo,
   SessionMetadata,
   ShutdownPhase,
@@ -28,6 +29,9 @@ export type {
   TeamConfig,
   TeamMember,
   TeamSummary,
+  TeamTemplate,
+  TopologyType,
+  WorkflowConfig,
 } from './schemas';
 
 export {
@@ -41,6 +45,7 @@ export {
   MessageSchema,
   MessageTypeSchema,
   PaneInfoSchema,
+  RoleDefinitionSchema,
   ServerInfoSchema,
   SessionMetadataSchema,
   ShutdownPhaseSchema,
@@ -53,6 +58,9 @@ export {
   TeamConfigSchema,
   TeamMemberSchema,
   TeamSummarySchema,
+  TeamTemplateSchema,
+  TopologyTypeSchema,
+  WorkflowConfigSchema,
 } from './schemas';
 
 // Legacy types that are not schema-backed (kept for backward compat)

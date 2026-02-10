@@ -19,6 +19,35 @@ export const TeamMemberSchema = z.object({
 
 export type TeamMember = z.infer<typeof TeamMemberSchema>;
 
+// ─── Topology Type ─────────────────────────────────────────────────────────
+
+export const TopologyTypeSchema = z.enum(['flat', 'hierarchical']);
+
+export type TopologyType = z.infer<typeof TopologyTypeSchema>;
+
+// ─── Role Definition ───────────────────────────────────────────────────────
+
+export const RoleDefinitionSchema = z.object({
+  name: z.string().min(1, 'Role name must be non-empty'),
+  allowedTools: z.array(z.string()).optional(),
+  deniedTools: z.array(z.string()).optional(),
+  description: z.string().optional(),
+});
+
+export type RoleDefinition = z.infer<typeof RoleDefinitionSchema>;
+
+// ─── Workflow Config ───────────────────────────────────────────────────────
+
+export const WorkflowConfigSchema = z.object({
+  enabled: z.boolean().default(false),
+  taskThreshold: z.number().int().positive().default(5),
+  workerRatio: z.number().positive().default(3.0),
+  cooldownSeconds: z.number().int().nonnegative().default(300),
+  lastSuggestionAt: z.string().datetime().optional(),
+});
+
+export type WorkflowConfig = z.infer<typeof WorkflowConfigSchema>;
+
 // ─── Team Config ───────────────────────────────────────────────────────────
 
 export const TeamConfigSchema = z.object({
@@ -30,6 +59,11 @@ export const TeamConfigSchema = z.object({
   leader: z.string().min(1, 'leader must be non-empty'),
   members: z.array(TeamMemberSchema).min(1, 'Team must have at least one member'),
   shutdownApprovals: z.array(z.string()).optional(),
+  topology: TopologyTypeSchema.optional(),
+  description: z.string().optional(),
+  templateSource: z.string().optional(),
+  roles: z.array(RoleDefinitionSchema).optional(),
+  workflowConfig: WorkflowConfigSchema.optional(),
 });
 
 export type TeamConfig = z.infer<typeof TeamConfigSchema>;
@@ -142,6 +176,24 @@ export const TaskFiltersSchema = z.object({
 
 export type TaskFilters = z.infer<typeof TaskFiltersSchema>;
 
+// ─── Team Template ─────────────────────────────────────────────────────────
+
+export const TeamTemplateSchema = z.object({
+  name: z
+    .string()
+    .min(1)
+    .regex(/^[a-z0-9-]+$/, 'Template name must be kebab-case'),
+  description: z.string().optional(),
+  topology: TopologyTypeSchema.default('flat'),
+  roles: z.array(RoleDefinitionSchema).min(1, 'Template must define at least one role'),
+  defaultTasks: z.array(TaskCreateInputSchema).optional(),
+  workflowConfig: WorkflowConfigSchema.optional(),
+  createdAt: z.string().datetime({ message: 'createdAt must be ISO 8601' }),
+  updatedAt: z.string().datetime().optional(),
+});
+
+export type TeamTemplate = z.infer<typeof TeamTemplateSchema>;
+
 // ─── Leader Info (for team creation) ───────────────────────────────────────
 
 export const LeaderInfoSchema = z.object({
@@ -172,7 +224,7 @@ export const AgentStateSchema = z.object({
   id: z.string().min(1, 'Agent ID must be non-empty'),
   name: z.string().min(1, 'Agent name must be non-empty'),
   teamName: z.string().min(1, 'Team name must be non-empty'),
-  role: z.enum(['leader', 'worker', 'reviewer']).default('worker'),
+  role: z.enum(['leader', 'worker', 'reviewer', 'task-manager']).default('worker'),
 
   // Model configuration
   model: z.string().min(1, 'Model identifier must be non-empty'),

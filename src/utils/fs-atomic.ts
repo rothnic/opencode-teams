@@ -197,12 +197,12 @@ export function lockedWrite(
  * @param updateFn - Function that takes the current data and returns updated data
  * @returns The updated data
  */
-export function lockedUpdate<T>(
+export function lockedUpdate<S extends ZodType>(
   lockPath: string,
   filePath: string,
-  schema: ZodType<T>,
-  updateFn: (current: T) => T,
-): T {
+  schema: S,
+  updateFn: (current: S['_output']) => S['_output'],
+): S['_output'] {
   const lock = acquireLock(lockPath, true); // exclusive lock
   try {
     const current = readValidatedJSON(filePath, schema);
@@ -224,16 +224,16 @@ export function lockedUpdate<T>(
  * @param updateFn - Function that takes the current data and returns updated data
  * @returns The updated data
  */
-export function lockedUpsert<T>(
+export function lockedUpsert<S extends ZodType>(
   lockPath: string,
   filePath: string,
-  schema: ZodType<T>,
-  defaultValue: T,
-  updateFn: (current: T) => T,
-): T {
+  schema: S,
+  defaultValue: S['_output'],
+  updateFn: (current: S['_output']) => S['_output'],
+): S['_output'] {
   const lock = acquireLock(lockPath, true);
   try {
-    let current: T;
+    let current: S['_output'];
     if (existsSync(filePath)) {
       current = readValidatedJSON(filePath, schema);
     } else {
