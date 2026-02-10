@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach } from 'bun:test';
+import { afterAll, beforeEach, describe, expect, it } from 'bun:test';
 import { EventBus } from '../src/operations/event-bus';
 import type { DispatchEvent } from '../src/types/schemas';
 
@@ -7,12 +7,16 @@ describe('EventBus', () => {
     EventBus.clear();
   });
 
+  afterAll(() => {
+    EventBus.clear();
+  });
+
   const mockEvent: DispatchEvent = {
     id: 'e1',
     type: 'task.created',
     teamName: 'team1',
     timestamp: new Date().toISOString(),
-    payload: { taskId: 't1' }
+    payload: { taskId: 't1' },
   };
 
   it('should subscribe and receive events', async () => {
@@ -27,8 +31,12 @@ describe('EventBus', () => {
 
   it('should handle multiple subscribers', async () => {
     let count = 0;
-    EventBus.subscribe('task.created', () => { count++; });
-    EventBus.subscribe('task.created', () => { count++; });
+    EventBus.subscribe('task.created', () => {
+      count++;
+    });
+    EventBus.subscribe('task.created', () => {
+      count++;
+    });
 
     await EventBus.emit(mockEvent);
     expect(count).toBe(2);
@@ -36,8 +44,10 @@ describe('EventBus', () => {
 
   it('should unsubscribe correctly', async () => {
     let count = 0;
-    const unsubscribe = EventBus.subscribe('task.created', () => { count++; });
-    
+    const unsubscribe = EventBus.subscribe('task.created', () => {
+      count++;
+    });
+
     unsubscribe();
     await EventBus.emit(mockEvent);
     expect(count).toBe(0);
@@ -54,8 +64,10 @@ describe('EventBus', () => {
 
   it('should clear all handlers', async () => {
     let count = 0;
-    EventBus.subscribe('task.created', () => { count++; });
-    
+    EventBus.subscribe('task.created', () => {
+      count++;
+    });
+
     EventBus.clear();
     await EventBus.emit(mockEvent);
     expect(count).toBe(0);
@@ -69,7 +81,7 @@ describe('EventBus', () => {
   it('should support async handlers', async () => {
     let processed = false;
     EventBus.subscribe('task.created', async () => {
-      await new Promise(resolve => setTimeout(resolve, 10));
+      await new Promise((resolve) => setTimeout(resolve, 10));
       processed = true;
     });
 
