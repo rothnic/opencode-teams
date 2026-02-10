@@ -1,7 +1,7 @@
 ---
 work_package_id: 'WP07'
 title: 'Heartbeat and Monitoring'
-lane: 'planned'
+lane: "doing"
 subtasks:
   - 'T039'
   - 'T040'
@@ -438,3 +438,7 @@ describe('AgentOperations - Heartbeat', () => {
 - [ ] `recoverContextLimit()` creates new session, captures context, re-prompts
 - [ ] `bun test tests/agent-heartbeat.test.ts` passes
 - [ ] No `as any` or type suppression
+
+## Activity Log
+
+- 2026-02-10T14:37:20Z – unknown – lane=doing – Code already on main
