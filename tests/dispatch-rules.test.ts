@@ -9,6 +9,7 @@ import { join } from 'node:path';
 import { DispatchRuleOperations } from '../src/operations/dispatch-rules';
 import { TeamOperations } from '../src/operations/team';
 import { TaskOperations } from '../src/operations/task';
+import { AgentOperations } from '../src/operations/agent';
 import { EventBus } from '../src/operations/event-bus';
 import { initDispatchEngine } from '../src/operations/dispatch-engine';
 import type { DispatchRule } from '../src/types/schemas';
@@ -157,6 +158,197 @@ describe('DispatchRuleOperations', () => {
 
       const logs = DispatchRuleOperations.getDispatchLog(teamName);
       expect(logs).toHaveLength(0);
+    });
+  });
+
+  describe('E2E Integration', () => {
+    it('should auto-assign unblocked task to idle agent via dispatch rule', async () => {
+      const task = TaskOperations.createTask(teamName, {
+        title: 'Pending Task',
+        priority: 'high',
+      });
+
+      const workerId = 'worker-1';
+      AgentOperations.registerAgent({
+        id: workerId,
+        name: 'Worker',
+        teamName,
+        role: 'worker',
+        model: 'test-model',
+        sessionId: 'session-worker-1',
+        serverPort: 3000,
+        cwd: '/tmp',
+        color: '#0000FF',
+        status: 'idle',
+        isActive: true,
+        createdAt: new Date().toISOString(),
+        heartbeatTs: new Date().toISOString(),
+        consecutiveMisses: 0,
+        sessionRotationCount: 0,
+      });
+
+      const rule: DispatchRule = {
+        id: 'auto-assign-rule',
+        eventType: 'task.created',
+        condition: {
+          type: 'simple_match',
+          field: 'priority',
+          operator: 'eq',
+          value: 'high',
+        },
+        action: {
+          type: 'assign_task'
+        },
+        priority: 10,
+        enabled: true,
+      };
+      DispatchRuleOperations.addDispatchRule(teamName, rule);
+
+      TaskOperations.createTask(teamName, {
+        title: 'Trigger Task',
+        priority: 'high',
+      });
+
+      await new Promise(resolve => setTimeout(resolve, 50));
+
+      const tasks = TaskOperations.getTasks(teamName, { status: 'in_progress' });
+      const assigned = tasks.find(t => t.owner === workerId);
+      expect(assigned).toBeDefined();
+      expect(assigned?.status).toBe('in_progress');
+      
+      const logs = DispatchRuleOperations.getDispatchLog(teamName);
+      expect(logs.some(l => l.ruleId === 'auto-assign-rule' && l.success)).toBe(true);
+    });
+
+    it('should notify leader when agent terminates', async () => {
+      const rule: DispatchRule = {
+        id: 'notify-term',
+        eventType: 'agent.terminated',
+        condition: {
+          type: 'simple_match',
+          field: 'reason',
+          operator: 'eq',
+          value: 'test',
+        },
+        action: {
+          type: 'notify_leader'
+        },
+        priority: 10,
+        enabled: true,
+      };
+      DispatchRuleOperations.addDispatchRule(teamName, rule);
+
+      const workerId = 'worker-term';
+      AgentOperations.registerAgent({
+        id: workerId,
+        name: 'Worker Term',
+        teamName,
+        role: 'worker',
+        model: 'test-model',
+        sessionId: 'session-worker-term',
+        serverPort: 3001,
+        cwd: '/tmp',
+        color: '#00FF00',
+        status: 'idle',
+        isActive: true,
+        createdAt: new Date().toISOString(),
+        heartbeatTs: new Date().toISOString(),
+        consecutiveMisses: 0,
+        sessionRotationCount: 0,
+      });
+
+      await AgentOperations.forceKill({ teamName, agentId: workerId, reason: 'test' });
+      
+      await new Promise(resolve => setTimeout(resolve, 100));
+
+      const logs = DispatchRuleOperations.getDispatchLog(teamName);
+      expect(logs.some(l => l.ruleId === 'notify-term' && l.success)).toBe(true);
+
+      const messages = TeamOperations.readMessages(teamName, 'leader-1');
+      const termMsg = messages.find(m => m.from === 'dispatch-engine' && m.message.includes('terminated'));
+      expect(termMsg).toBeDefined();
+    });
+
+    it('should respect disabled rules', async () => {
+      const rule: DispatchRule = {
+        id: 'disabled-rule',
+        eventType: 'task.created',
+        condition: {
+          type: 'simple_match',
+          field: 'priority',
+          operator: 'eq',
+          value: 'low',
+        },
+        action: {
+          type: 'log',
+          params: { message: 'Fail' }
+        },
+        priority: 10,
+        enabled: false,
+      };
+      DispatchRuleOperations.addDispatchRule(teamName, rule);
+
+      TaskOperations.createTask(teamName, {
+        title: 'Low Task',
+        priority: 'low',
+      });
+
+      await new Promise(resolve => setTimeout(resolve, 50));
+
+      const logs = DispatchRuleOperations.getDispatchLog(teamName);
+      expect(logs.find(l => l.ruleId === 'disabled-rule')).toBeUndefined();
+    });
+
+    it('should handle multiple rules in priority order', async () => {
+      const rule1: DispatchRule = {
+        id: 'prio-1',
+        eventType: 'task.created',
+        condition: {
+          type: 'simple_match',
+          field: 'priority',
+          operator: 'eq',
+          value: 'normal',
+        },
+        action: {
+          type: 'log',
+          params: { message: 'First' }
+        },
+        priority: 1,
+        enabled: true,
+      };
+      const rule2: DispatchRule = {
+        id: 'prio-2',
+        eventType: 'task.created',
+        condition: {
+          type: 'simple_match',
+          field: 'priority',
+          operator: 'eq',
+          value: 'normal',
+        },
+        action: {
+          type: 'log',
+          params: { message: 'Second' }
+        },
+        priority: 10,
+        enabled: true,
+      };
+
+      DispatchRuleOperations.addDispatchRule(teamName, rule1);
+      DispatchRuleOperations.addDispatchRule(teamName, rule2);
+
+      TaskOperations.createTask(teamName, {
+        title: 'Medium Task',
+        priority: 'normal',
+      });
+
+      await new Promise(resolve => setTimeout(resolve, 50));
+
+      const logs = DispatchRuleOperations.getDispatchLog(teamName)
+        .filter(l => l.ruleId === 'prio-1' || l.ruleId === 'prio-2');
+      
+      expect(logs).toHaveLength(2);
+      expect(logs[0].ruleId).toBe('prio-2');
+      expect(logs[1].ruleId).toBe('prio-1');
     });
   });
 });
