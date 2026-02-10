@@ -151,3 +151,138 @@ export const LeaderInfoSchema = z.object({
 });
 
 export type LeaderInfo = z.infer<typeof LeaderInfoSchema>;
+
+// ─── Agent Status ───────────────────────────────────────────────────────────
+
+export const AgentStatusSchema = z.enum([
+  'spawning', // Process started, not yet confirmed alive
+  'active', // Running and heartbeating normally
+  'idle', // Session idle event received, waiting for input
+  'inactive', // Heartbeat timeout, presumed dead
+  'shutting_down', // Graceful shutdown in progress
+  'terminated', // Clean shutdown completed
+]);
+
+export type AgentStatus = z.infer<typeof AgentStatusSchema>;
+
+// ─── Agent State ────────────────────────────────────────────────────────────
+
+export const AgentStateSchema = z.object({
+  // Identity
+  id: z.string().min(1, 'Agent ID must be non-empty'),
+  name: z.string().min(1, 'Agent name must be non-empty'),
+  teamName: z.string().min(1, 'Team name must be non-empty'),
+  role: z.enum(['leader', 'worker', 'reviewer']).default('worker'),
+
+  // Model configuration
+  model: z.string().min(1, 'Model identifier must be non-empty'),
+  providerId: z.string().optional(),
+
+  // Process linkage
+  sessionId: z.string().min(1, 'Session ID must be non-empty'),
+  paneId: z.string().optional(),
+  serverPort: z.number().int().min(1024).max(65535),
+
+  // Working context
+  cwd: z.string().min(1, 'Working directory must be non-empty'),
+  initialPrompt: z.string().optional(),
+
+  // Visual identification
+  color: z.string().regex(/^#[0-9a-fA-F]{6}$/, 'Color must be hex format (#RRGGBB)'),
+
+  // Lifecycle state
+  status: AgentStatusSchema,
+  isActive: z.boolean(),
+
+  // Timestamps (all ISO 8601)
+  createdAt: z.string().datetime({ message: 'createdAt must be ISO 8601' }),
+  heartbeatTs: z.string().datetime({ message: 'heartbeatTs must be ISO 8601' }),
+  updatedAt: z.string().datetime().optional(),
+  terminatedAt: z.string().datetime().optional(),
+
+  // Error tracking
+  consecutiveMisses: z.number().int().nonnegative().default(0),
+  lastError: z.string().optional(),
+  sessionRotationCount: z.number().int().nonnegative().default(0),
+});
+
+export type AgentState = z.infer<typeof AgentStateSchema>;
+
+// ─── Server Info ────────────────────────────────────────────────────────────
+
+export const ServerInfoSchema = z.object({
+  // Identity
+  projectPath: z.string().min(1, 'Project path must be non-empty'),
+  projectHash: z.string().min(1, 'Project hash must be non-empty'),
+
+  // Process
+  pid: z.number().int().positive(),
+  port: z.number().int().min(28000).max(28999),
+  hostname: z.string().default('127.0.0.1'),
+
+  // State
+  isRunning: z.boolean(),
+  activeSessions: z.number().int().nonnegative().default(0),
+
+  // Paths
+  logPath: z.string().optional(),
+
+  // Timestamps
+  startedAt: z.string().datetime({ message: 'startedAt must be ISO 8601' }),
+  lastHealthCheck: z.string().datetime().optional(),
+});
+
+export type ServerInfo = z.infer<typeof ServerInfoSchema>;
+
+// ─── Heartbeat Record ───────────────────────────────────────────────────────
+
+export const HeartbeatSourceSchema = z.enum([
+  'tool', // Explicit heartbeat tool call by agent
+  'sdk_session_idle', // SDK session.idle event
+  'sdk_session_updated', // SDK session.updated event
+  'sdk_tool_execute', // SDK tool.execute.after event
+]);
+
+export type HeartbeatSource = z.infer<typeof HeartbeatSourceSchema>;
+
+export const HeartbeatRecordSchema = z.object({
+  agentId: z.string().min(1),
+  sessionId: z.string().min(1),
+  source: HeartbeatSourceSchema,
+  timestamp: z.string().datetime({ message: 'timestamp must be ISO 8601' }),
+  metadata: z.record(z.string(), z.unknown()).optional(),
+});
+
+export type HeartbeatRecord = z.infer<typeof HeartbeatRecordSchema>;
+
+// ─── Shutdown Request ───────────────────────────────────────────────────────
+
+export const ShutdownPhaseSchema = z.enum([
+  'requested', // Leader sent shutdown request
+  'approved', // Target agent approved shutdown
+  'rejected', // Target agent rejected shutdown
+  'confirmed', // Shutdown cycle completed
+  'force_killed', // Bypassed negotiation via force kill
+]);
+
+export type ShutdownPhase = z.infer<typeof ShutdownPhaseSchema>;
+
+export const ShutdownRequestSchema = z.object({
+  id: z.string().min(1, 'Request ID must be non-empty'),
+  requesterAgentId: z.string().min(1),
+  targetAgentId: z.string().min(1),
+  teamName: z.string().min(1),
+  reason: z.string().optional(),
+  phase: ShutdownPhaseSchema,
+  force: z.boolean().default(false),
+
+  // Timestamps
+  requestedAt: z.string().datetime({ message: 'requestedAt must be ISO 8601' }),
+  respondedAt: z.string().datetime().optional(),
+  completedAt: z.string().datetime().optional(),
+
+  // Response
+  responseReason: z.string().optional(),
+});
+
+export type ShutdownRequest = z.infer<typeof ShutdownRequestSchema>;
