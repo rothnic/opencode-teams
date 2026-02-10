@@ -1,7 +1,7 @@
 ---
 work_package_id: WP01
 title: Structured Message Types
-lane: "doing"
+lane: "for_review"
 dependencies: []
 base_branch: main
 base_commit: affd8185fe6e8c498fbde64799bf32e6daa48d38
@@ -14,7 +14,7 @@ subtasks:
 - T005
 phase: Phase 1 - Schema + Operations
 assignee: ''
-agent: ''
+agent: "Sisyphus"
 shell_pid: "888629"
 review_status: ''
 reviewed_by: ''
@@ -257,3 +257,8 @@ Test the following scenarios:
 - [ ] `bun x tsc --noEmit` passes
 - [ ] `bun test` passes (all existing + new tests)
 - [ ] `bunx biome check src/ tests/` passes
+
+## Activity Log
+
+- 2026-02-10T01:51:55Z – Sisyphus – shell_pid=888629 – lane=doing – Assigned agent via workflow command
+- 2026-02-10T01:58:09Z – Sisyphus – shell_pid=888629 – lane=for_review – Ready for review: MessageTypeSchema, _sendTypedMessage, typed requestShutdown/approveShutdown, 202 tests pass
