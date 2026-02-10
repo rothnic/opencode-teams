@@ -1,7 +1,7 @@
 ---
 work_package_id: WP01
 title: Infrastructure and Data Model
-lane: "doing"
+lane: "for_review"
 dependencies: []
 base_branch: main
 base_commit: 36c690ef5613b3ac19680dab50e211ba1a8369e0
@@ -341,3 +341,7 @@ export const EventBus = {
 - Check that defaults are sensible (dispatchRules: [], dispatchLog: [])
 - Ensure EventBus properly isolates handler errors
 - Ensure no `as any` or type suppression
+
+## Activity Log
+
+- 2026-02-10T20:58:43Z – unknown – shell_pid=16625 – lane=for_review – Ready for review: schemas + event bus + tests
