@@ -1,7 +1,7 @@
 ---
 work_package_id: 'WP03'
 title: 'Server Manager Operations'
-lane: "doing"
+lane: "for_review"
 subtasks:
   - 'T014'
   - 'T015'
@@ -283,3 +283,4 @@ import { describe, it, expect } from 'bun:test';
 ## Activity Log
 
 - 2026-02-10T14:36:56Z – unknown – lane=doing – Code already on main
+- 2026-02-10T14:36:58Z – unknown – lane=for_review – Code already on main, verified
