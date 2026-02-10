@@ -1,14 +1,14 @@
 ---
 work_package_id: WP04
 title: Tooling and Integration
-lane: "for_review"
+lane: "doing"
 dependencies: [WP02, WP03]
 base_branch: 005-event-driven-agent-dispatch-WP03
 base_commit: 5bd56eaf070b9bcb311b66a6df544056cd75ef2d
 created_at: '2026-02-10T21:29:19.897187+00:00'
 subtasks: [T023, T024, T025, T026, T027, T028, T029, T030]
 shell_pid: "16625"
-agent: "Implementer"
+agent: "Reviewer"
 history:
 - date: '2026-02-10'
   action: created
@@ -347,3 +347,4 @@ describe('Event-Driven Dispatch E2E', () => {
 ## Activity Log
 
 - 2026-02-10T21:37:12Z – Implementer – shell_pid=16625 – lane=for_review – All 8 subtasks implemented: CRUD operations, tool registration, barrel exports, skill docs, E2E tests
+- 2026-02-10T21:38:18Z – Reviewer – shell_pid=16625 – lane=doing – Started review via workflow command
