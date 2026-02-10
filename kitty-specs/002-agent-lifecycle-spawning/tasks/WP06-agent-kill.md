@@ -1,7 +1,7 @@
 ---
 work_package_id: 'WP06'
 title: 'Agent Kill and Task Reassignment'
-lane: "for_review"
+lane: "done"
 subtasks:
   - 'T034'
   - 'T035'
@@ -12,8 +12,8 @@ phase: 'Phase 2 - Core Operations'
 assignee: ''
 agent: ''
 shell_pid: ''
-review_status: ''
-reviewed_by: ''
+review_status: "approved"
+reviewed_by: "Nick Roth"
 history:
   - timestamp: '2026-02-10T06:00:00Z'
     lane: 'planned'
@@ -317,3 +317,4 @@ describe('TaskOperations - reassignAgentTasks', () => {
 
 - 2026-02-10T14:37:12Z – unknown – lane=doing – Code already on main
 - 2026-02-10T14:37:15Z – unknown – lane=for_review – Code already on main, verified
+- 2026-02-10T14:37:17Z – unknown – lane=done – Code verified on main, 357 tests pass
