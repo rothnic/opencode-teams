@@ -1,7 +1,7 @@
 ---
 work_package_id: 'WP05'
 title: 'Agent Spawn Operations'
-lane: 'planned'
+lane: "doing"
 subtasks:
   - 'T028'
   - 'T029'
@@ -367,3 +367,7 @@ describe('AgentOperations', () => {
 - [ ] All disk writes use `writeAtomicJSON` with `AgentStateSchema`
 - [ ] `bun test tests/agent-operations.test.ts` passes
 - [ ] No `as any` or type suppression
+
+## Activity Log
+
+- 2026-02-10T14:37:04Z – unknown – lane=doing – Code already on main
