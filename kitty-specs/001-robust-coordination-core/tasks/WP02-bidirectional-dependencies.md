@@ -1,7 +1,7 @@
 ---
 work_package_id: WP02
 title: Bidirectional Dependencies
-lane: "for_review"
+lane: "doing"
 dependencies: []
 base_branch: main
 base_commit: 29c03678aa7aa2bf9fd035fffe20f610fb0f7d61
@@ -15,7 +15,7 @@ subtasks:
 phase: Phase 1 - Schema + Operations
 assignee: ''
 agent: "Sisyphus"
-shell_pid: "888629"
+shell_pid: "1366036"
 review_status: ''
 reviewed_by: ''
 history:
@@ -263,3 +263,4 @@ Add a new `describe('bidirectional dependencies (FR-009)')` block with these tes
 
 - 2026-02-10T03:56:23Z – Sisyphus – shell_pid=888629 – lane=doing – Assigned agent via workflow command
 - 2026-02-10T04:01:47Z – Sisyphus – shell_pid=888629 – lane=for_review – Ready for review: Added blocks field to TaskSchema, sync on create/update/delete, 5 new tests. 193 pass, 0 fail. tsc + biome clean.
+- 2026-02-10T04:05:32Z – Sisyphus – shell_pid=1366036 – lane=doing – Started review via workflow command
