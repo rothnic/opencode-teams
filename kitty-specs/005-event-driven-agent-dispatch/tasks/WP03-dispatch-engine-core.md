@@ -1,7 +1,7 @@
 ---
 work_package_id: WP03
 title: Dispatch Engine Core
-lane: "for_review"
+lane: "done"
 dependencies: [WP01]
 base_branch: 005-event-driven-agent-dispatch-WP01
 base_commit: 9e0208de35bf27bc2d81f88edee0c0e2b9b53ff7
@@ -327,3 +327,4 @@ export function initDispatchEngine(): void {
 - 2026-02-10T21:07:42Z – unknown – shell_pid=16625 – lane=for_review – Ready for review: dispatch engine core
 - 2026-02-10T21:10:16Z – unknown – shell_pid=16625 – lane=planned – Moved to planned
 - 2026-02-10T21:13:18Z – unknown – shell_pid=16625 – lane=for_review – Fixed: initDispatchEngine now called in src/index.ts
+- 2026-02-10T21:16:41Z – unknown – shell_pid=16625 – lane=done – Approved: dispatch engine with init fix applied
