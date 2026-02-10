@@ -1,7 +1,7 @@
 ---
 work_package_id: WP03
 title: Dispatch Engine Core
-lane: "doing"
+lane: "for_review"
 dependencies: [WP01]
 base_branch: 005-event-driven-agent-dispatch-WP01
 base_commit: 9e0208de35bf27bc2d81f88edee0c0e2b9b53ff7
@@ -319,3 +319,7 @@ export function initDispatchEngine(): void {
 - Check that action failures are logged, not thrown
 - Ensure assign_task uses existing TaskOperations.claimTask (atomic)
 - Verify no `as any` or type suppression
+
+## Activity Log
+
+- 2026-02-10T21:07:42Z – unknown – shell_pid=16625 – lane=for_review – Ready for review: dispatch engine core
