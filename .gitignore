@@ -37,5 +37,6 @@ coverage/
 __pycache__/
 *.pyc
 
-# Spec Kitty dashboard cache
+# Spec Kitty runtime state
 .kittify/.dashboard
+.kittify/workspaces/
