@@ -1,6 +1,6 @@
 {
   "name": "opencode-teams",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "description": "Multi-agent team coordination plugin for OpenCode",
   "author": {
     "name": "rothnic",
