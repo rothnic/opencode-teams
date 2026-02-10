@@ -1,7 +1,7 @@
 ---
 work_package_id: 'WP08'
 title: 'Tool Definitions'
-lane: 'planned'
+lane: "doing"
 subtasks:
   - 'T045'
   - 'T046'
@@ -354,3 +354,7 @@ export { createGetAgentStatusTool } from './get-agent-status';
 - [ ] Error handling returns `{ success: false, error: "..." }` (not thrown exceptions)
 - [ ] No `as any` or type suppression (except the existing `tool: any` pattern)
 - [ ] Existing tools still work: `bun test`
+
+## Activity Log
+
+- 2026-02-10T14:37:28Z – unknown – lane=doing – Code already on main
