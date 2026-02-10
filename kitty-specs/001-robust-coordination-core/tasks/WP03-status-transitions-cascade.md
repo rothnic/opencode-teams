@@ -1,7 +1,7 @@
 ---
 work_package_id: WP03
 title: Status Transitions + Cascade Unblocking
-lane: "for_review"
+lane: "doing"
 dependencies: []
 base_branch: main
 base_commit: e8c8da4de4adbc31c0b7e022d603c62e2ed1b7cd
@@ -13,7 +13,7 @@ subtasks:
 - T014
 phase: Phase 2 - Logic Hardening
 assignee: ''
-agent: "Antigravity"
+agent: "Antigravity-Reviewer"
 shell_pid: "1368003"
 review_status: ''
 reviewed_by: ''
@@ -233,3 +233,4 @@ Test cases:
 
 - 2026-02-10T04:05:56Z – Antigravity – shell_pid=1368003 – lane=doing – Assigned agent via workflow command
 - 2026-02-10T04:13:25Z – Antigravity – shell_pid=1368003 – lane=for_review – Ready for review: Forward-only status transitions (FR-011) and cascade unblocking (FR-010) with full test coverage. .gitignore change is from sparse-checkout, not WP03.
+- 2026-02-10T04:15:47Z – Antigravity-Reviewer – shell_pid=1368003 – lane=doing – Started review via workflow command
