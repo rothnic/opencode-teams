@@ -1,7 +1,7 @@
 ---
 work_package_id: WP04
 title: Tmux Operations Extensions
-lane: "doing"
+lane: "for_review"
 dependencies: []
 base_branch: main
 base_commit: 34b25804a106255042feec7a83556929c5326aef
@@ -283,3 +283,7 @@ describe('TmuxOperations Extensions', () => {
 - [ ] `bun test tests/tmux-operations.test.ts` still passes (no regressions)
 - [ ] `bun test tests/tmux-operations-ext.test.ts` passes
 - [ ] No `as any` or type suppression
+
+## Activity Log
+
+- 2026-02-10T14:34:38Z – unknown – shell_pid=1368003 – lane=for_review – Implementation complete, all 13 tests pass, tmux operations extensions ready
