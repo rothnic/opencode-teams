@@ -1,7 +1,7 @@
 ---
 work_package_id: 'WP06'
 title: 'Agent Kill and Task Reassignment'
-lane: 'planned'
+lane: "doing"
 subtasks:
   - 'T034'
   - 'T035'
@@ -312,3 +312,7 @@ describe('TaskOperations - reassignAgentTasks', () => {
 - [ ] `bun test tests/agent-kill.test.ts` passes
 - [ ] Existing tests still pass: `bun test tests/task-operations.test.ts`
 - [ ] No `as any` or type suppression
+
+## Activity Log
+
+- 2026-02-10T14:37:12Z – unknown – lane=doing – Code already on main
