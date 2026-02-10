@@ -20,6 +20,7 @@ try {
 }
 
 import { AgentOperations } from './operations/agent';
+import { initDispatchEngine } from './operations/dispatch-engine';
 import { SessionManager } from './operations/session-manager-cli';
 import { TaskOperations } from './operations/task';
 import { TeamOperations } from './operations/team';
@@ -43,6 +44,9 @@ import type { AgentState, Message, Task, TeamConfig, TeamMember } from './types/
  */
 export const OpenCodeTeamsPlugin = async (ctx: any) => {
   console.log('[OpenCode Teams Plugin] Initializing...');
+
+  // Initialize event-driven dispatch engine
+  initDispatchEngine();
 
   return {
     // Register custom tools
