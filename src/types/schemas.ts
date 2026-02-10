@@ -286,3 +286,39 @@ export const ShutdownRequestSchema = z.object({
 });
 
 export type ShutdownRequest = z.infer<typeof ShutdownRequestSchema>;
+
+// ─── CLI Configuration ─────────────────────────────────────────────────────
+
+export const CLIConfigSchema = z.object({
+  defaultLayout: z.enum(['tiled', 'main-vertical', 'even-horizontal']).default('tiled'),
+  autoCleanup: z.boolean().default(true),
+  paneMinWidth: z.number().default(80),
+  paneMinHeight: z.number().default(24),
+  dashboardRefreshInterval: z.number().default(3),
+});
+
+export type CLIConfig = z.infer<typeof CLIConfigSchema>;
+
+// ─── Pane Info ──────────────────────────────────────────────────────────────
+
+export const PaneInfoSchema = z.object({
+  paneId: z.string(),
+  agentName: z.string(),
+  teamName: z.string(),
+  label: z.string(),
+});
+
+export type PaneInfo = z.infer<typeof PaneInfoSchema>;
+
+// ─── Session Metadata ───────────────────────────────────────────────────────
+
+export const SessionMetadataSchema = z.object({
+  projectDir: z.string(),
+  sessionName: z.string(),
+  serverPaneId: z.string().optional(),
+  agentPanes: z.array(PaneInfoSchema).default([]),
+  createdAt: z.string(),
+  autoCleanupEnabled: z.boolean().default(true),
+});
+
+export type SessionMetadata = z.infer<typeof SessionMetadataSchema>;

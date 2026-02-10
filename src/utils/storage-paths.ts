@@ -217,6 +217,16 @@ export function getColorPoolPath(projectRoot?: string): string {
   return join(getProjectStorageDir(projectRoot), 'color-pool.json');
 }
 
+export function getSessionsDir(projectRoot?: string): string {
+  const dir = join(getProjectStorageDir(projectRoot), 'sessions');
+  ensureDir(dir);
+  return dir;
+}
+
+export function getSessionMetadataPath(sessionName: string, projectRoot?: string): string {
+  return join(getSessionsDir(projectRoot), `${sessionName}.json`);
+}
+
 /**
  * Get the global templates directory.
  * ~/.config/opencode/opencode-teams/templates/

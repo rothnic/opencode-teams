@@ -6,6 +6,7 @@
 
 export { AgentOperations } from './agent';
 export { ServerManager } from './server-manager';
+export { SessionManager } from './session-manager-cli';
 export { TaskOperations } from './task';
 export { TeamOperations } from './team';
 export { TmuxOperations } from './tmux';

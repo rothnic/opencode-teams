@@ -20,6 +20,7 @@ try {
 }
 
 import { AgentOperations } from './operations/agent';
+import { SessionManager } from './operations/session-manager-cli';
 import { TaskOperations } from './operations/task';
 import { TeamOperations } from './operations/team';
 import type { AgentState, Message, Task, TeamConfig, TeamMember } from './types/index';
@@ -353,6 +354,14 @@ export const OpenCodeTeamsPlugin = async (ctx: any) => {
         if (TeamOperations.shouldShutdown(team.name)) {
           console.log(`[OpenCode Teams] Idle session cleanup for team: ${team.name}`);
           TeamOperations.cleanup(team.name);
+        }
+      }
+
+      // Auto-cleanup stale tmux sessions with no attached clients
+      const activeSessions = SessionManager.listActiveSessions();
+      for (const session of activeSessions) {
+        if (SessionManager.checkAutoCleanup(session.sessionName)) {
+          console.log(`[OpenCode Teams] Auto-cleaned stale session: ${session.sessionName}`);
         }
       }
     },

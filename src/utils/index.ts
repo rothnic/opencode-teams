@@ -41,6 +41,8 @@ export {
   getServerLogPath,
   getServerStatePath,
   getServersDir,
+  getSessionMetadataPath,
+  getSessionsDir,
   getTaskLockPath,
   getTasksDir,
   getTeamConfigPath,
