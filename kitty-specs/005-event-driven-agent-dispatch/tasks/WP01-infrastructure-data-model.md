@@ -1,13 +1,17 @@
 ---
-work_package_id: "WP01"
-title: "Infrastructure and Data Model"
-lane: "planned"
+work_package_id: WP01
+title: Infrastructure and Data Model
+lane: "doing"
 dependencies: []
-subtasks: ["T001", "T002", "T003", "T004", "T005", "T006", "T007", "T008", "T009"]
+base_branch: main
+base_commit: 36c690ef5613b3ac19680dab50e211ba1a8369e0
+created_at: '2026-02-10T20:53:13.499283+00:00'
+subtasks: [T001, T002, T003, T004, T005, T006, T007, T008, T009]
+shell_pid: "16625"
 history:
-  - date: "2026-02-10"
-    action: "created"
-    by: "planner"
+- date: '2026-02-10'
+  action: created
+  by: planner
 ---
 
 # WP01: Infrastructure and Data Model
