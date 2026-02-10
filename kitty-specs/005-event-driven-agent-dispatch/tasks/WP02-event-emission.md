@@ -1,7 +1,7 @@
 ---
 work_package_id: WP02
 title: Event Emission
-lane: "doing"
+lane: "for_review"
 dependencies: [WP01]
 base_branch: 005-event-driven-agent-dispatch-WP01
 base_commit: eab8a91628b5a1b349ba72535a75b701ec0600c1
@@ -250,3 +250,7 @@ if (teamName) {
 - Check that event payloads contain useful debugging information
 - Ensure EventBus import does not create circular dependencies
 - Verify no `as any` or type suppression
+
+## Activity Log
+
+- 2026-02-10T21:14:18Z – unknown – shell_pid=16625 – lane=for_review – Event emission from task/agent ops
