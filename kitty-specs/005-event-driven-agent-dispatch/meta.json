@@ -1,6 +1,6 @@
 {
-  "feature_number": "006",
-  "slug": "006-event-driven-agent-dispatch",
+  "feature_number": "005",
+  "slug": "005-event-driven-agent-dispatch",
   "friendly_name": "Event-Driven Agent Dispatch",
   "mission": "software-dev",
   "source_description": "Plugin hook subscriptions, event-condition-action rules, auto-dispatch on task unblock, idle detection, file change monitoring - derived from constitution Priority 5",

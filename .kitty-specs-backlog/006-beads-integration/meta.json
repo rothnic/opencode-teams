@@ -1,6 +1,6 @@
 {
-  "feature_number": "005",
-  "slug": "005-beads-integration",
+  "feature_number": "006",
+  "slug": "006-beads-integration",
   "friendly_name": "Beads Integration",
   "mission": "software-dev",
   "source_description": "Beads issue tracking synchronization, cross-session persistence, visual dashboard, epic-level tracking, agent continuity - derived from constitution Priorities 2-3",

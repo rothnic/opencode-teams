@@ -1,8 +1,8 @@
 # Feature Specification: Beads Integration
 
-**Feature Branch**: 005-beads-integration
+**Feature Branch**: 006-beads-integration
 **Created**: 2026-02-10
-**Status**: Draft
+**Status**: Draft (OPTIONAL)
 **Mission**: software-dev
 
 ## Overview

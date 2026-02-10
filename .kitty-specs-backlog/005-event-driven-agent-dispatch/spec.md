@@ -1,6 +1,6 @@
 # Feature Specification: Event-Driven Agent Dispatch
 
-**Feature Branch**: 006-event-driven-agent-dispatch
+**Feature Branch**: 005-event-driven-agent-dispatch
 **Created**: 2026-02-10
 **Status**: Draft
 **Mission**: software-dev
