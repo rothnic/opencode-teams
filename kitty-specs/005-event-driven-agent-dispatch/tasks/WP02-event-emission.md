@@ -1,7 +1,7 @@
 ---
 work_package_id: WP02
 title: Event Emission
-lane: "doing"
+lane: "done"
 dependencies: [WP01]
 base_branch: 005-event-driven-agent-dispatch-WP01
 base_commit: eab8a91628b5a1b349ba72535a75b701ec0600c1
@@ -260,3 +260,4 @@ if (teamName) {
 - 2026-02-10T21:17:57Z – unknown – shell_pid=16625 – lane=planned – Moved to planned
 - 2026-02-10T21:26:14Z – Implementer – shell_pid=16625 – lane=for_review – Fixed EventBus test isolation: added afterAll cleanup in event-bus.test.ts and defensive clear in event-emission.test.ts beforeEach
 - 2026-02-10T21:27:15Z – Reviewer – shell_pid=16625 – lane=doing – Started review via workflow command
+- 2026-02-10T21:28:08Z – Reviewer – shell_pid=16625 – lane=done – Approved: implementation verified, events emitted after persistence, all tests pass (493 passed)
