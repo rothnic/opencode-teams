@@ -1,13 +1,15 @@
 ---
 work_package_id: WP02
 title: Event Emission
-lane: "for_review"
+lane: "planned"
 dependencies: [WP01]
 base_branch: 005-event-driven-agent-dispatch-WP01
 base_commit: eab8a91628b5a1b349ba72535a75b701ec0600c1
 created_at: '2026-02-10T21:01:04.772843+00:00'
 subtasks: [T010, T011, T012, T013, T014, T015, T016]
 shell_pid: "16625"
+review_status: "has_feedback"
+reviewed_by: "Nick Roth"
 history:
 - date: '2026-02-10'
   action: created
@@ -254,3 +256,4 @@ if (teamName) {
 ## Activity Log
 
 - 2026-02-10T21:14:18Z – unknown – shell_pid=16625 – lane=for_review – Event emission from task/agent ops
+- 2026-02-10T21:17:57Z – unknown – shell_pid=16625 – lane=planned – Moved to planned
