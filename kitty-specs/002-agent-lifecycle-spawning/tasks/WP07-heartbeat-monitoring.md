@@ -1,7 +1,7 @@
 ---
 work_package_id: 'WP07'
 title: 'Heartbeat and Monitoring'
-lane: "doing"
+lane: "for_review"
 subtasks:
   - 'T039'
   - 'T040'
@@ -442,3 +442,4 @@ describe('AgentOperations - Heartbeat', () => {
 ## Activity Log
 
 - 2026-02-10T14:37:20Z – unknown – lane=doing – Code already on main
+- 2026-02-10T14:37:23Z – unknown – lane=for_review – Code already on main, verified
