@@ -83,7 +83,9 @@ describe('TaskOperations', () => {
     });
 
     it('creates task with valid dependencies', () => {
-      const taskA = TaskOperations.createTask(teamName, { title: 'Dependency' });
+      const taskA = TaskOperations.createTask(teamName, {
+        title: 'Dependency',
+      });
       const taskB = TaskOperations.createTask(teamName, {
         title: 'Dependent',
         dependencies: [taskA.id],
@@ -139,7 +141,9 @@ describe('TaskOperations', () => {
 
       // Make A depend on B, creating A -> B -> A cycle
       expect(() => {
-        TaskOperations.updateTask(teamName, taskA.id, { dependencies: [taskB.id] });
+        TaskOperations.updateTask(teamName, taskA.id, {
+          dependencies: [taskB.id],
+        });
       }).toThrow('Circular dependency');
     });
 
@@ -168,14 +172,20 @@ describe('TaskOperations', () => {
 
     it('filters by status', () => {
       const task1 = TaskOperations.createTask(teamName, { title: 'Pending' });
-      const task2 = TaskOperations.createTask(teamName, { title: 'Will Claim' });
+      const task2 = TaskOperations.createTask(teamName, {
+        title: 'Will Claim',
+      });
       TaskOperations.claimTask(teamName, task2.id, 'worker-1');
 
-      const pendingTasks = TaskOperations.getTasks(teamName, { status: 'pending' });
+      const pendingTasks = TaskOperations.getTasks(teamName, {
+        status: 'pending',
+      });
       expect(pendingTasks).toHaveLength(1);
       expect(pendingTasks[0].id).toBe(task1.id);
 
-      const inProgressTasks = TaskOperations.getTasks(teamName, { status: 'in_progress' });
+      const inProgressTasks = TaskOperations.getTasks(teamName, {
+        status: 'in_progress',
+      });
       expect(inProgressTasks).toHaveLength(1);
       expect(inProgressTasks[0].id).toBe(task2.id);
     });
@@ -185,7 +195,9 @@ describe('TaskOperations', () => {
       TaskOperations.createTask(teamName, { title: 'Unowned' });
       TaskOperations.claimTask(teamName, task1.id, 'worker-1');
 
-      const ownedTasks = TaskOperations.getTasks(teamName, { owner: 'worker-1' });
+      const ownedTasks = TaskOperations.getTasks(teamName, {
+        owner: 'worker-1',
+      });
       expect(ownedTasks).toHaveLength(1);
       expect(ownedTasks[0].owner).toBe('worker-1');
     });
@@ -335,23 +347,31 @@ describe('TaskOperations', () => {
 
     it('throws for non-existent task', () => {
       expect(() => {
-        TaskOperations.updateTask(teamName, 'invalid-task-id', { title: 'Nope' });
+        TaskOperations.updateTask(teamName, 'invalid-task-id', {
+          title: 'Nope',
+        });
       }).toThrow('not found');
     });
 
     it('sets updatedAt timestamp', () => {
-      const task = TaskOperations.createTask(teamName, { title: 'Timestamp Test' });
+      const task = TaskOperations.createTask(teamName, {
+        title: 'Timestamp Test',
+      });
       expect(task.updatedAt).toBeUndefined();
 
       const beforeUpdate = new Date().toISOString();
-      const updated = TaskOperations.updateTask(teamName, task.id, { title: 'Changed' });
+      const updated = TaskOperations.updateTask(teamName, task.id, {
+        title: 'Changed',
+      });
 
       expect(updated.updatedAt).toBeTruthy();
       expect(updated.updatedAt! >= beforeUpdate).toBe(true);
     });
 
     it('preserves id and createdAt even if passed in updates', () => {
-      const task = TaskOperations.createTask(teamName, { title: 'Immutable Fields' });
+      const task = TaskOperations.createTask(teamName, {
+        title: 'Immutable Fields',
+      });
       const originalId = task.id;
       const originalCreatedAt = task.createdAt;
 
@@ -372,12 +392,18 @@ describe('TaskOperations', () => {
       const taskC = TaskOperations.createTask(teamName, { title: 'C' });
 
       // A -> B -> C chain
-      TaskOperations.updateTask(teamName, taskA.id, { dependencies: [taskB.id] });
-      TaskOperations.updateTask(teamName, taskB.id, { dependencies: [taskC.id] });
+      TaskOperations.updateTask(teamName, taskA.id, {
+        dependencies: [taskB.id],
+      });
+      TaskOperations.updateTask(teamName, taskB.id, {
+        dependencies: [taskC.id],
+      });
 
       // Try to make C depend on A, creating A -> B -> C -> A cycle
       expect(() => {
-        TaskOperations.updateTask(teamName, taskC.id, { dependencies: [taskA.id] });
+        TaskOperations.updateTask(teamName, taskC.id, {
+          dependencies: [taskA.id],
+        });
       }).toThrow('Circular dependency');
     });
   });
@@ -459,7 +485,9 @@ describe('TaskOperations', () => {
     });
 
     it('throws when task is not pending', () => {
-      const task = TaskOperations.createTask(teamName, { title: 'Already Claimed' });
+      const task = TaskOperations.createTask(teamName, {
+        title: 'Already Claimed',
+      });
       TaskOperations.claimTask(teamName, task.id, 'worker-1');
 
       expect(() => {
@@ -474,7 +502,9 @@ describe('TaskOperations', () => {
     });
 
     it('adds warning when dependencies are not met (soft blocking)', () => {
-      const dep = TaskOperations.createTask(teamName, { title: 'Unfinished Dep' });
+      const dep = TaskOperations.createTask(teamName, {
+        title: 'Unfinished Dep',
+      });
       const task = TaskOperations.createTask(teamName, {
         title: 'Dependent Task',
         dependencies: [dep.id],
@@ -489,7 +519,9 @@ describe('TaskOperations', () => {
     });
 
     it('does not add warning when all dependencies are met', () => {
-      const dep = TaskOperations.createTask(teamName, { title: 'Finished Dep' });
+      const dep = TaskOperations.createTask(teamName, {
+        title: 'Finished Dep',
+      });
       TaskOperations.updateTask(teamName, dep.id, { status: 'completed' });
 
       const task = TaskOperations.createTask(teamName, {
@@ -505,14 +537,18 @@ describe('TaskOperations', () => {
     it('uses OPENCODE_AGENT_ID as default owner when no agentId provided', () => {
       process.env.OPENCODE_AGENT_ID = 'env-agent';
 
-      const task = TaskOperations.createTask(teamName, { title: 'Default Owner' });
+      const task = TaskOperations.createTask(teamName, {
+        title: 'Default Owner',
+      });
       const claimed = TaskOperations.claimTask(teamName, task.id);
 
       expect(claimed.owner).toBe('env-agent');
     });
 
     it('persists claimed state to disk', () => {
-      const task = TaskOperations.createTask(teamName, { title: 'Persist Claim' });
+      const task = TaskOperations.createTask(teamName, {
+        title: 'Persist Claim',
+      });
       TaskOperations.claimTask(teamName, task.id, 'worker-1');
 
       // Re-read from disk
@@ -527,7 +563,9 @@ describe('TaskOperations', () => {
 
   describe('concurrent writes', () => {
     it('concurrent claim attempts result in exactly one success', async () => {
-      const task = TaskOperations.createTask(teamName, { title: 'Concurrent Test' });
+      const task = TaskOperations.createTask(teamName, {
+        title: 'Concurrent Test',
+      });
 
       // Launch 10 concurrent claim attempts via microtasks.
       // Since claimTask is synchronous, microtasks execute sequentially in
@@ -579,7 +617,9 @@ describe('TaskOperations', () => {
     });
 
     it('rapid sequential updates maintain data integrity', () => {
-      const task = TaskOperations.createTask(teamName, { title: 'Rapid Updates' });
+      const task = TaskOperations.createTask(teamName, {
+        title: 'Rapid Updates',
+      });
 
       // Perform many sequential updates
       for (let i = 0; i < 20; i++) {
@@ -610,7 +650,9 @@ describe('TaskOperations', () => {
         TaskOperations.checkCircularDependency(teamName, taskA.id, [taskB.id]);
       }).not.toThrow();
 
-      TaskOperations.updateTask(teamName, taskB.id, { dependencies: [taskC.id] });
+      TaskOperations.updateTask(teamName, taskB.id, {
+        dependencies: [taskC.id],
+      });
 
       // A still depends on B which depends on C - no cycle
       expect(() => {
@@ -702,6 +744,78 @@ describe('TaskOperations', () => {
       const claimed = TaskOperations.claimTask(teamName, main.id, 'worker-1');
       expect(claimed.warning).toBeUndefined();
       expect(claimed.status).toBe('in_progress');
+    });
+  });
+
+  // ─── bidirectional dependencies (FR-009) ──────────────────────────────────
+
+  describe('bidirectional dependencies (FR-009)', () => {
+    it('creating task with deps populates blocks on dependency', () => {
+      const taskA = TaskOperations.createTask(teamName, { title: 'A' });
+      const taskB = TaskOperations.createTask(teamName, {
+        title: 'B',
+        dependencies: [taskA.id],
+      });
+
+      const refreshedA = TaskOperations.getTask(teamName, taskA.id);
+      expect(refreshedA.blocks).toContain(taskB.id);
+      expect(refreshedA.blocks).toHaveLength(1);
+    });
+
+    it('deleting dependent cleans up blocks', () => {
+      const taskA = TaskOperations.createTask(teamName, { title: 'A' });
+      const taskB = TaskOperations.createTask(teamName, {
+        title: 'B',
+        dependencies: [taskA.id],
+      });
+
+      expect(TaskOperations.getTask(teamName, taskA.id).blocks).toContain(taskB.id);
+
+      TaskOperations.deleteTask(teamName, taskB.id);
+
+      const refreshedA = TaskOperations.getTask(teamName, taskA.id);
+      expect(refreshedA.blocks).toEqual([]);
+    });
+
+    it('updating dependencies syncs blocks on old and new targets', () => {
+      const taskA = TaskOperations.createTask(teamName, { title: 'A' });
+      const taskB = TaskOperations.createTask(teamName, { title: 'B' });
+      const taskC = TaskOperations.createTask(teamName, {
+        title: 'C',
+        dependencies: [taskA.id],
+      });
+
+      expect(TaskOperations.getTask(teamName, taskA.id).blocks).toContain(taskC.id);
+      expect(TaskOperations.getTask(teamName, taskB.id).blocks).toEqual([]);
+
+      TaskOperations.updateTask(teamName, taskC.id, {
+        dependencies: [taskB.id],
+      });
+
+      expect(TaskOperations.getTask(teamName, taskA.id).blocks).toEqual([]);
+      expect(TaskOperations.getTask(teamName, taskB.id).blocks).toContain(taskC.id);
+    });
+
+    it('multiple dependents appear in blocks', () => {
+      const taskA = TaskOperations.createTask(teamName, { title: 'A' });
+      const taskB = TaskOperations.createTask(teamName, {
+        title: 'B',
+        dependencies: [taskA.id],
+      });
+      const taskC = TaskOperations.createTask(teamName, {
+        title: 'C',
+        dependencies: [taskA.id],
+      });
+
+      const refreshedA = TaskOperations.getTask(teamName, taskA.id);
+      expect(refreshedA.blocks).toContain(taskB.id);
+      expect(refreshedA.blocks).toContain(taskC.id);
+      expect(refreshedA.blocks).toHaveLength(2);
+    });
+
+    it('blocks field defaults to empty array', () => {
+      const task = TaskOperations.createTask(teamName, { title: 'Solo' });
+      expect(task.blocks).toEqual([]);
     });
   });
 });
