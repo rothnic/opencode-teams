@@ -54,6 +54,7 @@ export const TaskSchema = z.object({
   claimedAt: z.string().datetime().optional(),
   completedAt: z.string().datetime().optional(),
   dependencies: z.array(z.string()).default([]),
+  blocks: z.array(z.string()).default([]),
   warning: z.string().optional(),
 });
 

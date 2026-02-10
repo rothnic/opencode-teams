@@ -108,6 +108,7 @@ export const TaskOperations = {
         status: 'pending',
         createdAt: now,
         dependencies: taskData.dependencies || [],
+        blocks: [],
       };
 
       // Validate dependencies exist
@@ -126,6 +127,21 @@ export const TaskOperations = {
       // Validate and write atomically
       const taskPath = getTaskFilePath(teamName, taskId);
       writeAtomicJSON(taskPath, task, TaskSchema);
+
+      // Sync blocks: add this task to each dependency's blocks array (FR-009)
+      if (task.dependencies.length > 0) {
+        for (const depId of task.dependencies) {
+          const depPath = getTaskFilePath(teamName, depId);
+          const depTask = readValidatedJSON(depPath, TaskSchema);
+          if (!depTask.blocks.includes(taskId)) {
+            writeAtomicJSON(
+              depPath,
+              { ...depTask, blocks: [...depTask.blocks, taskId] },
+              TaskSchema,
+            );
+          }
+        }
+      }
 
       return task;
     });
@@ -233,6 +249,53 @@ export const TaskOperations = {
 
         // Check for circular dependencies
         TaskOperations.checkCircularDependency(teamName, taskId, updates.dependencies);
+
+        // Sync blocks on affected dependency targets (FR-009)
+        const oldDeps = new Set(task.dependencies);
+        const newDeps = new Set(updates.dependencies);
+
+        for (const oldDepId of oldDeps) {
+          if (!newDeps.has(oldDepId)) {
+            const oldDepPath = getTaskFilePath(teamName, oldDepId);
+            if (fileExists(oldDepPath)) {
+              try {
+                const oldDep = readValidatedJSON(oldDepPath, TaskSchema);
+                if (oldDep.blocks.includes(taskId)) {
+                  writeAtomicJSON(
+                    oldDepPath,
+                    {
+                      ...oldDep,
+                      blocks: oldDep.blocks.filter((id: string) => id !== taskId),
+                    },
+                    TaskSchema,
+                  );
+                }
+              } catch {
+                /* skip unreadable */
+              }
+            }
+          }
+        }
+
+        for (const newDepId of newDeps) {
+          if (!oldDeps.has(newDepId)) {
+            const newDepPath = getTaskFilePath(teamName, newDepId);
+            if (fileExists(newDepPath)) {
+              try {
+                const newDep = readValidatedJSON(newDepPath, TaskSchema);
+                if (!newDep.blocks.includes(taskId)) {
+                  writeAtomicJSON(
+                    newDepPath,
+                    { ...newDep, blocks: [...newDep.blocks, taskId] },
+                    TaskSchema,
+                  );
+                }
+              } catch {
+                /* skip unreadable */
+              }
+            }
+          }
+        }
       }
 
       // Validate status transition if status is being updated
@@ -272,6 +335,8 @@ export const TaskOperations = {
       const teamTasksDir = getTeamTasksDir(teamName);
       const files = listJSONFiles(teamTasksDir);
 
+      const taskToDelete = readValidatedJSON(taskPath, TaskSchema);
+
       for (const file of files) {
         const otherTaskPath = join(teamTasksDir, file);
         try {
@@ -285,6 +350,28 @@ export const TaskOperations = {
           // Re-throw dependency errors, skip read errors
           if (err instanceof Error && err.message.includes('Cannot delete')) {
             throw err;
+          }
+        }
+      }
+
+      // Clean up: remove this task from its dependencies' blocks arrays (FR-009)
+      for (const depId of taskToDelete.dependencies) {
+        const depPath = getTaskFilePath(teamName, depId);
+        if (fileExists(depPath)) {
+          try {
+            const depTask = readValidatedJSON(depPath, TaskSchema);
+            if (depTask.blocks.includes(taskId)) {
+              writeAtomicJSON(
+                depPath,
+                {
+                  ...depTask,
+                  blocks: depTask.blocks.filter((id: string) => id !== taskId),
+                },
+                TaskSchema,
+              );
+            }
+          } catch {
+            // If dependency can't be read, skip cleanup
           }
         }
       }
