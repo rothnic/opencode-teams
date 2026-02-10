@@ -4,6 +4,7 @@
  * Re-exports all operation modules for convenient access.
  */
 
+export { AgentOperations } from './agent';
 export { ServerManager } from './server-manager';
 export { TaskOperations } from './task';
 export { TeamOperations } from './team';

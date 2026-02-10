@@ -42,3 +42,6 @@ __pycache__/
 .kittify/workspaces/
 # Excluded via sparse-checkout
 kitty-specs/
+
+# Git worktrees (spec-kitty feature worktrees)
+.worktrees/
