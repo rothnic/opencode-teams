@@ -87,6 +87,8 @@ export const TeamOperations = {
       ],
       ...(options?.description ? { description: options.description } : {}),
       ...(options?.topology ? { topology: options.topology } : {}),
+      dispatchRules: [],
+      dispatchLog: [],
     };
 
     // Validate and write atomically
