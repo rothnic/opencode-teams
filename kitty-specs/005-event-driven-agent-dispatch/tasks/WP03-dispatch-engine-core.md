@@ -1,13 +1,17 @@
 ---
-work_package_id: "WP03"
-title: "Dispatch Engine Core"
-lane: "planned"
-dependencies: ["WP01"]
-subtasks: ["T017", "T018", "T019", "T020", "T021", "T022"]
+work_package_id: WP03
+title: Dispatch Engine Core
+lane: "doing"
+dependencies: [WP01]
+base_branch: 005-event-driven-agent-dispatch-WP01
+base_commit: 9e0208de35bf27bc2d81f88edee0c0e2b9b53ff7
+created_at: '2026-02-10T21:01:33.238557+00:00'
+subtasks: [T017, T018, T019, T020, T021, T022]
+shell_pid: "16625"
 history:
-  - date: "2026-02-10"
-    action: "created"
-    by: "planner"
+- date: '2026-02-10'
+  action: created
+  by: planner
 ---
 
 # WP03: Dispatch Engine Core
