@@ -1,7 +1,7 @@
 ---
 work_package_id: 'WP06'
 title: 'Agent Kill and Task Reassignment'
-lane: "doing"
+lane: "for_review"
 subtasks:
   - 'T034'
   - 'T035'
@@ -316,3 +316,4 @@ describe('TaskOperations - reassignAgentTasks', () => {
 ## Activity Log
 
 - 2026-02-10T14:37:12Z – unknown – lane=doing – Code already on main
+- 2026-02-10T14:37:15Z – unknown – lane=for_review – Code already on main, verified
