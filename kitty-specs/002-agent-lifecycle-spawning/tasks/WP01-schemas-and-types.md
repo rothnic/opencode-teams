@@ -1,7 +1,7 @@
 ---
 work_package_id: WP01
 title: Schemas and Types
-lane: "doing"
+lane: "for_review"
 dependencies: []
 base_branch: main
 base_commit: e5cf53c726872183e2caff7080d86bc068ff07cb
@@ -282,3 +282,7 @@ export {
 - [ ] Section separators match existing style: `// ─── Section Name ───...`
 - [ ] Existing schemas (TeamConfig, Task, Message, etc.) are NOT modified
 - [ ] `bun test tests/` still passes (no regressions)
+
+## Activity Log
+
+- 2026-02-10T06:30:50Z – unknown – shell_pid=1368003 – lane=for_review – Moved to for_review
