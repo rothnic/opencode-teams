@@ -5,12 +5,12 @@
  * A team is created in each test's beforeEach to provide task storage.
  */
 
-import { describe, it, expect, beforeEach, afterEach } from 'bun:test';
-import { mkdtempSync, rmSync, existsSync, readFileSync } from 'node:fs';
-import { join } from 'node:path';
+import { afterEach, beforeEach, describe, expect, it } from 'bun:test';
+import { existsSync, mkdtempSync, readFileSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
-import { TeamOperations } from '../src/operations/team';
+import { join } from 'node:path';
 import { TaskOperations } from '../src/operations/task';
+import { TeamOperations } from '../src/operations/team';
 import { TaskSchema } from '../src/types/schemas';
 
 describe('TaskOperations', () => {
@@ -536,8 +536,8 @@ describe('TaskOperations', () => {
       // is no longer pending. This tests claim-once idempotency.
       const results = await Promise.allSettled(
         Array.from({ length: 10 }, (_, i) =>
-          Promise.resolve().then(() => TaskOperations.claimTask(teamName, task.id, `agent-${i}`))
-        )
+          Promise.resolve().then(() => TaskOperations.claimTask(teamName, task.id, `agent-${i}`)),
+        ),
       );
 
       const fulfilled = results.filter((r) => r.status === 'fulfilled');
@@ -556,14 +556,14 @@ describe('TaskOperations', () => {
     it('concurrent updates do not lose data', async () => {
       // Create multiple tasks and update them concurrently
       const tasks = Array.from({ length: 5 }, (_, i) =>
-        TaskOperations.createTask(teamName, { title: `Task ${i}` })
+        TaskOperations.createTask(teamName, { title: `Task ${i}` }),
       );
 
       // Claim all tasks concurrently
       const results = await Promise.allSettled(
         tasks.map((task, i) =>
-          Promise.resolve().then(() => TaskOperations.claimTask(teamName, task.id, `agent-${i}`))
-        )
+          Promise.resolve().then(() => TaskOperations.claimTask(teamName, task.id, `agent-${i}`)),
+        ),
       );
 
       // All claims should succeed since they target different tasks

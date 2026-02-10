@@ -1,4 +1,4 @@
-import { describe, it, expect, spyOn, afterEach } from 'bun:test';
+import { afterEach, describe, expect, it, spyOn } from 'bun:test';
 import { TmuxOperations } from '../src/operations/tmux';
 
 describe('TmuxOperations', () => {
@@ -29,7 +29,7 @@ describe('TmuxOperations', () => {
         return {
           exitCode: 0,
           stdout: Buffer.from(
-            'session1: 1 windows (created Sun Feb  8 12:00:00 2026)\nsession2: 2 windows'
+            'session1: 1 windows (created Sun Feb  8 12:00:00 2026)\nsession2: 2 windows',
           ),
           stderr: Buffer.from(''),
         } as any;

@@ -140,7 +140,7 @@ mise run build      # Build TypeScript
 mise run test       # Run tests
 mise run lint       # Check code style
 mise run lint:fix   # Auto-fix linting issues
-mise run format     # Format with Prettier
+mise run format     # Format with Biome
 mise run typecheck  # Type check without emitting
 ```
 

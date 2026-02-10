@@ -37,7 +37,7 @@ mise run build      # Build TypeScript
 mise run test       # Run tests with Bun
 mise run lint       # Lint code
 mise run lint:fix   # Auto-fix linting issues
-mise run format     # Format code with Prettier
+mise run format     # Format code with Biome
 mise run typecheck  # Type check without emitting
 mise run watch      # Watch mode for development
 ```
@@ -126,14 +126,14 @@ The integration test verifies the plugin works with OpenCode:
 Tests use Bun's native test framework:
 
 ```typescript
-import { describe, it, expect, beforeAll, afterAll } from 'bun:test';
+import { describe, it, expect, beforeAll, afterAll } from "bun:test";
 
-describe('MyFeature', () => {
+describe("MyFeature", () => {
   beforeAll(() => {
     // Setup
   });
 
-  it('should do something', () => {
+  it("should do something", () => {
     expect(true).toBe(true);
   });
 
@@ -175,7 +175,7 @@ npx lefthook run pre-push
 
 ### Linting
 
-ESLint with Prettier integration:
+ESLint for TypeScript linting:
 
 ```bash
 # Check for lint issues
@@ -187,14 +187,14 @@ mise run lint:fix
 
 ### Formatting
 
-Prettier for consistent code formatting:
+Biome for consistent code formatting:
 
 ```bash
 # Format code
 mise run format
 
 # Check formatting without fixing
-npx prettier --check .
+bunx biome check .
 ```
 
 ### Type Checking
@@ -236,12 +236,12 @@ This project uses Bun's native APIs for optimal performance:
 
 ```typescript
 // File operations
-const file = Bun.file('path/to/file');
+const file = Bun.file("path/to/file");
 await file.json(); // Read JSON
-await Bun.write('path/to/file', data); // Write file
+await Bun.write("path/to/file", data); // Write file
 
 // Process spawning
-Bun.spawnSync(['command', 'arg1', 'arg2']);
+Bun.spawnSync(["command", "arg1", "arg2"]);
 
 // Crypto
 globalThis.crypto.getRandomValues(new Uint8Array(16));

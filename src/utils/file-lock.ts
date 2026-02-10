@@ -7,7 +7,7 @@
  */
 
 import { dlopen, FFIType } from 'bun:ffi';
-import { openSync, closeSync, existsSync, mkdirSync, constants as fsConstants } from 'node:fs';
+import { closeSync, existsSync, constants as fsConstants, mkdirSync, openSync } from 'node:fs';
 import { dirname } from 'node:path';
 
 // POSIX fcntl() command constants
@@ -208,7 +208,7 @@ export function withLock<T>(lockPath: string, fn: () => T, exclusive = true): T 
 export async function withLockAsync<T>(
   lockPath: string,
   fn: () => Promise<T>,
-  exclusive = true
+  exclusive = true,
 ): Promise<T> {
   const lock = acquireLock(lockPath, exclusive);
   try {

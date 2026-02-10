@@ -10,28 +10,28 @@
 
 import { join } from 'node:path';
 import {
+  type Task,
+  type TaskCreateInput,
+  type TaskFilters,
   TaskSchema,
   TaskStatusSchema,
-  type Task,
-  type TaskFilters,
-  type TaskCreateInput,
 } from '../types/schemas';
-import {
-  getTeamTasksDir,
-  getTaskLockPath,
-  getTaskFilePath,
-  getTeamConfigPath,
-  fileExists,
-  dirExists,
-} from '../utils/storage-paths';
-import {
-  readValidatedJSON,
-  writeAtomicJSON,
-  listJSONFiles,
-  removeFile,
-  generateId,
-} from '../utils/fs-atomic';
 import { withLock } from '../utils/file-lock';
+import {
+  generateId,
+  listJSONFiles,
+  readValidatedJSON,
+  removeFile,
+  writeAtomicJSON,
+} from '../utils/fs-atomic';
+import {
+  dirExists,
+  fileExists,
+  getTaskFilePath,
+  getTaskLockPath,
+  getTeamConfigPath,
+  getTeamTasksDir,
+} from '../utils/storage-paths';
 
 /**
  * Task coordination operations
@@ -45,7 +45,7 @@ export const TaskOperations = {
     teamName: string,
     taskId: string,
     dependencies: string[],
-    _visited = new Set<string>()
+    _visited = new Set<string>(),
   ): void => {
     const teamTasksDir = getTeamTasksDir(teamName);
 
@@ -166,7 +166,7 @@ export const TaskOperations = {
 
         return tasks;
       },
-      false // shared lock for reads
+      false, // shared lock for reads
     );
   },
 
@@ -278,7 +278,7 @@ export const TaskOperations = {
           const otherTask = readValidatedJSON(otherTaskPath, TaskSchema);
           if (otherTask.id !== taskId && otherTask.dependencies?.includes(taskId)) {
             throw new Error(
-              `Cannot delete task ${taskId} because task ${otherTask.id} depends on it`
+              `Cannot delete task ${taskId} because task ${otherTask.id} depends on it`,
             );
           }
         } catch (err: unknown) {

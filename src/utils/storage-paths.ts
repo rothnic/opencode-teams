@@ -6,9 +6,9 @@
  * - Project Storage: <project-root>/.opencode/opencode-teams/ (Teams, Tasks, Inboxes)
  */
 
-import { join } from 'node:path';
-import { homedir } from 'node:os';
 import { existsSync, mkdirSync, statSync } from 'node:fs';
+import { homedir } from 'node:os';
+import { join } from 'node:path';
 
 const PLUGIN_NAME = 'opencode-teams';
 

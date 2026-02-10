@@ -18,7 +18,7 @@ export class TmuxOperations {
    * List all tmux sessions
    */
   static listSessions(): string[] {
-    if (!this.isTmuxInstalled()) {
+    if (!TmuxOperations.isTmuxInstalled()) {
       throw new Error('tmux is not installed');
     }
 
@@ -39,12 +39,12 @@ export class TmuxOperations {
    * Start a new tmux session
    */
   static startSession(sessionName: string): boolean {
-    if (!this.isTmuxInstalled()) {
+    if (!TmuxOperations.isTmuxInstalled()) {
       throw new Error('tmux is not installed');
     }
 
     // Check if session already exists
-    const sessions = this.listSessions();
+    const sessions = TmuxOperations.listSessions();
     if (sessions.some((s) => s.startsWith(`${sessionName}:`))) {
       return false;
     }
@@ -57,7 +57,7 @@ export class TmuxOperations {
    * Stop a tmux session
    */
   static stopSession(sessionName: string): boolean {
-    if (!this.isTmuxInstalled()) {
+    if (!TmuxOperations.isTmuxInstalled()) {
       throw new Error('tmux is not installed');
     }
 
@@ -69,7 +69,7 @@ export class TmuxOperations {
    * Select a layout for the current window in a tmux session
    */
   static selectLayout(sessionName: string, layout: string): boolean {
-    if (!this.isTmuxInstalled()) {
+    if (!TmuxOperations.isTmuxInstalled()) {
       throw new Error('tmux is not installed');
     }
 
@@ -81,7 +81,7 @@ export class TmuxOperations {
    * Add a new pane to the current window in a tmux session
    */
   static addPane(sessionName: string, command?: string): boolean {
-    if (!this.isTmuxInstalled()) {
+    if (!TmuxOperations.isTmuxInstalled()) {
       throw new Error('tmux is not installed');
     }
 

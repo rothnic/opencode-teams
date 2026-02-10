@@ -81,8 +81,8 @@ Performance is not a primary concern at this stage, but:
 
 Enforced automatically via Lefthook pre-commit hooks (parallel execution):
 
-- **Prettier**: Single quotes, ES5 trailing commas, 100-char line width, 2-space indent, semicolons required, arrow parens always
-- **ESLint 9**: Flat config with `@typescript-eslint` and Prettier integration
+- **Biome**: Formatting for TypeScript, JavaScript, and JSON (single quotes, 100-char line width, 2-space indent, semicolons, arrow parens always). Linting handled separately by ESLint.
+- **ESLint 9**: Flat config with `@typescript-eslint` for TypeScript-specific linting rules
   - `@typescript-eslint/no-explicit-any`: warn (avoid `any`, never suppress with `as any` or `@ts-ignore`)
   - `@typescript-eslint/no-unused-vars`: error (underscore prefix `_` allowed)
   - `no-console`: error (except `warn`, `error`, `log`)
@@ -99,7 +99,7 @@ Enforced automatically via Lefthook pre-commit hooks (parallel execution):
 
 CLI-only tool configurations that support `--config` flags live in `.config/`
 to keep the project root clean. Configs required by IDE extensions (ESLint,
-Prettier, TypeScript) remain in root. When adding a new tool, check if its
+Biome, TypeScript) remain in root. When adding a new tool, check if its
 CLI supports a custom config path before placing the config in root.
 
 ### Pull Request Requirements

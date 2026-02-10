@@ -8,16 +8,19 @@
  * - path resolution uses .opencode/ under project root
  */
 
-import { describe, it, expect, beforeEach, afterEach } from 'bun:test';
-import { mkdtempSync, rmSync, existsSync, writeFileSync, readFileSync, mkdirSync } from 'node:fs';
-import { join } from 'node:path';
+import { afterEach, beforeEach, describe, expect, it } from 'bun:test';
+import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
+import { join } from 'node:path';
 import { z } from 'zod';
-
-import { writeAtomicJSON, readValidatedJSON, lockedUpdate } from '../src/utils/fs-atomic';
-import { getProjectStorageDir } from '../src/utils/storage-paths';
-import { ValidationError } from '../src/utils/fs-atomic';
 import { withLock } from '../src/utils/file-lock';
+import {
+  lockedUpdate,
+  readValidatedJSON,
+  ValidationError,
+  writeAtomicJSON,
+} from '../src/utils/fs-atomic';
+import { getProjectStorageDir } from '../src/utils/storage-paths';
 
 const CounterSchema = z.object({ count: z.number() });
 type Counter = z.infer<typeof CounterSchema>;
@@ -86,8 +89,10 @@ describe('Phase 1 verification', () => {
 
     const updates = Array.from({ length: 25 }, () =>
       Promise.resolve().then(() =>
-        lockedUpdate(lockPath, filePath, CounterSchema, (data) => ({ count: data.count + 1 }))
-      )
+        lockedUpdate(lockPath, filePath, CounterSchema, (data) => ({
+          count: data.count + 1,
+        })),
+      ),
     );
 
     await Promise.all(updates);

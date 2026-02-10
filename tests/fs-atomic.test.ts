@@ -5,22 +5,22 @@
  * directory listing, file removal, and ID generation.
  */
 
-import { describe, it, expect, beforeEach, afterEach } from 'bun:test';
-import { join } from 'node:path';
-import { mkdtempSync, writeFileSync, readFileSync, rmSync, readdirSync, mkdirSync } from 'node:fs';
+import { afterEach, beforeEach, describe, expect, it } from 'bun:test';
+import { mkdirSync, mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
+import { join } from 'node:path';
 import { z } from 'zod';
 
 import {
-  ValidationError,
-  writeAtomicJSON,
-  readValidatedJSON,
-  readJSON,
+  generateId,
+  listJSONFiles,
   lockedUpdate,
   lockedUpsert,
-  listJSONFiles,
+  readJSON,
+  readValidatedJSON,
   removeFile,
-  generateId,
+  ValidationError,
+  writeAtomicJSON,
 } from '../src/utils/fs-atomic';
 
 // ── Test schemas ─────────────────────────────────────────────────────────
@@ -282,7 +282,7 @@ describe('fs-atomic', () => {
         filePath,
         CounterSchema,
         { count: 100 },
-        (data) => data
+        (data) => data,
       );
 
       expect(result).toEqual({ count: 100 });

@@ -6,31 +6,31 @@
  */
 
 export type {
-  TeamMember,
-  TeamConfig,
+  Inbox,
+  LeaderInfo,
   Message,
   Task,
-  TaskStatus,
-  TaskFilters,
-  TeamSummary,
-  LeaderInfo,
   TaskCreateInput,
+  TaskFilters,
+  TaskStatus,
   TaskUpdateInput,
-  Inbox,
+  TeamConfig,
+  TeamMember,
+  TeamSummary,
 } from './schemas';
 
 export {
-  TeamMemberSchema,
-  TeamConfigSchema,
+  InboxSchema,
+  LeaderInfoSchema,
   MessageSchema,
+  TaskCreateInputSchema,
+  TaskFiltersSchema,
   TaskSchema,
   TaskStatusSchema,
-  TaskFiltersSchema,
-  TeamSummarySchema,
-  LeaderInfoSchema,
-  InboxSchema,
-  TaskCreateInputSchema,
   TaskUpdateInputSchema,
+  TeamConfigSchema,
+  TeamMemberSchema,
+  TeamSummarySchema,
 } from './schemas';
 
 // Legacy types that are not schema-backed (kept for backward compat)

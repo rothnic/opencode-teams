@@ -3,9 +3,9 @@
  * Using Bun's built-in test runner
  */
 
-import { describe, it, expect, beforeAll, afterAll } from 'bun:test';
-import { generateId, dirExists, getPluginDir, getTeamsDir, getTasksDir } from '../src/utils/index';
+import { afterAll, beforeAll, describe, expect, it } from 'bun:test';
 import { join } from 'node:path';
+import { dirExists, generateId, getPluginDir, getTasksDir, getTeamsDir } from '../src/utils/index';
 
 describe('Utility Functions', () => {
   describe('generateId', () => {

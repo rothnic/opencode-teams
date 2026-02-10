@@ -34,8 +34,8 @@ CLI-only tool configs live in `.config/` to keep the project root clean:
 | ------------------- | ---------------------------------- | ------------------------------ |
 | ls-lint config      | `.config/ls-lint.yml`              | CLI supports `--config`        |
 | markdownlint config | `.config/.markdownlint-cli2.jsonc` | CLI supports `--config`        |
+| Biome config        | `biome.json` (root)                | IDE extensions expect root     |
 | ESLint config       | `eslint.config.js` (root)          | IDE extensions expect root     |
-| Prettier config     | `.prettierrc` (root)               | IDE extensions expect root     |
 | TypeScript config   | `tsconfig.json` (root)             | IDE/build tooling expects root |
 
 **Rule**: If a tool's CLI supports `--config` and no IDE extension
@@ -94,7 +94,7 @@ via `.config/.markdownlint-cli2.jsonc`.
 | ------------------ | ----------------- | ------------------------------------------ |
 | Heading style      | ATX (`#`) only    | No setext (underline) headings             |
 | List style         | Dashes (`-`)      | Not asterisks or plus signs                |
-| List indent        | 2 spaces          | Matches Prettier `tabWidth`                |
+| List indent        | 2 spaces          | Matches Biome indent                       |
 | Line length        | 100 characters    | Excludes code blocks, tables, headings     |
 | First-line heading | Disabled          | Files may use YAML frontmatter             |
 | Duplicate headings | Siblings only     | Same heading allowed in different sections |
@@ -135,7 +135,7 @@ Runs on every commit in parallel. Designed to not block progress:
 | Check        | Behavior                   | Blocking?                         |
 | ------------ | -------------------------- | --------------------------------- |
 | ESLint       | Auto-fixes and re-stages   | No (fixes in place)               |
-| Prettier     | Auto-formats and re-stages | No (fixes in place)               |
+| Biome        | Auto-formats and re-stages | No (fixes in place)               |
 | TypeScript   | Type-check only            | Yes (no `any` in production code) |
 | ls-lint      | Check naming conventions   | Yes (must rename files)           |
 | markdownlint | Check markdown standards   | No (warn only, blocks push/merge) |
@@ -184,7 +184,7 @@ bun test              # Tests
 bun run build         # Build
 
 bun run lint:fix         # ESLint auto-fix
-bun run format           # Prettier auto-format
+bun run format           # Biome auto-format
 bun run markdownlint:fix # Markdown auto-fix
 
 # Full pre-push check
@@ -197,5 +197,5 @@ bun test && bun run build && bun run ls-lint && bun run markdownlint
 - `.config/.markdownlint-cli2.jsonc` - Markdown linting configuration
 - `lefthook.yml` - Git hook configuration
 - `eslint.config.js` - ESLint configuration
-- `.prettierrc` - Prettier configuration
+- `biome.json` - Biome configuration (formatting)
 - `.kittify/memory/constitution.md` - Project constitution (references this skill)

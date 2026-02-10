@@ -19,9 +19,9 @@ try {
   tool = local.tool;
 }
 
-import { TeamOperations } from './operations/team';
 import { TaskOperations } from './operations/task';
-import type { TeamConfig, TeamMember, Message, Task } from './types/index';
+import { TeamOperations } from './operations/team';
+import type { Message, Task, TeamConfig, TeamMember } from './types/index';
 
 /**
  * OpenCode Teams Plugin
@@ -112,7 +112,7 @@ export const OpenCodeTeamsPlugin = async (ctx: any) => {
             args.teamName,
             args.targetAgentId,
             args.message,
-            args.fromAgentId
+            args.fromAgentId,
           );
         },
       }),
@@ -241,7 +241,7 @@ export const OpenCodeTeamsPlugin = async (ctx: any) => {
           const config = TeamOperations.approveShutdown(args.teamName, args.agentId);
           if (TeamOperations.shouldShutdown(args.teamName)) {
             console.log(
-              `[OpenCode Teams] Shutdown approved for team: ${args.teamName}. Cleaning up...`
+              `[OpenCode Teams] Shutdown approved for team: ${args.teamName}. Cleaning up...`,
             );
             TeamOperations.cleanup(args.teamName);
           }

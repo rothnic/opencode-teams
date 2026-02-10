@@ -8,34 +8,34 @@
  * - Project-specific storage paths (via storage-paths.ts)
  */
 
+import { readdirSync, rmSync } from 'node:fs';
 import { join } from 'node:path';
-import { rmSync, readdirSync } from 'node:fs';
 import {
-  TeamConfigSchema,
-  TeamMemberSchema,
-  MessageSchema,
   InboxSchema,
-  type TeamConfig,
-  type TeamMember,
   type LeaderInfo,
   type Message,
+  MessageSchema,
+  type TeamConfig,
+  TeamConfigSchema,
+  type TeamMember,
+  TeamMemberSchema,
   type TeamSummary,
 } from '../types/schemas';
+import { withLock } from '../utils/file-lock';
+import { lockedUpdate, lockedUpsert, readValidatedJSON, writeAtomicJSON } from '../utils/fs-atomic';
 import {
-  getTeamsDir,
-  getTeamDir,
-  getTeamConfigPath,
-  getTeamLockPath,
-  getTeamTasksDir,
-  getTasksDir,
-  getInboxesDir,
-  getAgentInboxPath,
+  dirExists,
   ensureDir,
   fileExists,
-  dirExists,
+  getAgentInboxPath,
+  getInboxesDir,
+  getTasksDir,
+  getTeamConfigPath,
+  getTeamDir,
+  getTeamLockPath,
+  getTeamsDir,
+  getTeamTasksDir,
 } from '../utils/storage-paths';
-import { readValidatedJSON, writeAtomicJSON, lockedUpdate, lockedUpsert } from '../utils/fs-atomic';
-import { withLock } from '../utils/file-lock';
 
 /**
  * Team coordination operations
@@ -192,7 +192,7 @@ export const TeamOperations = {
     teamName: string,
     targetAgentId: string,
     message: string,
-    fromAgentId?: string
+    fromAgentId?: string,
   ): Message => {
     const configPath = getTeamConfigPath(teamName);
     const lockPath = getTeamLockPath(teamName);
@@ -305,7 +305,7 @@ export const TeamOperations = {
 
         return filtered;
       },
-      true
+      true,
     );
   },
 
@@ -316,7 +316,7 @@ export const TeamOperations = {
     teamName: string,
     agentId?: string,
     timeoutMs: number = 30000,
-    since?: string
+    since?: string,
   ): Promise<Message[]> => {
     const startTime = Date.now();
     const currentAgentId = agentId || process.env.OPENCODE_AGENT_ID || 'unknown';
@@ -384,7 +384,7 @@ export const TeamOperations = {
 
     const isLeaderApproved = config.shutdownApprovals.includes(config.leader);
     const areAllMembersApproved = config.members.every((m) =>
-      config.shutdownApprovals?.includes(m.agentId)
+      config.shutdownApprovals?.includes(m.agentId),
     );
 
     return isLeaderApproved || areAllMembersApproved;

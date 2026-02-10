@@ -5,25 +5,25 @@
  * and filesystem helper functions.
  */
 
-import { describe, it, expect, beforeEach, afterEach } from 'bun:test';
-import { join } from 'node:path';
-import { mkdtempSync, mkdirSync, writeFileSync, rmSync } from 'node:fs';
+import { afterEach, beforeEach, describe, expect, it } from 'bun:test';
+import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
+import { join } from 'node:path';
 
 import {
   detectProjectRoot,
-  getProjectStorageDir,
-  getTeamsDir,
-  getTasksDir,
-  getTeamDir,
-  getTeamConfigPath,
-  getInboxesDir,
-  getAgentInboxPath,
-  getTeamLockPath,
-  getTaskLockPath,
+  dirExists,
   ensureDir,
   fileExists,
-  dirExists,
+  getAgentInboxPath,
+  getInboxesDir,
+  getProjectStorageDir,
+  getTaskLockPath,
+  getTasksDir,
+  getTeamConfigPath,
+  getTeamDir,
+  getTeamLockPath,
+  getTeamsDir,
 } from '../src/utils/storage-paths';
 
 describe('storage-paths', () => {

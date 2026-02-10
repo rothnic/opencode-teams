@@ -1,9 +1,9 @@
-import { describe, it, expect, beforeEach, afterEach } from 'bun:test';
-import { mkdtempSync, rmSync, existsSync } from 'node:fs';
-import { join } from 'node:path';
+import { afterEach, beforeEach, describe, expect, it } from 'bun:test';
+import { existsSync, mkdtempSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
+import { join } from 'node:path';
 import { TeamOperations } from '../src/operations/team';
-import { getTeamsDir, dirExists } from '../src/utils/index';
+import { dirExists, getTeamsDir } from '../src/utils/index';
 
 describe('Lifecycle Management', () => {
   const teamName = 'test-lifecycle-team';

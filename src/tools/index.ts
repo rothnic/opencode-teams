@@ -5,18 +5,18 @@
  * Each tool defines parameters and execution logic that OpenCode can invoke.
  */
 
-import { tool, type ToolDefinition } from './tool-helper';
-import { TeamOperations } from '../operations/team';
 import { TaskOperations } from '../operations/task';
+import { TeamOperations } from '../operations/team';
 import type {
-  TeamConfig,
   LeaderInfo,
-  TeamMember,
   Message,
   Task,
   TaskFilters,
+  TeamConfig,
+  TeamMember,
   TeamSummary,
 } from '../types/index';
+import { type ToolDefinition, tool } from './tool-helper';
 
 /**
  * Create a new team

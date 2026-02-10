@@ -3,9 +3,9 @@
  * Creates a new team for multi-agent collaboration
  */
 
-import { tool } from './tool-helper';
 import { TeamOperations } from '../operations/team';
-import type { TeamConfig, LeaderInfo } from '../types/index';
+import type { LeaderInfo, TeamConfig } from '../types/index';
+import { tool } from './tool-helper';
 
 export const spawnTeam = tool<{ teamName: string; leaderInfo?: LeaderInfo }, TeamConfig>({
   name: 'spawn-team',

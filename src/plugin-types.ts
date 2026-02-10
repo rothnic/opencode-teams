@@ -3,9 +3,7 @@
  * Based on OpenCode plugin API documentation
  */
 
-export interface Plugin {
-  (ctx: PluginContext): Promise<PluginHooks>;
-}
+export type Plugin = (ctx: PluginContext) => Promise<PluginHooks>;
 
 export interface PluginContext {
   project: any;

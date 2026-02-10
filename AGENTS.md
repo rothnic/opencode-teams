@@ -21,7 +21,7 @@ see the [skills/](skills/) directory.
 - **Test (watch)**: `bun test --watch`
 - **Lint**: `mise run lint` - Check code style
 - **Lint (fix)**: `mise run lint:fix` - Auto-fix issues
-- **Format**: `mise run format` - Format with Prettier
+- **Format**: `mise run format` - Format with Biome
 - **Type Check**: `mise run typecheck` - Verify types
 
 ## Code Style Guidelines
@@ -35,18 +35,18 @@ see the [skills/](skills/) directory.
 Example:
 
 ```typescript
-import { join } from 'node:path';
-import type { TeamConfig } from '../types/index';
-import { getTeamsDir } from '../utils/index';
+import { join } from "node:path";
+import type { TeamConfig } from "../types/index";
+import { getTeamsDir } from "../utils/index";
 ```
 
-### Formatting (Prettier)
+### Formatting (Biome)
 
-- **Single quotes**: Yes (`singleQuote: true`)
+- **Single quotes**: Yes
 - **Line width**: 100 characters
-- **Tab width**: 2 spaces
-- **Semicolons**: Required
-- **Trailing commas**: ES5 style
+- **Indent**: 2 spaces
+- **Semicolons**: Always (default)
+- **Trailing commas**: All (default)
 
 ### TypeScript Standards
 
@@ -65,15 +65,15 @@ Prefer Bun APIs over Node.js equivalents:
 
 ```typescript
 // ✅ Preferred (Bun)
-const file = Bun.file('path/to/file');
+const file = Bun.file("path/to/file");
 await file.json();
-await Bun.write('path', data);
-Bun.spawnSync(['command', 'arg']);
+await Bun.write("path", data);
+Bun.spawnSync(["command", "arg"]);
 
 // ❌ Avoid (Node.js)
-const fs = require('fs');
-fs.readFileSync('path');
-fs.writeFileSync('path', data);
+const fs = require("fs");
+fs.readFileSync("path");
+fs.writeFileSync("path", data);
 ```
 
 ### Error Handling
@@ -100,14 +100,14 @@ try {
 Example:
 
 ```typescript
-import { describe, it, expect, beforeAll } from 'bun:test';
+import { describe, it, expect, beforeAll } from "bun:test";
 
-describe('Feature Name', () => {
+describe("Feature Name", () => {
   beforeAll(() => {
     // Setup
   });
 
-  it('should do something', () => {
+  it("should do something", () => {
     expect(result).toBe(expected);
   });
 });
@@ -156,13 +156,13 @@ This is an **OpenCode plugin** that:
 Tools should be defined using OpenCode's standard pattern:
 
 ```typescript
-import { tool } from '@opencode/sdk'; // or similar
-import { z } from 'zod';
+import { tool } from "@opencode/sdk"; // or similar
+import { z } from "zod";
 
 export const spawnTeam = tool({
-  description: 'Create a new team of AI agents',
+  description: "Create a new team of AI agents",
   args: {
-    teamName: z.string().describe('Unique name for the team'),
+    teamName: z.string().describe("Unique name for the team"),
     leaderInfo: z
       .object({
         agentId: z.string().optional(),

@@ -5,50 +5,49 @@
  * New code should import directly from the specific modules.
  */
 
-// Re-export storage path utilities
-export {
-  getTeamsDir,
-  getTasksDir,
-  getTeamDir,
-  getTeamConfigPath,
-  getTeamTasksDir,
-  getTeamLockPath,
-  getTaskLockPath,
-  getInboxesDir,
-  getAgentInboxPath,
-  getGlobalConfigDir,
-  getProjectStorageDir,
-  getTemplatesDir,
-  ensureDir,
-  fileExists,
-  dirExists,
-  detectProjectRoot,
-} from './storage-paths';
+// Re-export file locking
+export { acquireLock, type FileLock, tryAcquireLock, withLock, withLockAsync } from './file-lock';
 
 // Re-export atomic file operations
 export {
-  readValidatedJSON,
-  readJSON,
-  writeAtomicJSON,
+  generateId,
+  listJSONFiles,
   lockedRead,
-  lockedWrite,
   lockedUpdate,
   lockedUpsert,
-  listJSONFiles,
+  lockedWrite,
+  readJSON,
+  readValidatedJSON,
   removeFile,
-  generateId,
   ValidationError,
+  writeAtomicJSON,
 } from './fs-atomic';
+// Re-export storage path utilities
+export {
+  detectProjectRoot,
+  dirExists,
+  ensureDir,
+  fileExists,
+  getAgentInboxPath,
+  getGlobalConfigDir,
+  getInboxesDir,
+  getProjectStorageDir,
+  getTaskLockPath,
+  getTasksDir,
+  getTeamConfigPath,
+  getTeamDir,
+  getTeamLockPath,
+  getTeamsDir,
+  getTeamTasksDir,
+  getTemplatesDir,
+} from './storage-paths';
 
-// Re-export file locking
-export { acquireLock, tryAcquireLock, withLock, withLockAsync, type FileLock } from './file-lock';
-
-// Legacy compat aliases
-import { readJSON, writeAtomicJSON as _writeAtomicJSON } from './fs-atomic';
-import { getProjectStorageDir as _getProjectStorageDir } from './storage-paths';
 import { existsSync, readdirSync, rmSync } from 'node:fs';
 import { join } from 'node:path';
 import type { AppConfig } from '../types/index';
+// Legacy compat aliases
+import { writeAtomicJSON as _writeAtomicJSON, readJSON } from './fs-atomic';
+import { getProjectStorageDir as _getProjectStorageDir } from './storage-paths';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function safeReadJSONSync(filePath: string): any {

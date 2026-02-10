@@ -1,7 +1,5 @@
 import js from '@eslint/js';
 import tseslint from 'typescript-eslint';
-import prettier from 'eslint-config-prettier/flat';
-import eslintPluginPrettier from 'eslint-plugin-prettier';
 
 export default tseslint.config(
   {
@@ -29,13 +27,10 @@ export default tseslint.config(
     },
     plugins: {
       '@typescript-eslint': tseslint.plugin,
-      prettier: eslintPluginPrettier,
     },
     rules: {
       ...js.configs.recommended.rules,
       ...tseslint.configs.recommended.rules,
-      ...prettier.rules,
-      'prettier/prettier': 'error',
       '@typescript-eslint/explicit-function-return-type': 'off',
       '@typescript-eslint/no-explicit-any': 'warn',
       'no-unused-vars': 'off',
@@ -48,5 +43,5 @@ export default tseslint.config(
       ],
       'no-console': ['error', { allow: ['warn', 'error', 'log'] }],
     },
-  }
+  },
 );

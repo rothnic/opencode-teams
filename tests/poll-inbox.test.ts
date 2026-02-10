@@ -2,10 +2,10 @@
  * Tests for poll-inbox tool and long-polling
  */
 
-import { describe, it, expect, beforeAll, afterAll } from 'bun:test';
-import { mkdtempSync, rmSync, existsSync } from 'node:fs';
-import { join } from 'node:path';
+import { afterAll, beforeAll, describe, expect, it } from 'bun:test';
+import { existsSync, mkdtempSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
+import { join } from 'node:path';
 import { TeamOperations } from '../src/operations/team';
 
 describe('pollInbox', () => {

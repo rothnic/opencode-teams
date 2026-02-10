@@ -14,24 +14,24 @@ pre-commit:
   parallel: true
   commands:
     lint:
-      glob: '*.{js,ts}'
+      glob: "*.{js,ts}"
       run: bun run lint:fix
       stage_fixed: true
 
     format:
-      glob: '*.{js,ts,json,md}'
+      glob: "*.{js,ts,json}"
       run: bun run format
       stage_fixed: true
 
     type-check:
-      glob: '*.ts'
+      glob: "*.ts"
       run: bun run typecheck
 
     ls-lint:
       run: bun run ls-lint
 
     markdownlint:
-      glob: '*.md'
+      glob: "*.md"
       run: |
         if bun run markdownlint 2>&1; then
           exit 0

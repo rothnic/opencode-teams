@@ -7,17 +7,17 @@
  * full concurrency-safe storage layer.
  */
 
-import { join, dirname, basename } from 'node:path';
 import {
-  readFileSync,
-  writeFileSync,
-  renameSync,
-  unlinkSync,
   existsSync,
   mkdirSync,
   readdirSync,
+  readFileSync,
+  renameSync,
+  unlinkSync,
+  writeFileSync,
 } from 'node:fs';
-import type { ZodType, ZodError } from 'zod';
+import { basename, dirname, join } from 'node:path';
+import type { ZodError, ZodType } from 'zod';
 import { acquireLock } from './file-lock';
 
 /**
@@ -26,7 +26,7 @@ import { acquireLock } from './file-lock';
 export class ValidationError extends Error {
   constructor(
     public readonly filePath: string,
-    public readonly zodError: ZodError
+    public readonly zodError: ZodError,
   ) {
     const issues = zodError.issues.map((i) => `  - ${i.path.join('.')}: ${i.message}`).join('\n');
     super(`Validation failed for ${filePath}:\n${issues}`);
@@ -153,7 +153,7 @@ export function writeAtomicJSON(filePath: string, data: unknown, schema?: ZodTyp
 export function lockedRead<S extends ZodType>(
   lockPath: string,
   filePath: string,
-  schema: S
+  schema: S,
 ): S['_output'] {
   const lock = acquireLock(lockPath, false); // shared lock for reads
   try {
@@ -175,7 +175,7 @@ export function lockedWrite(
   lockPath: string,
   filePath: string,
   data: unknown,
-  schema?: ZodType
+  schema?: ZodType,
 ): void {
   const lock = acquireLock(lockPath, true); // exclusive lock for writes
   try {
@@ -201,7 +201,7 @@ export function lockedUpdate<T>(
   lockPath: string,
   filePath: string,
   schema: ZodType<T>,
-  updateFn: (current: T) => T
+  updateFn: (current: T) => T,
 ): T {
   const lock = acquireLock(lockPath, true); // exclusive lock
   try {
@@ -229,7 +229,7 @@ export function lockedUpsert<T>(
   filePath: string,
   schema: ZodType<T>,
   defaultValue: T,
-  updateFn: (current: T) => T
+  updateFn: (current: T) => T,
 ): T {
   const lock = acquireLock(lockPath, true);
   try {
