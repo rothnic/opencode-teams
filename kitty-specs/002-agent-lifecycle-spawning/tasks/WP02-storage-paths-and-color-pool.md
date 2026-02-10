@@ -1,26 +1,30 @@
 ---
-work_package_id: 'WP02'
-title: 'Storage Paths and Color Pool'
-lane: 'planned'
+work_package_id: WP02
+title: Storage Paths and Color Pool
+lane: "doing"
+dependencies: []
+base_branch: main
+base_commit: 28ecfd1a59462c40da5538af4f043693b723620e
+created_at: '2026-02-10T06:28:52.158900+00:00'
 subtasks:
-  - 'T007'
-  - 'T008'
-  - 'T009'
-  - 'T010'
-  - 'T011'
-  - 'T012'
-  - 'T013'
-phase: 'Phase 1 - Foundation'
+- T007
+- T008
+- T009
+- T010
+- T011
+- T012
+- T013
+phase: Phase 1 - Foundation
 assignee: ''
 agent: ''
-shell_pid: ''
+shell_pid: "1368003"
 review_status: ''
 reviewed_by: ''
 history:
-  - timestamp: '2026-02-10T06:00:00Z'
-    lane: 'planned'
-    agent: 'system'
-    action: 'Prompt generated via /spec-kitty.tasks'
+- timestamp: '2026-02-10T06:00:00Z'
+  lane: planned
+  agent: system
+  action: Prompt generated via /spec-kitty.tasks
 ---
 # Work Package Prompt: WP02 – Storage Paths and Color Pool
 
