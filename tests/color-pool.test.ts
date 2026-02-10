@@ -9,7 +9,12 @@ import { mkdtempSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
-import { allocateColor, COLOR_PALETTE, ColorPoolSchema, releaseColor } from '../src/utils/color-pool';
+import {
+  allocateColor,
+  COLOR_PALETTE,
+  ColorPoolSchema,
+  releaseColor,
+} from '../src/utils/color-pool';
 
 describe('color-pool', () => {
   let tmpDir: string;
@@ -72,7 +77,7 @@ describe('color-pool', () => {
     it('exhaustion fallback: when all 10 colors assigned, generates from hash', () => {
       // Allocate all 10 palette colors
       const agents = Array.from({ length: 10 }, (_, i) => `agent-${i}`);
-      const colors = agents.map(agent => allocateColor(agent));
+      const colors = agents.map((agent) => allocateColor(agent));
 
       // All colors should be from palette
       for (const color of colors) {

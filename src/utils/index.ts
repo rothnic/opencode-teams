@@ -5,9 +5,11 @@
  * New code should import directly from the specific modules.
  */
 
+export type { ColorPool } from './color-pool';
+// Re-export color pool
+export { allocateColor, COLOR_PALETTE, ColorPoolSchema, releaseColor } from './color-pool';
 // Re-export file locking
 export { acquireLock, type FileLock, tryAcquireLock, withLock, withLockAsync } from './file-lock';
-
 // Re-export atomic file operations
 export {
   generateId,
@@ -30,15 +32,15 @@ export {
   fileExists,
   getAgentInboxPath,
   getAgentLockPath,
-  getAgentsDir,
   getAgentStatePath,
+  getAgentsDir,
   getColorPoolPath,
   getGlobalConfigDir,
   getInboxesDir,
   getProjectStorageDir,
   getServerLogPath,
-  getServersDir,
   getServerStatePath,
+  getServersDir,
   getTaskLockPath,
   getTasksDir,
   getTeamConfigPath,
@@ -48,10 +50,6 @@ export {
   getTeamTasksDir,
   getTemplatesDir,
 } from './storage-paths';
-
-// Re-export color pool
-export { allocateColor, COLOR_PALETTE, ColorPoolSchema, releaseColor } from './color-pool';
-export type { ColorPool } from './color-pool';
 
 import { existsSync, readdirSync, rmSync } from 'node:fs';
 import { join } from 'node:path';

@@ -21,8 +21,17 @@ export default tseslint.config(
         process: 'readonly',
         Buffer: 'readonly',
         global: 'writable',
+        globalThis: 'readonly',
+        require: 'readonly',
         // Bun globals
         Bun: 'readonly',
+        // Web API globals (available in Bun)
+        fetch: 'readonly',
+        Response: 'readonly',
+        Request: 'readonly',
+        Headers: 'readonly',
+        URL: 'readonly',
+        URLSearchParams: 'readonly',
       },
     },
     plugins: {

@@ -2,17 +2,16 @@ import { afterEach, beforeEach, describe, expect, it } from 'bun:test';
 import { mkdtempSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-
 import {
+  dirExists,
   getAgentLockPath,
-  getAgentsDir,
   getAgentStatePath,
+  getAgentsDir,
   getColorPoolPath,
   getServerLogPath,
-  getServersDir,
   getServerStatePath,
+  getServersDir,
 } from '../src/utils/storage-paths';
-import { dirExists } from '../src/utils/storage-paths';
 
 describe('storage-paths agent extensions', () => {
   let tmpDir: string;

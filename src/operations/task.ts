@@ -15,7 +15,6 @@ import {
   type TaskFilters,
   TaskSchema,
   type TaskStatus,
-  TaskStatusSchema,
 } from '../types/schemas';
 import { withLock } from '../utils/file-lock';
 import {
