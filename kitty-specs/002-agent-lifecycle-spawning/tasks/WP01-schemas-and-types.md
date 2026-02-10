@@ -1,25 +1,29 @@
 ---
-work_package_id: 'WP01'
-title: 'Schemas and Types'
-lane: 'planned'
+work_package_id: WP01
+title: Schemas and Types
+lane: "doing"
+dependencies: []
+base_branch: main
+base_commit: e5cf53c726872183e2caff7080d86bc068ff07cb
+created_at: '2026-02-10T06:28:39.925322+00:00'
 subtasks:
-  - 'T001'
-  - 'T002'
-  - 'T003'
-  - 'T004'
-  - 'T005'
-  - 'T006'
-phase: 'Phase 1 - Foundation'
+- T001
+- T002
+- T003
+- T004
+- T005
+- T006
+phase: Phase 1 - Foundation
 assignee: ''
 agent: ''
-shell_pid: ''
+shell_pid: "1368003"
 review_status: ''
 reviewed_by: ''
 history:
-  - timestamp: '2026-02-10T06:00:00Z'
-    lane: 'planned'
-    agent: 'system'
-    action: 'Prompt generated via /spec-kitty.tasks'
+- timestamp: '2026-02-10T06:00:00Z'
+  lane: planned
+  agent: system
+  action: Prompt generated via /spec-kitty.tasks
 ---
 # Work Package Prompt: WP01 – Schemas and Types
 
