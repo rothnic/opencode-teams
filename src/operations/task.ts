@@ -14,6 +14,7 @@ import {
   type TaskCreateInput,
   type TaskFilters,
   TaskSchema,
+  type TaskStatus,
   TaskStatusSchema,
 } from '../types/schemas';
 import { withLock } from '../utils/file-lock';
@@ -32,6 +33,16 @@ import {
   getTeamConfigPath,
   getTeamTasksDir,
 } from '../utils/storage-paths';
+
+/**
+ * Forward-only status transitions (FR-011).
+ * pending -> in_progress -> completed. No backward transitions.
+ */
+const VALID_TRANSITIONS: Record<TaskStatus, TaskStatus[]> = {
+  pending: ['in_progress'],
+  in_progress: ['completed'],
+  completed: [], // terminal state
+};
 
 /**
  * Task coordination operations
@@ -298,11 +309,11 @@ export const TaskOperations = {
         }
       }
 
-      // Validate status transition if status is being updated
+      // Validate status transition (FR-011: forward-only)
       if (updates.status && updates.status !== task.status) {
-        const statusResult = TaskStatusSchema.safeParse(updates.status);
-        if (!statusResult.success) {
-          throw new Error(`Invalid status: ${updates.status}`);
+        const allowed = VALID_TRANSITIONS[task.status];
+        if (!allowed.includes(updates.status)) {
+          throw new Error(`Invalid status transition: ${task.status} -> ${updates.status}`);
         }
       }
 
@@ -315,6 +326,46 @@ export const TaskOperations = {
       };
 
       writeAtomicJSON(taskPath, updatedTask, TaskSchema);
+
+      // Cascade unblock on completion (FR-010)
+      if (updatedTask.status === 'completed' && task.status !== 'completed') {
+        const teamTasksDir = getTeamTasksDir(teamName);
+        const files = listJSONFiles(teamTasksDir);
+
+        for (const file of files) {
+          const otherTaskPath = join(teamTasksDir, file);
+          try {
+            const otherTask = readValidatedJSON(otherTaskPath, TaskSchema);
+            if (otherTask.id === taskId) continue;
+
+            let modified = false;
+
+            if (otherTask.dependencies.includes(taskId)) {
+              otherTask.dependencies = otherTask.dependencies.filter((id: string) => id !== taskId);
+              modified = true;
+
+              if (
+                otherTask.dependencies.length === 0 &&
+                otherTask.warning?.includes('dependencies are not met')
+              ) {
+                otherTask.warning = undefined;
+              }
+            }
+
+            if (otherTask.blocks.includes(taskId)) {
+              otherTask.blocks = otherTask.blocks.filter((id: string) => id !== taskId);
+              modified = true;
+            }
+
+            if (modified) {
+              writeAtomicJSON(otherTaskPath, otherTask, TaskSchema);
+            }
+          } catch {
+            // Skip unreadable tasks during cascade
+          }
+        }
+      }
+
       return updatedTask;
     });
   },
