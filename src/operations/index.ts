@@ -6,6 +6,7 @@
 
 export { AgentOperations } from './agent';
 export { DispatchEngine, initDispatchEngine } from './dispatch-engine';
+export { DispatchRuleOperations } from './dispatch-rules';
 export { EventBus } from './event-bus';
 export {
   checkPermission,

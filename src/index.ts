@@ -21,11 +21,20 @@ try {
 
 import { AgentOperations } from './operations/agent';
 import { initDispatchEngine } from './operations/dispatch-engine';
+import { DispatchRuleOperations } from './operations/dispatch-rules';
 import { EventBus } from './operations/event-bus';
 import { SessionManager } from './operations/session-manager-cli';
 import { TaskOperations } from './operations/task';
 import { TeamOperations } from './operations/team';
-import type { AgentState, Message, Task, TeamConfig, TeamMember } from './types/index';
+import type {
+  AgentState,
+  DispatchLogEntry,
+  DispatchRule,
+  Message,
+  Task,
+  TeamConfig,
+  TeamMember,
+} from './types/index';
 
 /**
  * OpenCode Teams Plugin
@@ -335,6 +344,73 @@ export const OpenCodeTeamsPlugin = async (ctx: any) => {
             return AgentOperations.listAgents({ teamName: args.teamName });
           }
           return AgentOperations.listAgents();
+        },
+      }),
+
+      'add-dispatch-rule': tool({
+        description: 'Add a new event-driven dispatch rule to a team',
+        args: {
+          teamName: tool.schema.string().describe('Team name'),
+          rule: tool.schema.object({
+            id: tool.schema.string().describe('Unique rule ID'),
+            eventType: tool.schema
+              .string()
+              .describe('Event type to trigger on (e.g. task.created)'),
+            condition: tool.schema
+              .object({
+                type: tool.schema
+                  .string()
+                  .describe('Condition type (simple_match, resource_count)'),
+                field: tool.schema.string().optional(),
+                resource: tool.schema.string().optional(),
+                operator: tool.schema.string().describe('Operator (eq, neq, gt, lt, gte, lte)'),
+                value: tool.schema
+                  .union([tool.schema.string(), tool.schema.number(), tool.schema.boolean()])
+                  .describe('Value to compare against'),
+              })
+              .optional(),
+            action: tool.schema.object({
+              type: tool.schema.string().describe('Action type (assign_task, notify_leader, log)'),
+              params: tool.schema.record(tool.schema.string(), tool.schema.unknown()).optional(),
+            }),
+            priority: tool.schema.number().optional().default(0),
+            enabled: tool.schema.boolean().optional().default(true),
+          }),
+        },
+        async execute(args: any, _ctx: any): Promise<TeamConfig> {
+          return DispatchRuleOperations.addDispatchRule(args.teamName, args.rule);
+        },
+      }),
+
+      'remove-dispatch-rule': tool({
+        description: 'Remove a dispatch rule from a team',
+        args: {
+          teamName: tool.schema.string().describe('Team name'),
+          ruleId: tool.schema.string().describe('ID of the rule to remove'),
+        },
+        async execute(args: any, _ctx: any): Promise<TeamConfig> {
+          return DispatchRuleOperations.removeDispatchRule(args.teamName, args.ruleId);
+        },
+      }),
+
+      'list-dispatch-rules': tool({
+        description: 'List all dispatch rules for a team',
+        args: {
+          teamName: tool.schema.string().describe('Team name'),
+        },
+        async execute(args: any, _ctx: any): Promise<DispatchRule[]> {
+          return DispatchRuleOperations.listDispatchRules(args.teamName);
+        },
+      }),
+
+      'get-dispatch-log': tool({
+        description: 'Get the dispatch execution log for a team',
+        args: {
+          teamName: tool.schema.string().describe('Team name'),
+          limit: tool.schema.number().optional().describe('Max number of log entries to return'),
+        },
+        async execute(args: any, _ctx: any): Promise<DispatchLogEntry[]> {
+          return DispatchRuleOperations.getDispatchLog(args.teamName, args.limit);
         },
       }),
     },
