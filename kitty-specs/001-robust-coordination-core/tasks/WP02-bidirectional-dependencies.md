@@ -1,24 +1,28 @@
 ---
-work_package_id: "WP02"
-title: "Bidirectional Dependencies"
-lane: "planned"
+work_package_id: WP02
+title: Bidirectional Dependencies
+lane: "doing"
+dependencies: []
+base_branch: main
+base_commit: 29c03678aa7aa2bf9fd035fffe20f610fb0f7d61
+created_at: '2026-02-10T03:56:20.895206+00:00'
 subtasks:
-  - "T006"
-  - "T007"
-  - "T008"
-  - "T009"
-  - "T010"
-phase: "Phase 1 - Schema + Operations"
-assignee: ""
-agent: ""
-shell_pid: ""
-review_status: ""
-reviewed_by: ""
+- T006
+- T007
+- T008
+- T009
+- T010
+phase: Phase 1 - Schema + Operations
+assignee: ''
+agent: ''
+shell_pid: "888629"
+review_status: ''
+reviewed_by: ''
 history:
-  - timestamp: "2026-02-10T16:24:00Z"
-    lane: "planned"
-    agent: "system"
-    action: "Prompt generated via /spec-kitty.tasks"
+- timestamp: '2026-02-10T16:24:00Z'
+  lane: planned
+  agent: system
+  action: Prompt generated via /spec-kitty.tasks
 ---
 
 # Work Package Prompt: WP02 -- Bidirectional Dependencies
