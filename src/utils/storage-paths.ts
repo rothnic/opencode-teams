@@ -154,6 +154,70 @@ export function getTaskFilePath(teamName: string, taskId: string, projectRoot?: 
 }
 
 /**
+ * Get the agents directory within project storage.
+ * <project-root>/.opencode/opencode-teams/agents/
+ */
+export function getAgentsDir(projectRoot?: string): string {
+  const dir = join(getProjectStorageDir(projectRoot), 'agents');
+  ensureDir(dir);
+  return dir;
+}
+
+/**
+ * Get the state file path for a specific agent.
+ * <project-root>/.opencode/opencode-teams/agents/<agent-id>.json
+ */
+export function getAgentStatePath(agentId: string, projectRoot?: string): string {
+  return join(getAgentsDir(projectRoot), `${agentId}.json`);
+}
+
+/**
+ * Get the lock file path for agent state operations.
+ * <project-root>/.opencode/opencode-teams/agents/.lock
+ */
+export function getAgentLockPath(projectRoot?: string): string {
+  return join(getAgentsDir(projectRoot), '.lock');
+}
+
+/**
+ * Get the servers directory within project storage.
+ * <project-root>/.opencode/opencode-teams/servers/
+ */
+export function getServersDir(projectRoot?: string): string {
+  const dir = join(getProjectStorageDir(projectRoot), 'servers');
+  ensureDir(dir);
+  return dir;
+}
+
+/**
+ * Get the state file path for a specific server instance.
+ * <project-root>/.opencode/opencode-teams/servers/<project-hash>/server.json
+ */
+export function getServerStatePath(projectHash: string, projectRoot?: string): string {
+  const dir = join(getServersDir(projectRoot), projectHash);
+  ensureDir(dir);
+  return join(dir, 'server.json');
+}
+
+/**
+ * Get the log file path for a specific server instance.
+ * <project-root>/.opencode/opencode-teams/servers/<project-hash>/server.log
+ */
+export function getServerLogPath(projectHash: string, projectRoot?: string): string {
+  const dir = join(getServersDir(projectRoot), projectHash);
+  ensureDir(dir);
+  return join(dir, 'server.log');
+}
+
+/**
+ * Get the color pool state file path.
+ * <project-root>/.opencode/opencode-teams/color-pool.json
+ */
+export function getColorPoolPath(projectRoot?: string): string {
+  return join(getProjectStorageDir(projectRoot), 'color-pool.json');
+}
+
+/**
  * Get the global templates directory.
  * ~/.config/opencode/opencode-teams/templates/
  */
