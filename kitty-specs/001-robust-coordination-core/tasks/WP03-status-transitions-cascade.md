@@ -1,7 +1,7 @@
 ---
 work_package_id: WP03
 title: Status Transitions + Cascade Unblocking
-lane: "doing"
+lane: "done"
 dependencies: []
 base_branch: main
 base_commit: e8c8da4de4adbc31c0b7e022d603c62e2ed1b7cd
@@ -15,8 +15,8 @@ phase: Phase 2 - Logic Hardening
 assignee: ''
 agent: "Antigravity-Reviewer"
 shell_pid: "1368003"
-review_status: ''
-reviewed_by: ''
+review_status: "approved"
+reviewed_by: "Nick Roth"
 history:
 - timestamp: '2026-02-10T16:24:00Z'
   lane: planned
@@ -234,3 +234,4 @@ Test cases:
 - 2026-02-10T04:05:56Z – Antigravity – shell_pid=1368003 – lane=doing – Assigned agent via workflow command
 - 2026-02-10T04:13:25Z – Antigravity – shell_pid=1368003 – lane=for_review – Ready for review: Forward-only status transitions (FR-011) and cascade unblocking (FR-010) with full test coverage. .gitignore change is from sparse-checkout, not WP03.
 - 2026-02-10T04:15:47Z – Antigravity-Reviewer – shell_pid=1368003 – lane=doing – Started review via workflow command
+- 2026-02-10T04:23:21Z – Antigravity-Reviewer – shell_pid=1368003 – lane=done – Review passed: All 4 subtasks (T011-T014) correctly implemented. VALID_TRANSITIONS enforces forward-only pending->in_progress->completed. Cascade unblock removes completed task from dependencies+blocks arrays within lock scope. 8/8 transition tests + 6/6 cascade tests match spec. Existing tests properly updated with claimTask() before completing. Build clean: 207 tests pass, tsc clean, biome clean. WP02 dependency confirmed merged. Rebased clean onto main. WP04 (planned) depends on this WP.
