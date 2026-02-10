@@ -1,10 +1,24 @@
 {
+  "accept_commit": null,
+  "acceptance_history": [
+    {
+      "accepted_at": "2026-02-10T05:30:00Z",
+      "accepted_by": "Antigravity",
+      "accepted_from_commit": "c82ef0f",
+      "branch": "main",
+      "mode": "local"
+    }
+  ],
+  "acceptance_mode": "local",
+  "accepted_at": "2026-02-10T05:30:00Z",
+  "accepted_by": "Antigravity",
+  "accepted_from_commit": "c82ef0f",
+  "created_at": "2026-02-10T16:30:00Z",
   "feature_number": "001",
-  "slug": "001-robust-coordination-core",
   "friendly_name": "Robust Coordination Core",
   "mission": "software-dev",
+  "slug": "001-robust-coordination-core",
   "source_description": "File locking, atomic writes, Zod validation, per-agent inboxes, structured messages, bidirectional task dependencies, state machine enforcement - derived from comparison analysis against claude-code-teams-mcp reference implementation",
-  "created_at": "2026-02-10T16:30:00Z",
   "target_branch": "main",
   "vcs": "git"
 }

@@ -1,10 +1,24 @@
 {
+  "accept_commit": null,
+  "acceptance_history": [
+    {
+      "accepted_at": "2026-02-10T10:00:00Z",
+      "accepted_by": "Antigravity",
+      "accepted_from_commit": "11abdf2",
+      "branch": "main",
+      "mode": "local"
+    }
+  ],
+  "acceptance_mode": "local",
+  "accepted_at": "2026-02-10T10:00:00Z",
+  "accepted_by": "Antigravity",
+  "accepted_from_commit": "11abdf2",
+  "created_at": "2026-02-10T16:30:00Z",
   "feature_number": "002",
-  "slug": "002-agent-lifecycle-spawning",
   "friendly_name": "Agent Lifecycle and Spawning",
   "mission": "software-dev",
+  "slug": "002-agent-lifecycle-spawning",
   "source_description": "Agent spawning via OpenCode SDK, force kill, shutdown protocol, heartbeat/timeout, agent metadata enrichment, session management - derived from Phase 5 plan and Python reference spawn_teammate/force_kill_teammate",
-  "created_at": "2026-02-10T16:30:00Z",
   "target_branch": "main",
   "vcs": "git"
 }
