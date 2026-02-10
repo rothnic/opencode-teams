@@ -1,7 +1,7 @@
 ---
 work_package_id: 'WP08'
 title: 'Tool Definitions'
-lane: "doing"
+lane: "for_review"
 subtasks:
   - 'T045'
   - 'T046'
@@ -358,3 +358,4 @@ export { createGetAgentStatusTool } from './get-agent-status';
 ## Activity Log
 
 - 2026-02-10T14:37:28Z – unknown – lane=doing – Code already on main
+- 2026-02-10T14:37:31Z – unknown – lane=for_review – Code already on main, verified
