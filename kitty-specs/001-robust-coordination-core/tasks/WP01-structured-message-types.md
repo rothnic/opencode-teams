@@ -1,28 +1,28 @@
 ---
 work_package_id: WP01
 title: Structured Message Types
-lane: "doing"
+lane: "done"
 dependencies: []
 base_branch: main
 base_commit: affd8185fe6e8c498fbde64799bf32e6daa48d38
-created_at: '2026-02-10T01:51:53.143272+00:00'
+created_at: "2026-02-10T01:51:53.143272+00:00"
 subtasks:
-- T001
-- T002
-- T003
-- T004
-- T005
+  - T001
+  - T002
+  - T003
+  - T004
+  - T005
 phase: Phase 1 - Schema + Operations
-assignee: ''
+assignee: ""
 agent: "Sisyphus"
 shell_pid: "888629"
-review_status: ''
-reviewed_by: ''
+review_status: "approved"
+reviewed_by: "Sisyphus"
 history:
-- timestamp: '2026-02-10T16:24:00Z'
-  lane: planned
-  agent: system
-  action: Prompt generated via /spec-kitty.tasks
+  - timestamp: "2026-02-10T16:24:00Z"
+    lane: planned
+    agent: system
+    action: Prompt generated via /spec-kitty.tasks
 ---
 
 # Work Package Prompt: WP01 -- Structured Message Types
@@ -261,5 +261,6 @@ Test the following scenarios:
 ## Activity Log
 
 - 2026-02-10T01:51:55Z – Sisyphus – shell_pid=888629 – lane=doing – Assigned agent via workflow command
-- 2026-02-10T01:58:09Z – Sisyphus – shell_pid=888629 – lane=for_review – Ready for review: MessageTypeSchema, _sendTypedMessage, typed requestShutdown/approveShutdown, 202 tests pass
+- 2026-02-10T01:58:09Z – Sisyphus – shell_pid=888629 – lane=for_review – Ready for review: MessageTypeSchema, \_sendTypedMessage, typed requestShutdown/approveShutdown, 202 tests pass
 - 2026-02-10T04:04:56Z – Sisyphus – shell_pid=888629 – lane=doing – Started review via workflow command
+  - 2026-02-10T04:10:00Z – Sisyphus – lane=done – Review approved: all 9 acceptance criteria met
