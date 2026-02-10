@@ -15,6 +15,7 @@ import {
   type LeaderInfo,
   type Message,
   MessageSchema,
+  type MessageType,
   type TeamConfig,
   TeamConfigSchema,
   type TeamMember,
@@ -214,6 +215,7 @@ export const TeamOperations = {
       from: senderId,
       to: targetAgentId,
       message,
+      type: 'plain',
       timestamp: new Date().toISOString(),
       read: false,
     };
@@ -250,6 +252,7 @@ export const TeamOperations = {
       from: senderId,
       to: 'broadcast',
       message,
+      type: 'plain',
       timestamp: new Date().toISOString(),
       read: false,
       recipients: config.members.map((m) => m.agentId),
@@ -336,9 +339,34 @@ export const TeamOperations = {
     return [];
   },
 
-  /**
-   * Request team shutdown (locked read-modify-write)
-   */
+  _sendTypedMessage: (
+    teamName: string,
+    targetAgentId: string,
+    messageText: string,
+    type: MessageType,
+    fromAgentId: string,
+  ): Message => {
+    const inboxPath = getAgentInboxPath(teamName, targetAgentId);
+    const lockPath = getTeamLockPath(teamName);
+
+    const messageData: Message = {
+      from: fromAgentId,
+      to: targetAgentId,
+      message: messageText,
+      type,
+      timestamp: new Date().toISOString(),
+      read: false,
+    };
+
+    MessageSchema.parse(messageData);
+
+    lockedUpsert(lockPath, inboxPath, InboxSchema, [], (inbox) => {
+      return [...inbox, messageData];
+    });
+
+    return messageData;
+  },
+
   requestShutdown: (teamName: string, agentId?: string): TeamConfig => {
     const configPath = getTeamConfigPath(teamName);
     const lockPath = getTeamLockPath(teamName);
@@ -349,20 +377,59 @@ export const TeamOperations = {
 
     const currentAgentId = agentId || process.env.OPENCODE_AGENT_ID || 'unknown';
 
-    return lockedUpdate(lockPath, configPath, TeamConfigSchema, (config) => {
-      const approvals = config.shutdownApprovals || [];
+    const config = lockedUpdate(lockPath, configPath, TeamConfigSchema, (cfg) => {
+      const approvals = cfg.shutdownApprovals || [];
       if (!approvals.includes(currentAgentId)) {
         approvals.push(currentAgentId);
       }
-      return { ...config, shutdownApprovals: approvals };
+      return { ...cfg, shutdownApprovals: approvals };
     });
+
+    if (currentAgentId !== config.leader) {
+      TeamOperations._sendTypedMessage(
+        teamName,
+        config.leader,
+        `Agent ${currentAgentId} requests team shutdown`,
+        'shutdown_request',
+        currentAgentId,
+      );
+    }
+
+    return config;
   },
 
-  /**
-   * Approve team shutdown
-   */
   approveShutdown: (teamName: string, agentId?: string): TeamConfig => {
-    return TeamOperations.requestShutdown(teamName, agentId);
+    const configPath = getTeamConfigPath(teamName);
+    const lockPath = getTeamLockPath(teamName);
+
+    if (!fileExists(configPath)) {
+      throw new Error(`Team "${teamName}" does not exist`);
+    }
+
+    const currentAgentId = agentId || process.env.OPENCODE_AGENT_ID || 'unknown';
+
+    const config = lockedUpdate(lockPath, configPath, TeamConfigSchema, (cfg) => {
+      const approvals = cfg.shutdownApprovals || [];
+      if (!approvals.includes(currentAgentId)) {
+        approvals.push(currentAgentId);
+      }
+      return { ...cfg, shutdownApprovals: approvals };
+    });
+
+    const approvals = config.shutdownApprovals || [];
+    for (const requesterId of approvals) {
+      if (requesterId !== currentAgentId) {
+        TeamOperations._sendTypedMessage(
+          teamName,
+          requesterId,
+          `Agent ${currentAgentId} approved team shutdown`,
+          'shutdown_approved',
+          currentAgentId,
+        );
+      }
+    }
+
+    return config;
   },
 
   /**

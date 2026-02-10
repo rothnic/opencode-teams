@@ -88,12 +88,25 @@ export const TaskUpdateInputSchema = z
 
 export type TaskUpdateInput = z.infer<typeof TaskUpdateInputSchema>;
 
+// ─── Message Type ───────────────────────────────────────────────────────────
+
+export const MessageTypeSchema = z.enum([
+  'plain',
+  'idle',
+  'task_assignment',
+  'shutdown_request',
+  'shutdown_approved',
+]);
+
+export type MessageType = z.infer<typeof MessageTypeSchema>;
+
 // ─── Message ───────────────────────────────────────────────────────────────
 
 export const MessageSchema = z.object({
   from: z.string().min(1, 'Sender must be non-empty'),
   to: z.string().min(1, 'Recipient must be non-empty'),
   message: z.string(),
+  type: MessageTypeSchema.default('plain'),
   timestamp: z.string().datetime({ message: 'timestamp must be ISO 8601' }),
   read: z.boolean().default(false),
   summary: z.string().optional(),
