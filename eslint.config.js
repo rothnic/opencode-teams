@@ -32,6 +32,13 @@ export default tseslint.config(
         Headers: 'readonly',
         URL: 'readonly',
         URLSearchParams: 'readonly',
+        // Timer and controller globals (available in Bun)
+        setInterval: 'readonly',
+        clearInterval: 'readonly',
+        setTimeout: 'readonly',
+        clearTimeout: 'readonly',
+        AbortController: 'readonly',
+        AbortSignal: 'readonly',
       },
     },
     plugins: {

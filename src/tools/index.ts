@@ -5,9 +5,11 @@
  * Each tool defines parameters and execution logic that OpenCode can invoke.
  */
 
+import { AgentOperations } from '../operations/agent';
 import { TaskOperations } from '../operations/task';
 import { TeamOperations } from '../operations/team';
 import type {
+  AgentState,
   LeaderInfo,
   Message,
   Task,
@@ -337,6 +339,114 @@ export const updateTask = tool<{ teamName: string; taskId: string; updates: Part
 /**
  * Export all tools as a registry
  */
+export const spawnAgent = tool<
+  {
+    teamName: string;
+    prompt: string;
+    name?: string;
+    model?: string;
+    providerId?: string;
+    role?: 'worker' | 'reviewer';
+    cwd?: string;
+  },
+  {
+    success: boolean;
+    agentId?: string;
+    sessionId?: string;
+    paneId?: string;
+    name?: string;
+    color?: string;
+    port?: number;
+    error?: string;
+  }
+>({
+  name: 'spawn-agent',
+  description: 'Spawn a new AI agent into an existing team',
+  parameters: {
+    teamName: { type: 'string', description: 'Team to spawn the agent into', required: true },
+    prompt: { type: 'string', description: 'Initial prompt/task for the agent', required: true },
+    name: { type: 'string', description: 'Display name for the agent', required: false },
+    model: { type: 'string', description: 'Model to use', required: false },
+    providerId: { type: 'string', description: 'Provider ID', required: false },
+    role: { type: 'string', description: 'Agent role: worker or reviewer', required: false },
+    cwd: { type: 'string', description: 'Working directory', required: false },
+  },
+  execute: async ({ teamName, prompt, name, model, providerId, role, cwd }) =>
+    AgentOperations.spawnAgent({ teamName, prompt, name, model, providerId, role, cwd }),
+});
+
+export const killAgent = tool<
+  { teamName: string; agentId: string; force?: boolean; reason?: string },
+  { success: boolean; reassignedTasks?: string[]; phase?: string; error?: string }
+>({
+  name: 'kill-agent',
+  description: 'Terminate an agent (force kill or graceful shutdown)',
+  parameters: {
+    teamName: { type: 'string', description: 'Team name', required: true },
+    agentId: { type: 'string', description: 'Agent ID to terminate', required: true },
+    force: {
+      type: 'boolean',
+      description: 'Force kill (true) or graceful shutdown (false)',
+      required: false,
+    },
+    reason: { type: 'string', description: 'Reason for termination', required: false },
+  },
+  execute: async ({ teamName, agentId, force, reason }) => {
+    if (force) {
+      return AgentOperations.forceKill({ teamName, agentId, reason });
+    }
+    const requesterAgentId = process.env.OPENCODE_AGENT_ID || 'leader';
+    const result = AgentOperations.requestGracefulShutdown({
+      teamName,
+      requesterAgentId,
+      targetAgentId: agentId,
+      reason,
+    });
+    return { success: result.success, phase: result.phase, error: result.error };
+  },
+});
+
+export const heartbeatTool = tool<
+  { agentId: string },
+  {
+    success: boolean;
+    heartbeatTs: string;
+    nextDeadline: string;
+    agentStatus: string;
+    error?: string;
+  }
+>({
+  name: 'heartbeat',
+  description: 'Send a heartbeat signal for an agent to confirm it is alive',
+  parameters: {
+    agentId: { type: 'string', description: 'Agent ID sending the heartbeat', required: true },
+  },
+  execute: async ({ agentId }) => AgentOperations.updateHeartbeat(agentId, 'tool'),
+});
+
+export const getAgentStatus = tool<
+  { agentId?: string; teamName?: string },
+  AgentState | AgentState[] | { error: string }
+>({
+  name: 'get-agent-status',
+  description: 'Get status of a specific agent or all agents in a team',
+  parameters: {
+    agentId: { type: 'string', description: 'Specific agent ID to query', required: false },
+    teamName: { type: 'string', description: 'Team name to list all agents', required: false },
+  },
+  execute: async ({ agentId, teamName }) => {
+    if (agentId) {
+      const agent = AgentOperations.getAgentState(agentId);
+      if (!agent) return { error: `Agent '${agentId}' not found` };
+      return agent;
+    }
+    if (teamName) {
+      return AgentOperations.listAgents({ teamName });
+    }
+    return AgentOperations.listAgents();
+  },
+});
+
 export const tools: Record<string, ToolDefinition> = {
   'spawn-team': spawnTeam,
   'discover-teams': discoverTeams,
@@ -350,4 +460,8 @@ export const tools: Record<string, ToolDefinition> = {
   'get-tasks': getTasks,
   'claim-task': claimTask,
   'update-task': updateTask,
+  'spawn-agent': spawnAgent,
+  'kill-agent': killAgent,
+  heartbeat: heartbeatTool,
+  'get-agent-status': getAgentStatus,
 };

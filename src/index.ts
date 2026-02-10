@@ -19,9 +19,10 @@ try {
   tool = local.tool;
 }
 
+import { AgentOperations } from './operations/agent';
 import { TaskOperations } from './operations/task';
 import { TeamOperations } from './operations/team';
-import type { Message, Task, TeamConfig, TeamMember } from './types/index';
+import type { AgentState, Message, Task, TeamConfig, TeamMember } from './types/index';
 
 /**
  * OpenCode Teams Plugin
@@ -246,6 +247,88 @@ export const OpenCodeTeamsPlugin = async (ctx: any) => {
             TeamOperations.cleanup(args.teamName);
           }
           return config;
+        },
+      }),
+
+      'spawn-agent': tool({
+        description: 'Spawn a new AI agent into an existing team',
+        args: {
+          teamName: tool.schema.string().describe('Team to spawn the agent into'),
+          prompt: tool.schema.string().describe('Initial prompt/task for the agent'),
+          name: tool.schema.string().optional().describe('Display name for the agent'),
+          model: tool.schema.string().optional().describe('Model to use'),
+          providerId: tool.schema.string().optional().describe('Provider ID'),
+          role: tool.schema.string().optional().describe('Agent role: worker or reviewer'),
+          cwd: tool.schema.string().optional().describe('Working directory'),
+        },
+        async execute(args: any, _ctx: any) {
+          return AgentOperations.spawnAgent({
+            teamName: args.teamName,
+            prompt: args.prompt,
+            name: args.name,
+            model: args.model,
+            providerId: args.providerId,
+            role: args.role,
+            cwd: args.cwd,
+          });
+        },
+      }),
+
+      'kill-agent': tool({
+        description: 'Terminate an agent (force kill or graceful shutdown)',
+        args: {
+          teamName: tool.schema.string().describe('Team name'),
+          agentId: tool.schema.string().describe('Agent ID to terminate'),
+          force: tool.schema.boolean().optional().describe('Force kill (true) or graceful (false)'),
+          reason: tool.schema.string().optional().describe('Reason for termination'),
+        },
+        async execute(args: any, _ctx: any) {
+          if (args.force) {
+            return AgentOperations.forceKill({
+              teamName: args.teamName,
+              agentId: args.agentId,
+              reason: args.reason,
+            });
+          }
+          const requesterAgentId = process.env.OPENCODE_AGENT_ID || 'leader';
+          return AgentOperations.requestGracefulShutdown({
+            teamName: args.teamName,
+            requesterAgentId,
+            targetAgentId: args.agentId,
+            reason: args.reason,
+          });
+        },
+      }),
+
+      heartbeat: tool({
+        description: 'Send a heartbeat signal for an agent to confirm it is alive',
+        args: {
+          agentId: tool.schema.string().describe('Agent ID sending the heartbeat'),
+        },
+        async execute(args: any, _ctx: any) {
+          return AgentOperations.updateHeartbeat(args.agentId, 'tool');
+        },
+      }),
+
+      'get-agent-status': tool({
+        description: 'Get status of a specific agent or all agents in a team',
+        args: {
+          agentId: tool.schema.string().optional().describe('Specific agent ID'),
+          teamName: tool.schema.string().optional().describe('Team name to list all agents'),
+        },
+        async execute(
+          args: any,
+          _ctx: any,
+        ): Promise<AgentState | AgentState[] | { error: string }> {
+          if (args.agentId) {
+            const agent = AgentOperations.getAgentState(args.agentId);
+            if (!agent) return { error: `Agent '${args.agentId}' not found` };
+            return agent;
+          }
+          if (args.teamName) {
+            return AgentOperations.listAgents({ teamName: args.teamName });
+          }
+          return AgentOperations.listAgents();
         },
       }),
     },

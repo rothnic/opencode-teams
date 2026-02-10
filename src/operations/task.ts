@@ -433,6 +433,52 @@ export const TaskOperations = {
   /**
    * Claim a task (locked read-modify-write with soft blocking)
    */
+  /**
+   * Reassign all in_progress tasks owned by a terminated/inactive agent
+   * back to pending status. This is a special backward transition allowed
+   * only through this method (FR-008).
+   *
+   * @returns Array of reassigned task IDs
+   */
+  reassignAgentTasks: (teamName: string, agentId: string, projectRoot?: string): string[] => {
+    const teamTasksDir = getTeamTasksDir(teamName, projectRoot);
+    const lockPath = getTaskLockPath(teamName, projectRoot);
+
+    if (!dirExists(teamTasksDir)) {
+      return [];
+    }
+
+    return withLock(lockPath, () => {
+      const reassigned: string[] = [];
+      const files = listJSONFiles(teamTasksDir);
+
+      for (const file of files) {
+        const taskPath = join(teamTasksDir, file);
+        try {
+          const task = readValidatedJSON(taskPath, TaskSchema);
+
+          // Only reassign in_progress tasks owned by this agent
+          if (task.status === 'in_progress' && task.owner === agentId) {
+            const updated = {
+              ...task,
+              status: 'pending' as const,
+              owner: undefined,
+              claimedAt: undefined,
+              updatedAt: new Date().toISOString(),
+              warning: `Reassigned: previous owner ${agentId} terminated`,
+            };
+            writeAtomicJSON(taskPath, updated, TaskSchema);
+            reassigned.push(task.id);
+          }
+        } catch {
+          // Skip unreadable tasks
+        }
+      }
+
+      return reassigned;
+    });
+  },
+
   claimTask: (teamName: string, taskId: string, agentId?: string): Task => {
     const currentAgentId = agentId || process.env.OPENCODE_AGENT_ID || 'unknown';
     const taskPath = getTaskFilePath(teamName, taskId);
