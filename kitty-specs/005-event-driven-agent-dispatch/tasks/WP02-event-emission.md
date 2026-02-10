@@ -1,7 +1,7 @@
 ---
 work_package_id: WP02
 title: Event Emission
-lane: "planned"
+lane: "for_review"
 dependencies: [WP01]
 base_branch: 005-event-driven-agent-dispatch-WP01
 base_commit: eab8a91628b5a1b349ba72535a75b701ec0600c1
@@ -10,6 +10,7 @@ subtasks: [T010, T011, T012, T013, T014, T015, T016]
 shell_pid: "16625"
 review_status: "has_feedback"
 reviewed_by: "Nick Roth"
+agent: "Implementer"
 history:
 - date: '2026-02-10'
   action: created
@@ -257,3 +258,4 @@ if (teamName) {
 
 - 2026-02-10T21:14:18Z – unknown – shell_pid=16625 – lane=for_review – Event emission from task/agent ops
 - 2026-02-10T21:17:57Z – unknown – shell_pid=16625 – lane=planned – Moved to planned
+- 2026-02-10T21:26:14Z – Implementer – shell_pid=16625 – lane=for_review – Fixed EventBus test isolation: added afterAll cleanup in event-bus.test.ts and defensive clear in event-emission.test.ts beforeEach
