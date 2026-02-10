@@ -29,7 +29,7 @@ ls:
   .*.json: kebab-case
 
   # Markdown: UPPERCASE in root and most directories
-  .md: 'regex:[A-Z][A-Z0-9-]*'
+  .md: "regex:[A-Z][A-Z0-9-]*"
 
   # tests/: compound .test.ts extension + shell scripts
   tests:
@@ -46,12 +46,13 @@ ls:
     .md: kebab-case
 
   # kitty-specs/: spec-kitty feature specs use kebab-case markdown, plus README
+  # WP files use WP##-kebab-slug naming (e.g. WP01-structured-message-types.md)
   kitty-specs:
-    .md: 'kebab-case | regex:[A-Z][A-Z0-9-]*'
+    .md: "kebab-case | regex:[A-Z][A-Z0-9-]* | regex:WP[0-9]+-[a-z0-9-]+"
 
   # workflows/: allow both kebab-case and UPPERCASE markdown
   workflows:
-    .md: 'kebab-case | regex:[A-Z][A-Z0-9-]*'
+    .md: "kebab-case | regex:[A-Z][A-Z0-9-]*"
 
   # .github/: CI workflow files
   .github:
