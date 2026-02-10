@@ -1,7 +1,7 @@
 ---
 work_package_id: 'WP09'
 title: 'Integration Tests'
-lane: "doing"
+lane: "for_review"
 subtasks:
   - 'T051'
   - 'T052'
@@ -345,3 +345,4 @@ describe('Error Recovery E2E', () => {
 ## Activity Log
 
 - 2026-02-10T14:37:36Z – unknown – lane=doing – Code already on main
+- 2026-02-10T14:37:39Z – unknown – lane=for_review – Code already on main, verified
