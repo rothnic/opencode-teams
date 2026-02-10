@@ -1,24 +1,28 @@
 ---
-work_package_id: "WP01"
-title: "Structured Message Types"
-lane: "planned"
+work_package_id: WP01
+title: Structured Message Types
+lane: "doing"
+dependencies: []
+base_branch: main
+base_commit: affd8185fe6e8c498fbde64799bf32e6daa48d38
+created_at: '2026-02-10T01:51:53.143272+00:00'
 subtasks:
-  - "T001"
-  - "T002"
-  - "T003"
-  - "T004"
-  - "T005"
-phase: "Phase 1 - Schema + Operations"
-assignee: ""
-agent: ""
-shell_pid: ""
-review_status: ""
-reviewed_by: ""
+- T001
+- T002
+- T003
+- T004
+- T005
+phase: Phase 1 - Schema + Operations
+assignee: ''
+agent: ''
+shell_pid: "888629"
+review_status: ''
+reviewed_by: ''
 history:
-  - timestamp: "2026-02-10T16:24:00Z"
-    lane: "planned"
-    agent: "system"
-    action: "Prompt generated via /spec-kitty.tasks"
+- timestamp: '2026-02-10T16:24:00Z'
+  lane: planned
+  agent: system
+  action: Prompt generated via /spec-kitty.tasks
 ---
 
 # Work Package Prompt: WP01 -- Structured Message Types

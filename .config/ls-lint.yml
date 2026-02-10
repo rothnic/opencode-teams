@@ -82,6 +82,7 @@ ignore:
   - .sisyphus
   - .ntm
   - .beads
+  - .worktrees
 
   # Extensionless files (ls-lint cannot match files without extensions)
   - LICENSE
